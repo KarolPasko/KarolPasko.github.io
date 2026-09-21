@@ -13,7 +13,7 @@
 const projects = [
 
     {
-        folder: "oliver",
+        folder: "undefined",
         title: "Oliver! Jr.",
         type: "School Production",
         description:
