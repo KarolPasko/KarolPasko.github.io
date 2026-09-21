@@ -51,7 +51,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #ffcc00;
+    color: #8600c9;
 }
 
 /* Hero */
@@ -79,7 +79,7 @@ nav a:hover {
 }
 
 .small-title {
-    color: #ffcc00;
+    color: #8600c9;
     font-size: 14px;
     font-weight: bold;
     letter-spacing: 3px;
@@ -93,7 +93,7 @@ nav a:hover {
 }
 
 .hero h2 span {
-    color: #ffcc00;
+    color: #8600c9;
 }
 
 .hero p {
@@ -105,7 +105,7 @@ nav a:hover {
 /* Buttons */
 .button {
     display: inline-block;
-    background: #ffcc00;
+    background: #8600c9;
     color: #111111;
     padding: 12px 25px;
     text-decoration: none;
@@ -168,7 +168,7 @@ nav a:hover {
 }
 
 .card h3 {
-    color: #ffcc00;
+    color: #8600c9;
     font-size: 24px;
     margin-bottom: 10px;
 }
