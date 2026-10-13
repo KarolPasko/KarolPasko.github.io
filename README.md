@@ -1,2 +1,7 @@
-# KarolPasko.github.io
-A portfolio showcasing my experience and skills in lighting, sound, and education, combining technical creativity, practical knowledge, and a passion for helping others learn and develop.
+# Karol Pasko Technical
+
+Website for **Karol Pasko Technical** – freelance lighting, sound and technical production for theatre, live events, festivals and schools.
+
+Live at **https://karolpasko.github.io/** (served by GitHub Pages from the `main` branch).
+
+Plain HTML/CSS/JS – edit `index.html`, `style.css` and `script.js`, no build step needed.

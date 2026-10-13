@@ -1,597 +1,335 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Karol Pasko Technical – freelance lighting, sound and technical production for theatre, live events, festivals and schools.">
+    <meta name="author" content="Karol Pasko">
+    <meta name="theme-color" content="#08090f">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Karol Pasko Technical">
+    <meta property="og:description" content="Freelance lighting, sound and technical production for theatre, live events and schools.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://karolpasko.github.io/">
 
-    <meta name="description"
-          content="Karol Pasko - Lighting, Sound and Education portfolio.">
+    <title>Karol Pasko Technical | Lighting, Sound &amp; Production</title>
 
-    <meta name="author"
-          content="Karol Pasko">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308090f'/%3E%3Ctext x='32' y='42' font-family='Arial,sans-serif' font-size='26' font-weight='700' text-anchor='middle' fill='%23f5b301'%3EKP%3C/text%3E%3C/svg%3E">
 
-    <title>
-        Karol Pasko | Lighting, Sound & Education
-    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-
 </head>
 
-
 <body>
-
 
 <!-- =========================
      NAVIGATION
 ========================= -->
 
-<header>
+<header class="site-header">
+    <nav class="nav container">
+        <a href="#home" class="brand" aria-label="Karol Pasko Technical – home">
+            <span class="brand-mark">KP</span>
+            <span class="brand-name">Karol Pasko <strong>Technical</strong></span>
+        </a>
 
-    <nav>
+        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+            <span></span><span></span><span></span>
+        </button>
 
-        <h1>Karol Pasko</h1>
-
-        <ul>
-
-            <li>
-                <a href="#home">Home</a>
-            </li>
-
-            <li>
-                <a href="#about">About</a>
-            </li>
-
-            <li>
-                <a href="#skills">Skills</a>
-            </li>
-
-            <li>
-                <a href="#projects">Projects</a>
-            </li>
-
-            <li>
-                <a href="#contact">Contact</a>
-            </li>
-
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#process">Process</a></li>
+            <li><a href="#contact" class="nav-cta">Get a Quote</a></li>
         </ul>
-
     </nav>
-
 </header>
 
 
-
 <main>
-
 
 <!-- =========================
      HERO
 ========================= -->
 
 <section id="home" class="hero">
-
-    <div class="hero-content">
-
-        <p class="small-title">
-            LIGHTING • SOUND • EDUCATION
-        </p>
-
-        <h2>
-            Creative.
-            Technical.
-            <span>Passionate.</span>
-        </h2>
-
-        <p>
-            A portfolio showcasing my experience and skills
-            across lighting, sound and education.
-        </p>
-
-        <a href="#projects" class="button">
-            View My Work
-        </a>
-
+    <div class="hero-beams" aria-hidden="true">
+        <span></span><span></span><span></span>
     </div>
 
+    <div class="container hero-content">
+        <p class="eyebrow">Freelance Technical Production</p>
+
+        <h1>
+            Lighting, sound &amp; production<br>
+            that makes your event <span class="highlight">shine.</span>
+        </h1>
+
+        <p class="lead">
+            Karol Pasko Technical provides lighting design, programming,
+            sound and technical support for theatre, live events,
+            festivals and school productions.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#contact" class="button button-primary">Book Karol</a>
+            <a href="#services" class="button button-ghost">View Services</a>
+        </div>
+
+        <ul class="hero-stats">
+            <li><strong>Lighting</strong><span>Design &amp; programming</span></li>
+            <li><strong>Sound &amp; AV</strong><span>Setup &amp; operation</span></li>
+            <li><strong>Production</strong><span>Planning &amp; management</span></li>
+        </ul>
+    </div>
 </section>
 
+
+<!-- =========================
+     SERVICES
+========================= -->
+
+<section id="services" class="section">
+    <div class="container">
+        <div class="section-header">
+            <p class="eyebrow">What I Offer</p>
+            <h2>Services</h2>
+            <p>
+                Flexible technical support for any size of production –
+                from a single night to a full run.
+            </p>
+        </div>
+
+        <div class="card-grid">
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">💡</div>
+                <h3>Lighting Design</h3>
+                <p>
+                    Creative lighting designs that support the story, the
+                    music and the mood – from concept to final cue.
+                </p>
+            </article>
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">🎛️</div>
+                <h3>Lighting Programming &amp; Operation</h3>
+                <p>
+                    Showfile building, cueing, effects and live operation
+                    on all major consoles.
+                </p>
+                <ul class="tags">
+                    <li>grandMA2</li>
+                    <li>grandMA3</li>
+                    <li>Avolites Titan</li>
+                    <li>ChamSys</li>
+                </ul>
+            </article>
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">🔊</div>
+                <h3>Sound &amp; AV</h3>
+                <p>
+                    Setup and operation of sound and AV systems for live
+                    events, presentations and performances.
+                </p>
+            </article>
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">⚙️</div>
+                <h3>Technical Management</h3>
+                <p>
+                    Production planning, equipment sourcing, supplier
+                    liaison and making sure everything runs to schedule.
+                </p>
+            </article>
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">🎭</div>
+                <h3>Theatre &amp; School Productions</h3>
+                <p>
+                    Experienced supporting schools and theatre groups –
+                    including working with and training young crews.
+                </p>
+            </article>
+
+            <article class="card reveal">
+                <div class="card-icon" aria-hidden="true">🎓</div>
+                <h3>Training &amp; Education</h3>
+                <p>
+                    Practical, hands-on teaching of lighting and sound
+                    skills for students, staff and volunteer teams.
+                </p>
+            </article>
+
+        </div>
+    </div>
+</section>
 
 
 <!-- =========================
      ABOUT
 ========================= -->
 
-<section id="about" class="section about">
+<section id="about" class="section section-alt">
+    <div class="container about">
+        <div class="about-text">
+            <p class="eyebrow">About</p>
+            <h2>Hi, I'm Karol.</h2>
+            <p>
+                I'm a freelance lighting and sound technician and the
+                founder of Karol Pasko Technical. I combine technical
+                know-how with creativity and calm problem solving to
+                bring productions to life.
+            </p>
+            <p>
+                I've worked across theatre, festivals, concerts, school
+                productions and live events – adapting quickly to new
+                venues, equipment and teams, and delivering under
+                pressure.
+            </p>
+            <p>
+                Whether you need a designer, a programmer, an operator or
+                an extra pair of experienced hands, I'm happy to help.
+            </p>
+            <a href="#contact" class="button button-primary">Work With Me</a>
+        </div>
 
-    <div class="about-content">
-
-        <p class="small-title">
-            ABOUT ME
-        </p>
-
-        <h2>
-            Bringing Technical Ideas to Life
-        </h2>
-
-        <p>
-            I am Karol Pasko, a creative and technically minded
-            professional with experience across lighting, sound
-            and education.
-        </p>
-
-        <p>
-            My work combines technical knowledge with creativity,
-            problem solving and a passion for live production.
-            I enjoy working both independently and as part of
-            a technical team.
-        </p>
-
-        <p>
-            This portfolio showcases my projects, technical skills
-            and experience across theatre, festivals, live events
-            and education.
-        </p>
-
+        <ul class="about-points">
+            <li class="reveal">
+                <h3>Reliable</h3>
+                <p>On time, prepared and focused on delivering the show.</p>
+            </li>
+            <li class="reveal">
+                <h3>Adaptable</h3>
+                <p>Comfortable with unfamiliar venues, rigs and consoles.</p>
+            </li>
+            <li class="reveal">
+                <h3>Collaborative</h3>
+                <p>Works well solo or as part of a wider technical team.</p>
+            </li>
+            <li class="reveal">
+                <h3>Creative</h3>
+                <p>Technical skill with an eye for what looks and sounds great.</p>
+            </li>
+        </ul>
     </div>
-
 </section>
 
 
-
 <!-- =========================
-     SKILLS
+     WORK
 ========================= -->
 
-<section id="skills" class="section skills">
+<section id="work" class="section">
+    <div class="container">
+        <div class="section-header">
+            <p class="eyebrow">Selected Work</p>
+            <h2>Recent Productions</h2>
+            <p>A selection of productions I've designed, programmed and operated.</p>
+        </div>
 
-    <div class="skills-header">
+        <div class="card-grid work-grid">
 
-        <p class="small-title">
-            WHAT I DO
-        </p>
+            <article class="work-card reveal">
+                <span class="work-tag">School Production</span>
+                <h3>Oliver! Jr.</h3>
+                <p>Lighting programming, operation and technical production.</p>
+            </article>
 
-        <h2>
-            Skills
-        </h2>
+            <article class="work-card reveal">
+                <span class="work-tag">Lighting Design</span>
+                <h3>Beauty and the Beast</h3>
+                <p>Lighting design, programming and operation.</p>
+            </article>
 
-        <p>
-            A selection of my technical and creative skills
-            developed through live events, theatre, festivals
-            and education.
-        </p>
+            <article class="work-card reveal">
+                <span class="work-tag">Programming &amp; Operation</span>
+                <h3>Aladdin Jr.</h3>
+                <p>Lighting programming and show operation.</p>
+            </article>
 
+        </div>
     </div>
-
-
-    <div class="skills-grid">
-
-
-        <!-- Lighting -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                💡
-            </div>
-
-            <h3>
-                Lighting
-            </h3>
-
-            <p>
-                Lighting design, programming, operation and
-                technical production for live events and theatre.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>Avolites Titan</span>
-                <span>grandMA2</span>
-                <span>grandMA3</span>
-                <span>ChamSys</span>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- Programming -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                🎛️
-            </div>
-
-            <h3>
-                Programming
-            </h3>
-
-            <p>
-                Creating and programming showfiles, building
-                cues, effects and complex lighting states.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>Cueing</span>
-                <span>Programming</span>
-                <span>Showfiles</span>
-                <span>Effects</span>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- Sound -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                🔊
-            </div>
-
-            <h3>
-                Sound & AV
-            </h3>
-
-            <p>
-                Experience supporting live sound and AV
-                production, including technical setup and
-                operation.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>AV</span>
-                <span>Sound</span>
-                <span>Live Events</span>
-                <span>Technical Support</span>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- Live Production -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                🎭
-            </div>
-
-            <h3>
-                Live Production
-            </h3>
-
-            <p>
-                Working across theatre, festivals, concerts,
-                school productions and large-scale events.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>Theatre</span>
-                <span>Festivals</span>
-                <span>Concerts</span>
-                <span>Events</span>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- Technical Management -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                ⚙️
-            </div>
-
-            <h3>
-                Technical Management
-            </h3>
-
-            <p>
-                Planning productions, sourcing equipment,
-                managing technical requirements and working
-                with suppliers.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>Planning</span>
-                <span>Equipment</span>
-                <span>Production</span>
-                <span>Management</span>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- Problem Solving -->
-
-        <div class="skill-card">
-
-            <div class="skill-icon">
-                ⚡
-            </div>
-
-            <h3>
-                Problem Solving
-            </h3>
-
-            <p>
-                Quickly adapting to unfamiliar venues,
-                equipment and technical setups while working
-                under pressure.
-            </p>
-
-            <div class="skill-tags">
-
-                <span>Adaptability</span>
-                <span>Teamwork</span>
-                <span>Time Management</span>
-                <span>Problem Solving</span>
-
-            </div>
-
-        </div>
-
-
-    </div>
-
 </section>
 
 
-
 <!-- =========================
-     PROJECTS
+     PROCESS
 ========================= -->
 
-<section id="projects" class="section projects">
+<section id="process" class="section section-alt">
+    <div class="container">
+        <div class="section-header">
+            <p class="eyebrow">How It Works</p>
+            <h2>From first message to final bow</h2>
+        </div>
 
-
-    <div class="projects-header">
-
-        <p class="small-title">
-            PORTFOLIO
-        </p>
-
-        <h2>
-            My Projects
-        </h2>
-
-        <p>
-            A selection of productions and events I've worked on,
-            including lighting design, programming and operation.
-        </p>
-
+        <ol class="steps">
+            <li class="reveal">
+                <span class="step-number">01</span>
+                <h3>Get in touch</h3>
+                <p>Tell me about your event, venue, dates and what you need.</p>
+            </li>
+            <li class="reveal">
+                <span class="step-number">02</span>
+                <h3>Plan</h3>
+                <p>We agree the scope, equipment and schedule, and I send a quote.</p>
+            </li>
+            <li class="reveal">
+                <span class="step-number">03</span>
+                <h3>Prepare</h3>
+                <p>Design, programming and preparation before arriving on site.</p>
+            </li>
+            <li class="reveal">
+                <span class="step-number">04</span>
+                <h3>Deliver</h3>
+                <p>Setup, rehearsals and show operation – then a clean get-out.</p>
+            </li>
+        </ol>
     </div>
-
-
-
-    <div class="project-grid">
-
-
-        <!-- OLIVER -->
-
-        <div class="project-folder"
-             onclick="openProject('oliver')">
-
-            <div class="folder-icon">
-                📁
-            </div>
-
-            <h3>
-                Oliver! Jr.
-            </h3>
-
-            <p>
-                School Production
-            </p>
-
-        </div>
-
-
-
-        <!-- BEAUTY -->
-
-        <div class="project-folder"
-             onclick="openProject('beauty')">
-
-            <div class="folder-icon">
-                📁
-            </div>
-
-            <h3>
-                Beauty and the Beast
-            </h3>
-
-            <p>
-                Lighting Design
-            </p>
-
-        </div>
-
-
-
-        <!-- ALADDIN -->
-
-        <div class="project-folder"
-             onclick="openProject('aladdin')">
-
-            <div class="folder-icon">
-                📁
-            </div>
-
-            <h3>
-                Aladdin Jr.
-            </h3>
-
-            <p>
-                Lighting Programming & Operation
-            </p>
-
-        </div>
-
-
-    </div>
-
 </section>
-
-
-
-<!-- =========================
-     PROJECT WINDOW
-========================= -->
-
-<div id="projectViewer"
-     class="project-viewer">
-
-
-    <div class="project-window">
-
-
-        <button class="close-button"
-                onclick="closeProject()">
-
-            ×
-
-        </button>
-
-
-
-        <div class="project-window-header">
-
-            <h2 id="projectTitle"></h2>
-
-            <p id="projectDescription"></p>
-
-        </div>
-
-
-
-        <div id="projectImages"
-             class="project-images">
-
-        </div>
-
-
-    </div>
-
-</div>
-
-
-
-<!-- =========================
-     IMAGE VIEWER
-========================= -->
-
-<div id="imageViewer"
-     class="image-viewer">
-
-
-    <button class="image-close"
-            onclick="closeImage()">
-
-        ×
-
-    </button>
-
-
-
-    <div class="image-viewer-content">
-
-
-        <img id="largeImage"
-             src=""
-             alt="">
-
-
-        <div class="image-description">
-
-            <h3 id="imageTitle"></h3>
-
-            <p id="imageDescription"></p>
-
-        </div>
-
-
-    </div>
-
-</div>
-
 
 
 <!-- =========================
      CONTACT
 ========================= -->
 
-<section id="contact"
-         class="section contact">
+<section id="contact" class="section contact">
+    <div class="container contact-inner">
+        <p class="eyebrow">Get In Touch</p>
+        <h2>Let's light up your next event.</h2>
+        <p class="lead">
+            Available for freelance bookings. Send over a few details and
+            I'll get back to you as soon as possible.
+        </p>
 
-
-    <p class="small-title">
-        GET IN TOUCH
-    </p>
-
-    <h2>
-        Let's Work Together
-    </h2>
-
-    <p>
-        Interested in working together or learning more
-        about my work?
-    </p>
-
-
-    <a href="mailto:your@email.com"
-       class="button">
-
-        Contact Me
-
-    </a>
-
-
+        <div class="hero-actions">
+            <!-- TODO: replace with the business email address -->
+            <a href="mailto:hello@example.com" class="button button-primary">Email Me</a>
+        </div>
+    </div>
 </section>
 
-
 </main>
-
 
 
 <!-- =========================
      FOOTER
 ========================= -->
 
-<footer>
-
-    <p>
-        &copy; 2026 Karol Pasko.
-        All rights reserved.
-    </p>
-
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <p><strong>Karol Pasko Technical</strong> · Freelance lighting, sound &amp; production</p>
+        <p>&copy; <span id="year">2026</span> Karol Pasko Technical. All rights reserved.</p>
+    </div>
 </footer>
 
-
-
 <script src="script.js"></script>
-
 </body>
-
 </html>
