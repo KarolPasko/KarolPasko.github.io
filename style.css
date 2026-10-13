@@ -319,13 +319,35 @@ nav ul a.nav-cta:hover {
     stroke-linejoin: round;
 }
 
+.project-card {
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.project-card:disabled {
+    cursor: default;
+}
+
+.project-card:disabled:hover {
+    transform: none;
+    border-color: var(--border);
+}
+
 .project-card img {
     width: calc(100% + 60px);
     margin: -30px -30px 24px;
     aspect-ratio: 16 / 10;
     object-fit: cover;
-    border-radius: var(--radius) var(--radius) 0 0;
     display: block;
+}
+
+.card .project-count {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--accent);
 }
 
 .card .project-role {
@@ -409,6 +431,148 @@ footer {
 
 
 /* =========================
+   GALLERY + LIGHTBOX
+========================= */
+
+.gallery,
+.lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    background: rgba(3, 4, 12, 0.92);
+    backdrop-filter: blur(6px);
+}
+
+.gallery.active {
+    display: block;
+    overflow-y: auto;
+    padding: 40px 16px;
+}
+
+.gallery-window {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.gallery-window h2 {
+    font-size: 32px;
+    margin-bottom: 6px;
+    padding-right: 50px;
+}
+
+.gallery-window > p {
+    color: var(--muted);
+    margin-bottom: 28px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+}
+
+.gallery-thumb {
+    padding: 0;
+    border: none;
+    background: var(--surface);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: zoom-in;
+}
+
+.gallery-thumb img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.gallery-thumb:hover img {
+    transform: scale(1.05);
+}
+
+.close-button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.close-button:hover {
+    border-color: var(--accent);
+}
+
+.lightbox {
+    z-index: 3000;
+}
+
+.lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox figure {
+    max-width: 90vw;
+    text-align: center;
+}
+
+.lightbox img {
+    max-width: 90vw;
+    max-height: 82vh;
+    border-radius: 8px;
+}
+
+.lightbox figcaption {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(17, 20, 51, 0.8);
+    color: var(--text);
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.lightbox-arrow:hover {
+    border-color: var(--accent);
+}
+
+.lightbox-arrow.prev {
+    left: 16px;
+}
+
+.lightbox-arrow.next {
+    right: 16px;
+}
+
+
+/* =========================
    RESPONSIVE
 ========================= */
 
@@ -479,5 +643,24 @@ footer {
 
     .card-grid {
         grid-template-columns: 1fr;
+    }
+
+    .gallery-window {
+        padding: 24px 16px;
+    }
+
+    .gallery-window h2 {
+        font-size: 24px;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .lightbox-arrow {
+        top: auto;
+        bottom: 20px;
+        transform: none;
     }
 }

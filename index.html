@@ -171,9 +171,32 @@
         </p>
     </div>
 
-    <!-- Projects are listed in script.js -->
+    <!-- Projects are listed in script.js, photos live in images/<folder>/ -->
     <div id="projectGrid" class="card-grid project-grid"></div>
 </section>
+
+<!-- =========================
+     PROJECT GALLERY
+========================= -->
+
+<div id="gallery" class="gallery" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
+    <div class="gallery-window">
+        <button id="galleryClose" class="close-button" aria-label="Close">&times;</button>
+        <h2 id="galleryTitle"></h2>
+        <p id="galleryDescription"></p>
+        <div id="galleryGrid" class="gallery-grid"></div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button id="lightboxClose" class="close-button" aria-label="Close">&times;</button>
+    <button id="lightboxPrev" class="lightbox-arrow prev" aria-label="Previous photo">&#8249;</button>
+    <figure>
+        <img id="lightboxImage" src="" alt="">
+        <figcaption id="lightboxCaption"></figcaption>
+    </figure>
+    <button id="lightboxNext" class="lightbox-arrow next" aria-label="Next photo">&#8250;</button>
+</div>
 
 <!-- =========================
      ABOUT
