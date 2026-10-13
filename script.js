@@ -1,517 +1,264 @@
 /* =========================
-   PORTFOLIO PROJECT SYSTEM
+   PROJECTS
 ========================= */
 
 /*
     Add projects here.
 
-    folder = the exact folder name inside /projects/
-    title  = name displayed on the website
-    type   = small description underneath the title
+    folder      = the folder name inside /images/ that holds this
+                  project's photos, e.g. "lionking" for images/lionking/
+    title       = name displayed on the website
+    type        = your role, shown under the title
+    description = a sentence or two about the job
+
+    Every photo in the folder is shown automatically (.jpg, .jpeg,
+    .png, .webp, .gif), so just upload pictures to the folder on GitHub.
 */
 
 const projects = [
-
     {
-        folder: "undefined",
+        folder: "oliver",
         title: "Oliver! Jr.",
         type: "School Production",
         description:
-            "My technical work on Oliver! Jr., including lighting programming, operation and technical production."
+            "Lighting programming, operation and technical production."
     },
-
     {
-        folder: "beauty",
+        folder: "beauty-and-the-beast",
         title: "Beauty and the Beast",
         type: "Lighting Design",
         description:
-            "Lighting design, programming and operation for Beauty and the Beast."
+            "Lighting design, programming and operation."
     },
-
     {
         folder: "aladdin",
         title: "Aladdin Jr.",
         type: "Lighting Programming & Operation",
         description:
-            "Lighting programming and operation for Aladdin Jr."
+            "Console programming and show operation."
     }
-
 ];
 
 
 /* =========================
-   CREATE PROJECT FOLDERS
+   FIND PHOTOS
 ========================= */
 
-async function loadProjects() {
+/*
+    GitHub Pages can't list a folder, so the site asks GitHub's API for
+    the list of files in this repository (one request for all projects).
+*/
 
-    const projectGrid =
-        document.getElementById("projectGrid");
+const GITHUB_REPO = "KarolPasko/KarolPasko.github.io";
+const GITHUB_BRANCH = "main";
+const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
 
-    projectGrid.innerHTML = "";
-
-
-    for (const project of projects) {
-
-        const folder =
-            document.createElement("div");
-
-        folder.className =
-            "project-folder";
-
-
-        folder.innerHTML = `
-
-            <div class="folder-icon">
-                📁
-            </div>
-
-            <h3>
-                ${project.title}
-            </h3>
-
-            <p>
-                ${project.type}
-            </p>
-
-        `;
-
-
-        folder.addEventListener(
-            "click",
-            () => openProject(project)
-        );
-
-
-        projectGrid.appendChild(folder);
-
-    }
-
-}
-
-
-/* =========================
-   GET GITHUB INFORMATION
-========================= */
-
-function getGitHubDetails() {
-
-    const hostname =
-        window.location.hostname;
-
-    const path =
-        window.location.pathname;
-
-
-    /*
-        Works with:
-
-        username.github.io
-
-        and
-
-        username.github.io/repository/
-    */
-
-    let owner =
-        hostname.split(".")[0];
-
-
-    let pathParts =
-        path.split("/").filter(Boolean);
-
-
-    let repository = "";
-
-
-    /*
-        If your website is:
-
-        username.github.io
-
-        there is no repository
-        in the URL.
-    */
-
-    if (
-        hostname.endsWith(".github.io") &&
-        pathParts.length > 0
-    ) {
-
-        repository =
-            pathParts[0];
-
-    }
-
-
-    return {
-        owner: owner,
-        repository: repository
-    };
-
-}
-
-
-/* =========================
-   GET IMAGES FROM GITHUB
-========================= */
-
-async function getProjectImages(folder) {
-
-    const github =
-        getGitHubDetails();
-
-
-    let apiURL;
-
-
-    /*
-        GitHub Pages user site:
-
-        username.github.io
-
-        Repository is normally:
-
-        username.github.io
-    */
-
-    if (github.repository === "") {
-
-        apiURL =
-            `https://api.github.com/repos/${github.owner}/${github.owner}.github.io/contents/projects/${folder}`;
-
-    }
-
-    /*
-        GitHub Pages project site:
-
-        username.github.io/repository
-    */
-
-    else {
-
-        apiURL =
-            `https://api.github.com/repos/${github.owner}/${github.repository}/contents/projects/${folder}`;
-
-    }
-
+async function getImagesByFolder() {
+    const byFolder = {};
 
     try {
-
-        const response =
-            await fetch(apiURL);
-
+        const response = await fetch(
+            `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`
+        );
 
         if (!response.ok) {
-
-            throw new Error(
-                "Could not load project images."
-            );
-
+            throw new Error(`GitHub API returned ${response.status}`);
         }
 
+        const data = await response.json();
 
-        const files =
-            await response.json();
+        for (const file of data.tree) {
+            const parts = file.path.split("/");
 
+            if (
+                file.type === "blob" &&
+                parts.length === 3 &&
+                parts[0] === "images" &&
+                IMAGE_TYPES.test(parts[2])
+            ) {
+                (byFolder[parts[1]] ||= []).push(file.path);
+            }
+        }
 
-        /*
-            Only allow common image formats.
-        */
-
-        return files.filter(file => {
-
-            const name =
-                file.name.toLowerCase();
-
-            return (
-                name.endsWith(".jpg") ||
-                name.endsWith(".jpeg") ||
-                name.endsWith(".png") ||
-                name.endsWith(".webp") ||
-                name.endsWith(".gif")
+        for (const folder in byFolder) {
+            byFolder[folder].sort((a, b) =>
+                a.localeCompare(b, undefined, { numeric: true })
             );
-
-        });
-
+        }
     }
 
     catch (error) {
-
-        console.error(error);
-
-        return [];
-
+        console.error("Could not load project photos:", error);
     }
 
+    return byFolder;
 }
 
 
 /* =========================
-   OPEN PROJECT
+   PROJECT CARDS
 ========================= */
 
-async function openProject(project) {
+async function loadProjects() {
+    const grid = document.getElementById("projectGrid");
+    const imagesByFolder = await getImagesByFolder();
 
-    const projectViewer =
-        document.getElementById(
-            "projectViewer"
-        );
+    for (const project of projects) {
+        const images = imagesByFolder[project.folder] || [];
+
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "card project-card";
+
+        if (images.length > 0) {
+            const cover = document.createElement("img");
+            cover.src = images[0];
+            cover.alt = project.title;
+            cover.loading = "lazy";
+            card.appendChild(cover);
+        }
+
+        const role = document.createElement("p");
+        role.className = "project-role";
+        role.textContent = project.type;
+
+        const title = document.createElement("h3");
+        title.textContent = project.title;
+
+        const description = document.createElement("p");
+        description.textContent = project.description;
+
+        const count = document.createElement("p");
+        count.className = "project-count";
+        count.textContent =
+            images.length === 0 ? "Photos coming soon"
+            : images.length === 1 ? "View 1 photo"
+            : `View ${images.length} photos`;
+
+        card.append(role, title, description, count);
+
+        if (images.length > 0) {
+            card.addEventListener("click", () => openGallery(project, images));
+        } else {
+            card.disabled = true;
+        }
+
+        grid.appendChild(card);
+    }
+}
 
 
-    const projectTitle =
-        document.getElementById(
-            "projectTitle"
-        );
+/* =========================
+   GALLERY
+========================= */
 
+const gallery = document.getElementById("gallery");
+const galleryGrid = document.getElementById("galleryGrid");
+const lightbox = document.getElementById("lightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const lightboxCaption = document.getElementById("lightboxCaption");
 
-    const projectDescription =
-        document.getElementById(
-            "projectDescription"
-        );
+let currentImages = [];
+let currentIndex = 0;
+let currentTitle = "";
 
+function openGallery(project, images) {
+    currentImages = images;
+    currentTitle = project.title;
 
-    const imageContainer =
-        document.getElementById(
-            "projectImages"
-        );
-
-
-    projectTitle.textContent =
-        project.title;
-
-
-    projectDescription.textContent =
+    document.getElementById("galleryTitle").textContent = project.title;
+    document.getElementById("galleryDescription").textContent =
         project.description;
 
+    galleryGrid.innerHTML = "";
 
-    /*
-        Show loading message
-    */
+    images.forEach((src, index) => {
+        const thumb = document.createElement("button");
+        thumb.type = "button";
+        thumb.className = "gallery-thumb";
 
-    imageContainer.innerHTML = `
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = `${project.title} photo ${index + 1}`;
+        img.loading = "lazy";
 
-        <div class="loading">
+        thumb.appendChild(img);
+        thumb.addEventListener("click", () => openLightbox(index));
+        galleryGrid.appendChild(thumb);
+    });
 
-            <div class="loading-spinner"></div>
+    gallery.classList.add("active");
+    document.body.style.overflow = "hidden";
+}
 
-            <p>
-                Loading images...
-            </p>
+function closeGallery() {
+    gallery.classList.remove("active");
+    document.body.style.overflow = "";
+}
 
-        </div>
+function openLightbox(index) {
+    currentIndex = (index + currentImages.length) % currentImages.length;
+    lightboxImage.src = currentImages[currentIndex];
+    lightboxImage.alt = `${currentTitle} photo ${currentIndex + 1}`;
+    lightboxCaption.textContent =
+        `${currentTitle}  ·  ${currentIndex + 1} / ${currentImages.length}`;
+    lightbox.classList.add("active");
+}
 
-    `;
+function closeLightbox() {
+    lightbox.classList.remove("active");
+}
 
+document.getElementById("galleryClose").addEventListener("click", closeGallery);
+document.getElementById("lightboxClose").addEventListener("click", closeLightbox);
+document.getElementById("lightboxPrev")
+    .addEventListener("click", () => openLightbox(currentIndex - 1));
+document.getElementById("lightboxNext")
+    .addEventListener("click", () => openLightbox(currentIndex + 1));
 
-    projectViewer.classList.add(
-        "active"
-    );
+/* Clicking the dark background closes the window */
+gallery.addEventListener("click", (event) => {
+    if (event.target === gallery) closeGallery();
+});
+lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) closeLightbox();
+});
 
-
-    document.body.style.overflow =
-        "hidden";
-
-
-    /*
-        Get images from GitHub
-    */
-
-    const images =
-        await getProjectImages(
-            project.folder
-        );
-
-
-    imageContainer.innerHTML = "";
-
-
-    if (images.length === 0) {
-
-        imageContainer.innerHTML = `
-
-            <div class="no-images">
-
-                <h3>
-                    No images found
-                </h3>
-
-                <p>
-                    Add images to the
-                    <strong>
-                        projects/${project.folder}
-                    </strong>
-                    folder on GitHub.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
-
+document.addEventListener("keydown", (event) => {
+    if (lightbox.classList.contains("active")) {
+        if (event.key === "Escape") closeLightbox();
+        if (event.key === "ArrowLeft") openLightbox(currentIndex - 1);
+        if (event.key === "ArrowRight") openLightbox(currentIndex + 1);
+    } else if (event.key === "Escape") {
+        closeGallery();
     }
-
-
-    /*
-        Create image cards
-    */
-
-    images.forEach(
-        (image, index) => {
-
-            const imageElement =
-                document.createElement(
-                    "div"
-                );
-
-
-            imageElement.className =
-                "project-image";
-
-
-            imageElement.innerHTML = `
-
-                <img
-                    src="${image.download_url}"
-                    alt="${project.title} - Image ${index + 1}"
-                    loading="lazy"
-                >
-
-            `;
-
-
-            imageElement.addEventListener(
-                "click",
-                () => {
-
-                    openImage(
-
-                        image.download_url,
-
-                        `${project.title} - Image ${index + 1}`,
-
-                        `Photography from ${project.title}.`
-
-                    );
-
-                }
-            );
-
-
-            imageContainer.appendChild(
-                imageElement
-            );
-
-        }
-    );
-
-}
+});
 
 
 /* =========================
-   CLOSE PROJECT
+   MOBILE MENU
 ========================= */
 
-function closeProject() {
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.getElementById("navLinks");
 
-    document
-        .getElementById(
-            "projectViewer"
-        )
-        .classList.remove(
-            "active"
-        );
+navToggle.addEventListener("click", () => {
+    const open = navLinks.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", open);
+});
 
-
-    document.body.style.overflow =
-        "";
-
-}
-
-
-/* =========================
-   OPEN IMAGE
-========================= */
-
-function openImage(
-    src,
-    title,
-    description
-) {
-
-    document.getElementById(
-        "largeImage"
-    ).src = src;
-
-
-    document.getElementById(
-        "largeImage"
-    ).alt = title;
-
-
-    document.getElementById(
-        "imageTitle"
-    ).textContent = title;
-
-
-    document.getElementById(
-        "imageDescription"
-    ).textContent = description;
-
-
-    document
-        .getElementById(
-            "imageViewer"
-        )
-        .classList.add(
-            "active"
-        );
-
-}
-
-
-/* =========================
-   CLOSE IMAGE
-========================= */
-
-function closeImage() {
-
-    document
-        .getElementById(
-            "imageViewer"
-        )
-        .classList.remove(
-            "active"
-        );
-
-}
-
-
-/* =========================
-   ESCAPE KEY
-========================= */
-
-document.addEventListener(
-    "keydown",
-    (event) => {
-
-        if (
-            event.key === "Escape"
-        ) {
-
-            closeImage();
-
-            closeProject();
-
-        }
-
+navLinks.addEventListener("click", (event) => {
+    if (event.target.tagName === "A") {
+        navLinks.classList.remove("open");
+        navToggle.setAttribute("aria-expanded", "false");
     }
-);
+});
 
 
 /* =========================
    START WEBSITE
 ========================= */
+
+document.getElementById("year").textContent = new Date().getFullYear();
 
 loadProjects();
