@@ -607,6 +607,206 @@ body.home {
 }
 
 
+.text-link {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.text-link:hover {
+    text-decoration: underline;
+}
+
+.study-card {
+    max-width: 760px;
+}
+
+.subject-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    list-style: none;
+    margin: 6px 0 18px;
+}
+
+.subject-list li {
+    padding: 6px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.12);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card p + p {
+    margin-top: 12px;
+}
+
+.study-card .text-link {
+    display: inline-block;
+    margin-top: 6px;
+}
+
+.project-list {
+    display: grid;
+    gap: 24px;
+    max-width: 900px;
+}
+
+.card.project-feature:hover {
+    transform: none;
+}
+
+.project-feature h3 {
+    font-size: 24px;
+}
+
+.research-question {
+    margin: 14px 0 16px;
+    padding: 14px 20px;
+    border-left: 3px solid var(--accent);
+    background: rgba(168, 85, 247, 0.08);
+    border-radius: 0 10px 10px 0;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--text);
+}
+
+.project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.project-links .button {
+    padding: 10px 22px;
+}
+
+.card .role-subtitle {
+    color: var(--accent);
+    margin: -4px 0 12px;
+    font-weight: 600;
+}
+
+.duty-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.duty-list li {
+    display: flex;
+    flex-direction: column;
+    padding: 14px 18px;
+    background: var(--bg-alt);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+}
+
+.duty-list span {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.slides {
+    margin-top: 24px;
+}
+
+.slides iframe {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #000;
+    margin-bottom: 10px;
+}
+
+.card .slides-missing {
+    padding: 18px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 14px;
+}
+
+
+/* =========================
+   ESSAY
+========================= */
+
+.essay {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 70px 24px 100px;
+}
+
+.essay-header {
+    margin-bottom: 40px;
+}
+
+.essay-header .text-link {
+    display: inline-block;
+    margin-bottom: 28px;
+}
+
+.essay-header h1 {
+    font-size: clamp(38px, 6vw, 56px);
+    line-height: 1.1;
+    margin-bottom: 14px;
+}
+
+.essay-subtitle {
+    color: var(--muted);
+    font-size: 19px;
+}
+
+.essay h2 {
+    font-size: 26px;
+    margin: 48px 0 14px;
+}
+
+.essay > p {
+    color: #d6daeb;
+    font-size: 17px;
+    line-height: 1.75;
+    margin-bottom: 18px;
+}
+
+.equation {
+    margin: 4px 0 22px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    font-family: "Cambria Math", "STIX Two Math", Cambria, Georgia, serif;
+    font-size: 19px;
+    line-height: 1.8;
+    overflow-x: auto;
+}
+
+.essay-figure {
+    margin: 10px 0 26px;
+}
+
+.essay-figure img {
+    display: block;
+    width: 100%;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.essay-figure figcaption {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+
 /* =========================
    GALLERY + LIGHTBOX
 ========================= */

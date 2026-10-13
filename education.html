@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Karol Pasko: education, qualifications and academic projects.">
+    <meta name="description" content="Karol Pasko: Mathematics, Further Mathematics and Computer Science at Lancaster University School of Mathematics, plus projects in fluid dynamics, light and space design.">
     <meta name="author" content="Karol Pasko">
     <title>Karol Pasko | Education &amp; Academics</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23070817'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='%23a855f7'>KP</text></svg>">
@@ -29,8 +29,8 @@
         <ul id="navLinks">
             <li><a href="index.html">Home</a></li>
             <li><a href="#studies">Studies</a></li>
-            <li><a href="#qualifications">Qualifications</a></li>
             <li><a href="#projects">Projects</a></li>
+            <li><a href="#uksdc">UKSDC</a></li>
             <li><a href="technical.html" class="nav-cta">Lighting site</a></li>
         </ul>
     </nav>
@@ -38,19 +38,15 @@
 
 <main>
 
-<!--
-    PLACEHOLDER PAGE
-    Everything in [square brackets] below is placeholder text.
-    Replace it with your own details.
--->
-
 <section class="hero hero-short">
     <div class="hero-content">
         <p class="small-title">Education &bull; Academics</p>
-        <h1>Student &amp; <span>academic work.</span></h1>
+        <h1>Maths, physics <span>and how things work.</span></h1>
         <p class="hero-lead">
-            [A sentence or two about what you study, where, and what you're
-            interested in.]
+            I study Mathematics, Further Mathematics and Computer Science at
+            Lancaster University School of Mathematics. I'm most interested in
+            the maths behind real things, from how light leaves a lantern to
+            how a wing generates lift.
         </p>
     </div>
 </section>
@@ -65,67 +61,110 @@
         <h2>Where I study</h2>
     </div>
 
-    <div class="timeline">
-        <article class="card">
-            <p class="project-role">[Start year] &ndash; [End year or Present]</p>
-            <h3>[Course name]</h3>
-            <p>[School, college or university]</p>
-        </article>
-        <article class="card">
-            <p class="project-role">[Start year] &ndash; [End year]</p>
-            <h3>[Previous course or school]</h3>
-            <p>[School, college or university]</p>
-        </article>
-    </div>
+    <article class="card study-card">
+        <p class="project-role">Current</p>
+        <h3>Lancaster University School of Mathematics</h3>
+        <ul class="subject-list">
+            <li>Mathematics</li>
+            <li>Further Mathematics</li>
+            <li>Computer Science</li>
+        </ul>
+        <p>
+            Alongside these I take <strong>FPT</strong> as an additional
+            component, covering number theory and proof.
+            <a class="text-link" href="https://github.com/KarolPasko/FPT">See my number theory code on GitHub &rarr;</a>
+        </p>
+    </article>
 </section>
 
 <!-- =========================
-     QUALIFICATIONS
+     PROJECTS
 ========================= -->
 
-<section id="qualifications" class="section section-alt">
-    <div class="section-header">
-        <p class="small-title">Qualifications</p>
-        <h2>Qualifications &amp; certificates</h2>
-    </div>
-
-    <div class="card-grid">
-        <article class="card">
-            <h3>[Qualification]</h3>
-            <p>[Grade, awarding body, year]</p>
-        </article>
-        <article class="card">
-            <h3>[Qualification]</h3>
-            <p>[Grade, awarding body, year]</p>
-        </article>
-        <article class="card">
-            <h3>[Certificate or training course]</h3>
-            <p>[Provider, year]</p>
-        </article>
-    </div>
-</section>
-
-<!-- =========================
-     ACADEMIC PROJECTS
-========================= -->
-
-<section id="projects" class="section">
+<section id="projects" class="section section-alt">
     <div class="section-header">
         <p class="small-title">Projects</p>
         <h2>Academic projects</h2>
-        <p>[Coursework, research or other projects you'd like to show.]</p>
     </div>
 
-    <div class="card-grid">
-        <article class="card">
-            <h3>[Project title]</h3>
-            <p>[A short description of the project and what you learned.]</p>
+    <div class="project-list">
+
+        <article class="card project-feature">
+            <p class="project-role">Individual project &bull; In progress</p>
+            <h3>The mathematics of lift</h3>
+            <blockquote class="research-question">
+                To what extent can fluid dynamics and mathematical modelling
+                explain the generation of lift in modern aircraft?
+            </blockquote>
+            <p>
+                An individual research project looking at the fluid dynamics
+                behind lift, and how well mathematical models describe what
+                actually happens on a modern aircraft wing.
+            </p>
         </article>
-        <article class="card">
-            <h3>[Project title]</h3>
-            <p>[A short description of the project and what you learned.]</p>
+
+        <article class="card project-feature">
+            <p class="project-role">Side project</p>
+            <h3>How Light Travels</h3>
+            <p>
+                An exploration of the physics and mathematics behind light,
+                written from a lighting designer's perspective. It runs from
+                Maxwell's equations through Snell's law and the Fresnel lens to
+                the inverse square law, which I tested with lux meter readings
+                and a Python model.
+            </p>
+            <div class="project-links">
+                <a href="how-light-travels.html" class="button">Read it</a>
+                <a href="https://github.com/KarolPasko/How-Does-Light-Travel-" class="button button-ghost">Code on GitHub</a>
+            </div>
         </article>
+
+        <article class="card project-feature">
+            <p class="project-role">Lancaster University School of Mathematics</p>
+            <!-- PLACEHOLDER: replace with the project's title and a short description -->
+            <h3>Lancaster project</h3>
+            <p>[A sentence or two about what the project was and what you found.]</p>
+            <div class="slides" data-file="presentations/lancaster-project.pptx"></div>
+        </article>
+
     </div>
+</section>
+
+<!-- =========================
+     UKSDC
+========================= -->
+
+<section id="uksdc" class="section">
+    <div class="section-header">
+        <p class="small-title">Competition &amp; leadership</p>
+        <h2>UK Space Design Competition</h2>
+        <p>
+            The UKSDC challenges teams to design a space settlement as if they
+            were a company bidding for the contract, covering everything from
+            structure and operations to the people who would live there.
+        </p>
+    </div>
+
+    <article class="card project-feature">
+        <p class="project-role">My role</p>
+        <h3>Head of Operations &amp; Infrastructure</h3>
+        <p class="role-subtitle">Operations / Mission Systems</p>
+        <p>
+            As head of department I was responsible for the settlement's
+            day-to-day survival systems, logistics and physical functions,
+            and I led my team in delivering our presentation.
+        </p>
+
+        <ul class="duty-list">
+            <li><strong>Life support</strong><span>Air, water and food replenishment</span></li>
+            <li><strong>Power</strong><span>Generation, including solar and nuclear</span></li>
+            <li><strong>Waste management</strong><span>Handling and recycling on the settlement</span></li>
+            <li><strong>Communications</strong><span>Keeping the settlement connected</span></li>
+            <li><strong>Logistics</strong><span>General logistics and interplanetary cargo tracking</span></li>
+        </ul>
+
+        <div class="slides" data-file="presentations/uksdc.pptx"></div>
+    </article>
 </section>
 
 </main>
@@ -135,5 +174,6 @@
 </footer>
 
 <script src="site.js"></script>
+<script src="slides.js"></script>
 </body>
 </html>
