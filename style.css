@@ -725,6 +725,22 @@ body.home {
     margin-bottom: 10px;
 }
 
+.slides-document iframe {
+    aspect-ratio: auto;
+    height: 85vh;
+    background: #fff;
+}
+
+.essay.essay-wide {
+    max-width: 960px;
+}
+
+.essay .essay-code {
+    margin-top: 20px;
+    color: var(--muted);
+}
+
+.slides-missing,
 .card .slides-missing {
     padding: 18px;
     border: 1px dashed var(--border);

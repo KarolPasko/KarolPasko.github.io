@@ -7,6 +7,7 @@
     shows that PowerPoint as slides you can click through, using
     Microsoft's free Office viewer. Upload the .pptx to the presentations
     folder with the same name and it appears automatically.
+    Word documents (.docx) work the same way.
 */
 
 async function loadSlides(box) {
@@ -22,7 +23,7 @@ async function loadSlides(box) {
     }
 
     if (!exists) {
-        box.innerHTML = `<p class="slides-missing">Presentation coming soon</p>`;
+        box.innerHTML = `<p class="slides-missing">${box.dataset.missing || "Presentation coming soon"}</p>`;
         return;
     }
 
@@ -30,14 +31,14 @@ async function loadSlides(box) {
     viewer.src =
         "https://view.officeapps.live.com/op/embed.aspx?src=" +
         encodeURIComponent(fileURL);
-    viewer.title = "Presentation";
+    viewer.title = box.dataset.title || "Presentation";
     viewer.loading = "lazy";
     viewer.allowFullscreen = true;
 
     const download = document.createElement("a");
     download.href = file;
     download.className = "text-link";
-    download.textContent = "Download the PowerPoint";
+    download.textContent = box.dataset.label || "Download the PowerPoint";
     download.setAttribute("download", "");
 
     box.append(viewer, download);
