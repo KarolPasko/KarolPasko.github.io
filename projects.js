@@ -37,20 +37,20 @@ const projects = [
             "Lighting design, program and operation for Addams family performance, including a DMX controled moon!"
     },
     {
-        folder: "oliver",
-        title: "Oliver! Jr.",
-        type: "Lighting Design, Lighting Hire, Lighting Operation",
-        date: "February 2026",
-        description:
-            "Lighting programming, operation and technical production."
-    },
-    {
         folder: "beauty-and-the-beast",
         title: "Beauty and the Beast",
         type: "Lighting Design",
         date: "July 2026",
         description:
             "Lighting design, programming and operation."
+    },
+    {
+        folder: "oliver",
+        title: "Oliver! Jr.",
+        type: "Lighting Design, Lighting Hire, Lighting Operation",
+        date: "February 2026",
+        description:
+            "Lighting programming, operation and technical production."
     }
 ];
 
