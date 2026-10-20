@@ -14,6 +14,7 @@ const REPO = "KarolPasko/KarolPasko.github.io";
 const BRANCH = "main";
 const TOKEN_KEY = "kp-admin-token";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
+const OTHER_PHOTO_TYPES = /\.(heic|heif|avif|tiff?|bmp)$/i;
 
 /* Photos bigger than this are shrunk to a JPEG before upload */
 const MAX_SIDE = 2000;
@@ -305,12 +306,69 @@ dropZone.addEventListener("drop", (event) => {
 window.addEventListener("dragover", (event) => event.preventDefault());
 window.addEventListener("drop", (event) => event.preventDefault());
 
-function addFiles(fileList) {
-    for (const file of fileList) {
-        if (!file.type.startsWith("image/")) continue;
-        pending.push({ file, preview: URL.createObjectURL(file) });
+/* Loads the HEIC converter the first time an iPhone photo is added */
+let heicLoader = null;
+function loadHeicConverter() {
+    heicLoader ||= new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "vendor/heic2any.min.js";
+        script.onload = () => resolve(window.heic2any);
+        script.onerror = () => { heicLoader = null; reject(new Error("Couldn't load the HEIC converter.")); };
+        document.head.appendChild(script);
+    });
+    return heicLoader;
+}
+
+function isPhoto(file) {
+    return file.type.startsWith("image/") || OTHER_PHOTO_TYPES.test(file.name);
+}
+
+async function canDecode(file) {
+    try {
+        (await createImageBitmap(file)).close();
+        return true;
+    } catch (error) {
+        return false;
     }
-    renderPending();
+}
+
+/*
+    Photos the browser can't show (HEIC in most browsers) are turned into
+    JPEGs here, so they can be previewed and the
+    website can display them.
+*/
+async function toWebPhoto(file) {
+    if (await canDecode(file)) return file;
+
+    /* Not readable: most likely HEIC, sometimes even with a .jpg name */
+    const heic2any = await loadHeicConverter();
+    let jpeg = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+    if (Array.isArray(jpeg)) jpeg = jpeg[0]; // burst/live photos: keep the first frame
+    const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
+    return new File([jpeg], name, { type: "image/jpeg" });
+}
+
+async function addFiles(fileList) {
+    const files = [...fileList].filter(isPhoto);
+    const skipped = fileList.length - files.length;
+    const failed = [];
+
+    for (let i = 0; i < files.length; i++) {
+        setPhotoStatus(`Reading photo ${i + 1} of ${files.length}…`);
+        try {
+            const file = await toWebPhoto(files[i]);
+            pending.push({ file, preview: URL.createObjectURL(file) });
+        } catch (error) {
+            console.error(`Could not read ${files[i].name}:`, error);
+            failed.push(files[i].name);
+        }
+        renderPending();
+    }
+
+    const problems = [];
+    if (failed.length) problems.push(`Couldn't open ${failed.join(", ")}. Try exporting it as a JPEG first.`);
+    if (skipped) problems.push(`Skipped ${skipped} file${skipped === 1 ? "" : "s"} that ${skipped === 1 ? "isn't a photo" : "aren't photos"}.`);
+    setPhotoStatus(problems.join(" "), problems.length ? "error" : "");
 }
 
 function renderPending() {
@@ -387,13 +445,7 @@ async function preparePhoto(file) {
         return { base64: await blobToBase64(file), ext };
     }
 
-    let bitmap;
-    try {
-        bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-    } catch (error) {
-        // e.g. HEIC photos some browsers can't read: upload as-is
-        return { base64: await blobToBase64(file), ext: IMAGE_TYPES.test(file.name) ? ext : "jpg" };
-    }
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
 
     const longest = Math.max(bitmap.width, bitmap.height);
     if (longest <= MAX_SIDE && file.size <= MAX_BYTES && IMAGE_TYPES.test(file.name)) {
