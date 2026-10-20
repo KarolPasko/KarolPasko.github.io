@@ -24,6 +24,7 @@ const projects = [
         folder: "lightning-seeds-lytham",
         title: "Lightning Seeds Lytham",
         type: "Lighting Desginer & Operator",
+        date: "December 2025",
         description:
             "Lighting Desginer & Operator for lightning seeds for their visit to Lowther Pavilion Lytham"
     },
