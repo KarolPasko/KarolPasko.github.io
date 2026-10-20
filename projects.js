@@ -39,7 +39,8 @@ const projects = [
     {
         folder: "oliver",
         title: "Oliver! Jr.",
-        type: "School Production",
+        type: "Lighting Design, Lighting Hire, Lighting Operation",
+        date: "February 2026",
         description:
             "Lighting programming, operation and technical production."
     },
