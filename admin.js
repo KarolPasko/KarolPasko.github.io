@@ -368,6 +368,16 @@ function renderExisting() {
     });
 }
 
+/* photos.json entries for a list of photo paths, keeping saved comments */
+function folderEntries(paths) {
+    return paths.map((path) => {
+        const entry = { file: path.split("/").pop() };
+        const caption = savedCaption(path);
+        if (caption) entry.caption = caption;
+        return entry;
+    });
+}
+
 function photoInfoChange(info) {
     return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(info, null, 2) + "\n") };
 }
@@ -402,14 +412,12 @@ $("undoOrderButton").addEventListener("click", startEditing);
 async function deletePhoto(path) {
     if (!confirm(`Delete photo ${path.split("/").pop()} from the website?`)) return;
 
-    const [, folder, file] = path.split("/");
-    const changes = [{ path, remove: true }];
-    let info = photoInfo;
-
-    if ((photoInfo[folder] || []).some((entry) => entry.file === file)) {
-        info = { ...photoInfo, [folder]: photoInfo[folder].filter((entry) => entry.file !== file) };
-        changes.push(photoInfoChange(info));
-    }
+    const [, folder] = path.split("/");
+    const info = {
+        ...photoInfo,
+        [folder]: folderEntries(orderedPhotos(folder).filter((p) => p !== path))
+    };
+    const changes = [{ path, remove: true }, photoInfoChange(info)];
 
     setOrderStatus("Deleting…");
     try {
@@ -670,6 +678,12 @@ $("uploadButton").addEventListener("click", async () => {
             if (updated === projectsFile) throw new Error("Couldn't find the projects list in projects.js.");
             changes.push({ path: "projects.js", base64: textToBase64(updated) });
         }
+
+        /* Keep photos.json listing every photo, so the site can show them without GitHub's API */
+        const newPaths = changes.filter((change) => change.path.startsWith(`images/${folder}/`))
+            .map((change) => change.path);
+        const info = { ...photoInfo, [folder]: folderEntries([...orderedPhotos(folder), ...newPaths]) };
+        changes.push(photoInfoChange(info));
 
         setPhotoStatus("Uploading to GitHub…");
         const count = pending.length;

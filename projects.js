@@ -45,11 +45,15 @@ const projects = [
 ========================= */
 
 /*
-    GitHub Pages can't list a folder, so the site asks GitHub's API for
-    the list of files in this repository (one request for all projects).
+    images/photos.json (kept up to date by the admin page) lists each
+    project's photos in order, with any comments. The site reads that
+    first, so photos show even if GitHub's API is busy.
 
-    images/photos.json (written by the admin page) holds the photo order
-    and comments for each project. Photos not in it come last, by number.
+    GitHub Pages can't list a folder, so the site also asks GitHub's API
+    for the files in this repository. That catches photos uploaded on
+    GitHub directly, which are added after the listed ones, by number.
+    If the API is unavailable (it allows 60 requests an hour per visitor),
+    the list in photos.json is used on its own.
 */
 
 const GITHUB_REPO = "KarolPasko/KarolPasko.github.io";
@@ -63,14 +67,13 @@ async function getPhotoInfo() {
         const response = await fetch("images/photos.json", { cache: "no-cache" });
         return response.ok ? await response.json() : {};
     } catch (error) {
+        console.error("Could not load images/photos.json:", error);
         return {};
     }
 }
 
-async function getImagesByFolder() {
-    const byFolder = {};
-    const photoInfoRequest = getPhotoInfo();
-
+/* { folder: [paths] } from GitHub's file list, or null if unavailable */
+async function getRepoImages() {
     try {
         const response = await fetch(
             `https://api.github.com/repos/${GITHUB_REPO}/git/trees/${GITHUB_BRANCH}?recursive=1`
@@ -81,6 +84,7 @@ async function getImagesByFolder() {
         }
 
         const data = await response.json();
+        const byFolder = {};
 
         for (const file of data.tree) {
             const parts = file.path.split("/");
@@ -95,28 +99,44 @@ async function getImagesByFolder() {
             }
         }
 
-        const photoInfo = await photoInfoRequest;
-
         for (const folder in byFolder) {
             byFolder[folder].sort((a, b) =>
                 a.localeCompare(b, undefined, { numeric: true })
             );
-
-            const saved = (photoInfo[folder] || []).map((entry) => {
-                const path = `images/${folder}/${entry.file}`;
-                if (entry.caption) photoCaptions[path] = entry.caption;
-                return path;
-            });
-
-            byFolder[folder] = [
-                ...saved.filter((path) => byFolder[folder].includes(path)),
-                ...byFolder[folder].filter((path) => !saved.includes(path))
-            ];
         }
+
+        return byFolder;
     }
 
     catch (error) {
-        console.error("Could not load project photos:", error);
+        console.warn("Using images/photos.json only:", error);
+        return null;
+    }
+}
+
+async function getImagesByFolder() {
+    const [photoInfo, repoImages] = await Promise.all([getPhotoInfo(), getRepoImages()]);
+    const byFolder = {};
+
+    const folders = new Set([...Object.keys(photoInfo), ...Object.keys(repoImages || {})]);
+
+    for (const folder of folders) {
+        const listed = (photoInfo[folder] || []).map((entry) => {
+            const path = `images/${folder}/${entry.file}`;
+            if (entry.caption) photoCaptions[path] = entry.caption;
+            return path;
+        });
+
+        if (!repoImages) {
+            byFolder[folder] = listed;
+            continue;
+        }
+
+        const inRepo = repoImages[folder] || [];
+        byFolder[folder] = [
+            ...listed.filter((path) => inRepo.includes(path)),
+            ...inRepo.filter((path) => !listed.includes(path))
+        ];
     }
 
     return byFolder;
