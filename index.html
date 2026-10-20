@@ -74,9 +74,16 @@
       ]
     }
     </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="home">
+
+<div class="stage-rig" aria-hidden="true">
+    <span class="fixture"></span><span class="fixture"></span><span class="fixture"></span><span class="fixture"></span><span class="fixture"></span>
+</div>
 
 <main class="home-main">
 
@@ -124,5 +131,6 @@
 <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 </script>
+<script src="fx.js"></script>
 </body>
 </html>
