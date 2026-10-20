@@ -17,6 +17,13 @@
 
 const projects = [
     {
+        folder: "addams-family",
+        title: "Addams Family",
+        type: "Lighting Designer",
+        description:
+            "Lighting design, program and operation for Addams family performance, including a DMX controled moon!"
+    },
+    {
         folder: "oliver",
         title: "Oliver! Jr.",
         type: "School Production",
