@@ -47,6 +47,7 @@ const projects = [
         folder: "beauty-and-the-beast",
         title: "Beauty and the Beast",
         type: "Lighting Design",
+        date: "July 2026",
         description:
             "Lighting design, programming and operation."
     }
