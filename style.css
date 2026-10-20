@@ -12,6 +12,13 @@
     --accent: #a855f7;
     --accent-2: #6366f1;
     --radius: 16px;
+
+    /* Gel colours for beams and accents */
+    --gel-magenta: #ff3cac;
+    --gel-amber: #ffb547;
+    --gel-cyan: #2de2e6;
+    --gel-blue: #4f6bff;
+    --heading-font: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
 }
 
 
@@ -35,6 +42,14 @@ body {
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
+    overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--heading-font);
+    letter-spacing: -0.02em;
 }
 
 a {
@@ -1533,5 +1548,594 @@ body.home {
         padding: 0;
         border: none;
         background: none;
+    }
+}
+
+
+/* =========================
+   STAGE FX
+   Beams, gel colours and motion layered over the base theme.
+========================= */
+
+@property --spin {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+/* ---- Colour-shifting headline text ---- */
+
+.hero h1 span,
+.home-intro h1 {
+    background: linear-gradient(100deg, var(--gel-magenta), var(--accent), var(--gel-cyan), var(--gel-amber), var(--gel-magenta));
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gel-shift 12s linear infinite;
+}
+
+@keyframes gel-shift {
+    to { background-position: 300% 0; }
+}
+
+/* ---- Buttons ---- */
+
+.button {
+    background: linear-gradient(120deg, var(--gel-magenta), var(--accent), var(--gel-blue));
+    background-size: 200% 100%;
+    transition: transform 0.2s, box-shadow 0.2s, background-position 0.5s;
+}
+
+.button:hover {
+    background-position: 100% 0;
+    box-shadow: 0 10px 34px rgba(255, 60, 172, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.button-ghost,
+.button-ghost:hover {
+    background: transparent;
+}
+
+.button-ghost:hover {
+    border-color: var(--gel-cyan);
+    box-shadow: 0 0 24px rgba(45, 226, 230, 0.25);
+}
+
+/* ---- Labels with a little "tally light" ---- */
+
+.small-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.small-title::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gel-magenta);
+    box-shadow: 0 0 10px var(--gel-magenta), 0 0 20px var(--gel-magenta);
+    animation: tally 2.4s ease-in-out infinite;
+}
+
+.home-choice .small-title,
+.card .small-title {
+    display: flex;
+}
+
+@keyframes tally {
+    50% { opacity: 0.35; }
+}
+
+/* ---- Header and footer light lines ---- */
+
+header {
+    border-bottom-color: transparent;
+}
+
+header::after,
+footer::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gel-magenta), var(--accent), var(--gel-cyan), transparent);
+    opacity: 0.7;
+}
+
+header::after {
+    bottom: -1px;
+}
+
+footer {
+    position: relative;
+    border-top: none;
+}
+
+footer::before {
+    top: 0;
+}
+
+.brand-mark {
+    background: linear-gradient(135deg, var(--gel-magenta), var(--accent), var(--gel-blue));
+    box-shadow: 0 0 18px rgba(168, 85, 247, 0.45);
+}
+
+nav ul a:hover {
+    color: #fff;
+    text-shadow: 0 0 12px var(--accent);
+}
+
+nav ul a.nav-cta {
+    border-color: var(--gel-magenta);
+}
+
+nav ul a.nav-cta:hover {
+    background: var(--gel-magenta);
+    text-shadow: none;
+}
+
+/* ---- The lighting rig ---- */
+
+.hero,
+.home-intro {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.stage-rig {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Truss along the top of the stage */
+.stage-rig::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 14px;
+    background:
+        repeating-linear-gradient(60deg, transparent 0 9px, rgba(183, 189, 214, 0.18) 9px 11px),
+        linear-gradient(rgba(183, 189, 214, 0.22), rgba(183, 189, 214, 0.22)) top / 100% 2px no-repeat,
+        linear-gradient(rgba(183, 189, 214, 0.22), rgba(183, 189, 214, 0.22)) bottom / 100% 2px no-repeat;
+}
+
+/* Haze glow on the floor */
+.stage-rig::after {
+    content: "";
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    bottom: -30%;
+    height: 60%;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(255, 60, 172, 0.18), transparent 60%),
+        radial-gradient(ellipse at 70% 50%, rgba(45, 226, 230, 0.14), transparent 60%);
+    filter: blur(20px);
+    animation: haze 14s ease-in-out infinite alternate;
+}
+
+@keyframes haze {
+    to { transform: translateX(6%) scale(1.08); }
+}
+
+.fixture {
+    position: absolute;
+    top: 6px;
+    left: var(--x);
+    width: 22px;
+    height: 16px;
+    margin-left: -11px;
+    border-radius: 4px 4px 8px 8px;
+    background: #1c2046;
+    border: 1px solid #2b3163;
+    transform-origin: 50% 0;
+    animation: sweep var(--speed, 9s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+/* The lens */
+.fixture::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 12px;
+    height: 6px;
+    margin-left: -6px;
+    border-radius: 50%;
+    background: var(--gel);
+    box-shadow: 0 0 10px 3px var(--gel), 0 0 30px 8px var(--gel);
+}
+
+/* The beam */
+.fixture::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    width: 340px;
+    height: 130vh;
+    margin-left: -170px;
+    background: linear-gradient(to bottom, var(--gel) 0%, transparent 75%);
+    clip-path: polygon(48% 0, 52% 0, 100% 100%, 0 100%);
+    opacity: 0.22;
+    filter: blur(3px);
+    mix-blend-mode: screen;
+    animation: flicker var(--speed, 9s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+
+.fixture:nth-child(1) { --x: 12%; --gel: var(--gel-magenta); --speed: 8s;  --from: -28deg; --to: 12deg; }
+.fixture:nth-child(2) { --x: 30%; --gel: var(--gel-cyan);    --speed: 11s; --from: 18deg;  --to: -16deg; --delay: -3s; }
+.fixture:nth-child(3) { --x: 52%; --gel: var(--gel-amber);   --speed: 9s;  --from: -14deg; --to: 22deg; --delay: -5s; }
+.fixture:nth-child(4) { --x: 72%; --gel: var(--accent);      --speed: 12s; --from: 24deg;  --to: -10deg; --delay: -1s; }
+.fixture:nth-child(5) { --x: 90%; --gel: var(--gel-blue);    --speed: 10s; --from: -8deg;  --to: 30deg; --delay: -7s; }
+
+@keyframes sweep {
+    from { transform: rotate(var(--from, -20deg)); }
+    to { transform: rotate(var(--to, 20deg)); }
+}
+
+@keyframes flicker {
+    0%, 100% { opacity: 0.22; }
+    50% { opacity: 0.32; }
+}
+
+/* Calmer rig for the education pages */
+.stage-rig-soft .fixture::after {
+    opacity: 0.14;
+    animation: none;
+}
+
+/* The home page rig fills the whole screen */
+body.home {
+    position: relative;
+    overflow-x: hidden;
+}
+
+body.home > .stage-rig {
+    position: fixed;
+    z-index: 0;
+}
+
+body.home .home-main,
+body.home footer {
+    position: relative;
+    z-index: 1;
+}
+
+.home-intro {
+    overflow: visible;
+}
+
+/* ---- Hero console chips ---- */
+
+.hero-consoles li {
+    background: rgba(12, 14, 36, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.hero-consoles li.preferred {
+    border-color: var(--gel-magenta);
+    background: rgba(255, 60, 172, 0.15);
+    box-shadow: 0 0 18px rgba(255, 60, 172, 0.3);
+}
+
+/* ---- Scrolling ticker ---- */
+
+.marquee {
+    overflow: hidden;
+    padding: 18px 0;
+    background: linear-gradient(90deg, rgba(255, 60, 172, 0.12), rgba(168, 85, 247, 0.12), rgba(45, 226, 230, 0.12));
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+}
+
+.marquee ul {
+    display: flex;
+    flex: none;
+    list-style: none;
+}
+
+.marquee li {
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    font-family: var(--heading-font);
+    font-size: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.marquee li::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-left: 44px;
+    border-radius: 50%;
+    background: var(--gel-amber);
+    box-shadow: 0 0 10px var(--gel-amber);
+}
+
+.marquee li:nth-child(3n + 2)::after {
+    background: var(--gel-cyan);
+    box-shadow: 0 0 10px var(--gel-cyan);
+}
+
+.marquee li:nth-child(3n)::after {
+    background: var(--gel-magenta);
+    box-shadow: 0 0 10px var(--gel-magenta);
+}
+
+@keyframes marquee {
+    to { transform: translateX(-50%); }
+}
+
+/* ---- Cards: gel strip and a follow spot ---- */
+
+.card,
+.home-choice,
+.console {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.card::before,
+.home-choice::before,
+.console::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--card-gel, var(--accent)), transparent);
+    opacity: 0.8;
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+.card::after,
+.home-choice::after,
+.console::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(320px circle at var(--mx, 50%) var(--my, -40%), color-mix(in srgb, var(--card-gel, var(--accent)) 22%, transparent), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.card:hover::after,
+.home-choice:hover::after,
+.console:hover::after {
+    opacity: 1;
+}
+
+.card:hover,
+.home-choice:hover {
+    border-color: var(--card-gel, var(--accent));
+    box-shadow: 0 16px 40px color-mix(in srgb, var(--card-gel, var(--accent)) 22%, transparent);
+}
+
+.project-card:disabled:hover {
+    box-shadow: none;
+}
+
+.project-card:disabled:hover::after {
+    opacity: 0;
+}
+
+.card-grid > :nth-child(4n + 1),
+.home-choice:nth-child(1),
+.console:nth-child(4n + 1) { --card-gel: var(--gel-magenta); }
+.card-grid > :nth-child(4n + 2),
+.home-choice:nth-child(2),
+.console:nth-child(4n + 2) { --card-gel: var(--gel-cyan); }
+.card-grid > :nth-child(4n + 3),
+.console:nth-child(4n + 3) { --card-gel: var(--gel-amber); }
+.card-grid > :nth-child(4n + 4),
+.console:nth-child(4n + 4) { --card-gel: var(--accent); }
+
+.card-icon {
+    background: color-mix(in srgb, var(--card-gel, var(--accent)) 14%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-gel, var(--accent)) 30%, transparent) inset;
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.card-icon svg {
+    stroke: var(--card-gel, var(--accent));
+}
+
+.card:hover .card-icon,
+.home-choice:hover .card-icon {
+    transform: scale(1.08);
+    box-shadow: 0 0 22px color-mix(in srgb, var(--card-gel, var(--accent)) 45%, transparent);
+}
+
+.home-choice .small-title,
+.home-choice-link {
+    color: var(--card-gel, var(--accent));
+}
+
+.home-choice .small-title::before {
+    background: var(--card-gel, var(--accent));
+    box-shadow: 0 0 10px var(--card-gel, var(--accent));
+}
+
+.home-choice-link {
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.home-choice:hover .home-choice-link {
+    transform: translateX(6px);
+}
+
+.home-choice {
+    background: rgba(17, 20, 51, 0.72);
+    backdrop-filter: blur(6px);
+}
+
+/* Project photos pop a little on hover */
+.project-card img {
+    transition: transform 0.5s, filter 0.5s;
+    filter: saturate(0.9);
+}
+
+.project-card:hover img {
+    transform: scale(1.04);
+    filter: saturate(1.15);
+}
+
+/* ---- Preferred desk gets a chasing border ---- */
+
+.console-preferred {
+    border: 1px solid transparent;
+    background:
+        linear-gradient(135deg, rgba(40, 18, 70, 0.96), rgba(17, 20, 51, 0.98)) padding-box,
+        conic-gradient(from var(--spin), var(--gel-magenta), var(--accent), var(--gel-cyan), var(--gel-amber), var(--gel-magenta)) border-box;
+    animation: chase 6s linear infinite;
+}
+
+.console-preferred::before {
+    display: none;
+}
+
+.console-badge {
+    background: linear-gradient(120deg, var(--gel-magenta), var(--accent));
+    box-shadow: 0 0 16px rgba(255, 60, 172, 0.4);
+}
+
+@keyframes chase {
+    to { --spin: 360deg; }
+}
+
+/* ---- Section lighting ---- */
+
+.section {
+    position: relative;
+}
+
+.section-alt {
+    background:
+        radial-gradient(ellipse at 100% 0%, rgba(255, 60, 172, 0.08), transparent 50%),
+        radial-gradient(ellipse at 0% 100%, rgba(45, 226, 230, 0.06), transparent 50%),
+        var(--bg-alt);
+}
+
+.contact {
+    background:
+        radial-gradient(ellipse at 50% 120%, rgba(255, 60, 172, 0.25), transparent 55%),
+        radial-gradient(ellipse at 20% 0%, rgba(45, 226, 230, 0.1), transparent 45%),
+        var(--bg-alt);
+}
+
+.about-facts li {
+    border-left-color: var(--fact-gel, var(--accent));
+    transition: transform 0.2s;
+}
+
+.about-facts li:hover {
+    transform: translateX(6px);
+}
+
+.about-facts li:nth-child(1) { --fact-gel: var(--gel-magenta); }
+.about-facts li:nth-child(2) { --fact-gel: var(--gel-cyan); }
+.about-facts li:nth-child(3) { --fact-gel: var(--gel-amber); }
+
+.enquiry-form input:focus,
+.enquiry-form textarea:focus {
+    border-color: var(--gel-magenta);
+    box-shadow: 0 0 0 3px rgba(255, 60, 172, 0.18);
+}
+
+.gallery-thumb:hover {
+    box-shadow: 0 0 0 2px var(--gel-magenta), 0 0 24px rgba(255, 60, 172, 0.35);
+}
+
+/* ---- Fade-in as things come on stage ---- */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    transition-delay: var(--reveal-delay, 0s);
+}
+
+.reveal.in {
+    opacity: 1;
+    transform: none;
+}
+
+/* Project cards are built by projects.js, so they animate in with CSS */
+.project-grid > .card {
+    animation: rise 0.6s ease both;
+}
+
+.project-grid > .card:nth-child(2) { animation-delay: 0.08s; }
+.project-grid > .card:nth-child(3) { animation-delay: 0.16s; }
+.project-grid > .card:nth-child(4) { animation-delay: 0.24s; }
+.project-grid > .card:nth-child(n + 5) { animation-delay: 0.32s; }
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+}
+
+@media (max-width: 760px) {
+    .fixture::after {
+        width: 220px;
+        margin-left: -110px;
+    }
+
+    .fixture:nth-child(2),
+    .fixture:nth-child(4) {
+        display: none;
+    }
+
+    .marquee li {
+        font-size: 16px;
+        padding: 0 16px;
+    }
+
+    .marquee li::after {
+        margin-left: 32px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal {
+        opacity: 1;
+        transform: none;
     }
 }
