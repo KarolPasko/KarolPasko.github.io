@@ -9,7 +9,11 @@
                   project's photos, e.g. "lionking" for images/lionking/
     title       = name displayed on the website
     type        = your role, shown under the title
+    date        = when the show was (optional, any wording, e.g. "March 2025")
     description = a sentence or two about the job
+    notes       = extra detail, shown smaller under the description (optional)
+
+    The admin page (admin.html) can add, edit, reorder and delete these.
 
     Every photo in the folder is shown automatically (.jpg, .jpeg,
     .png, .webp, .gif), so just upload pictures to the folder on GitHub.
@@ -182,7 +186,7 @@ async function loadProjects() {
 
         const role = document.createElement("p");
         role.className = "project-role";
-        role.textContent = project.type;
+        role.textContent = project.date ? `${project.type}  ·  ${project.date}` : project.type;
 
         const title = document.createElement("h3");
         title.textContent = project.title;
@@ -197,7 +201,16 @@ async function loadProjects() {
             : images.length === 1 ? "View 1 photo"
             : `View ${images.length} photos`;
 
-        card.append(role, title, description, count);
+        card.append(role, title, description);
+
+        if (project.notes) {
+            const notes = document.createElement("p");
+            notes.className = "project-notes";
+            notes.textContent = project.notes;
+            card.appendChild(notes);
+        }
+
+        card.appendChild(count);
 
         if (images.length > 0) {
             card.addEventListener("click", () => openGallery(project, images));
@@ -230,7 +243,7 @@ function openGallery(project, images) {
 
     document.getElementById("galleryTitle").textContent = project.title;
     document.getElementById("galleryDescription").textContent =
-        project.description;
+        [project.date, project.description, project.notes].filter(Boolean).join("  ·  ");
 
     galleryGrid.innerHTML = "";
 

@@ -26,7 +26,8 @@ const PHOTO_INFO = "images/photos.json";
 const $ = (id) => document.getElementById(id);
 
 let token = "";
-let shows = [];          // [{ folder, title }]
+let shows = [];          // [{ folder, title, type, date, description, notes }]
+let repoPaths = [];      // every file path in the repository
 let photosByFolder = {}; // { folder: ["images/folder/1.jpg", …] }
 let pending = [];        // [{ file, name, preview }]
 let photoInfo = {};      // images/photos.json: { folder: [{ file, caption }] }
@@ -166,8 +167,8 @@ async function loadShows() {
 
     try { photoInfo = JSON.parse(infoFile) || {}; } catch (error) { photoInfo = {}; }
 
-    shows = [...projectsFile.matchAll(/folder:\s*"([^"]+)",\s*title:\s*"([^"]+)"/g)]
-        .map(([, folder, title]) => ({ folder, title }));
+    shows = splitProjects(projectsFile).entries.map(entryFields);
+    repoPaths = repoTree.tree.filter((file) => file.type === "blob").map((file) => file.path);
 
     photosByFolder = {};
     for (const file of repoTree.tree) {
@@ -380,8 +381,26 @@ function folderEntries(paths) {
     });
 }
 
-function photoInfoChange(info) {
-    return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(info, null, 2) + "\n") };
+/*
+    Writes photos.json. Any photo in the repo that it doesn't list yet
+    (for example uploaded on GitHub directly) is added at the end of its
+    show, so the site can always show every photo without GitHub's API.
+    removed = paths being deleted in the same commit.
+*/
+function photoInfoChange(info, removed = []) {
+    const complete = { ...info };
+    for (const folder in photosByFolder) {
+        const listed = (complete[folder] || []).map((entry) => `images/${folder}/${entry.file}`);
+        const missing = photosByFolder[folder]
+            .filter((path) => !listed.includes(path) && !removed.includes(path));
+        if (missing.length) {
+            complete[folder] = [
+                ...(complete[folder] || []),
+                ...missing.map((path) => ({ file: path.split("/").pop() }))
+            ];
+        }
+    }
+    return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(complete, null, 2) + "\n") };
 }
 
 $("saveOrderButton").addEventListener("click", async () => {
@@ -419,7 +438,7 @@ async function deletePhoto(path) {
         ...photoInfo,
         [folder]: folderEntries(orderedPhotos(folder).filter((p) => p !== path))
     };
-    const changes = [{ path, remove: true }, photoInfoChange(info)];
+    const changes = [{ path, remove: true }, photoInfoChange(info, [path])];
 
     setOrderStatus("Deleting…");
     try {
@@ -518,6 +537,20 @@ function renderShowOrder() {
         const label = document.createElement("figcaption");
         label.textContent = `${index + 1}. ${title}`;
 
+        const date = shows.find((show) => show.folder === folder)?.date;
+        if (date) {
+            const when = document.createElement("span");
+            when.className = "admin-show-date";
+            when.textContent = date;
+            label.append(document.createElement("br"), when);
+        }
+
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "admin-show-edit";
+        edit.textContent = "Edit";
+        edit.addEventListener("click", () => openEditor(folder));
+
         const moves = document.createElement("div");
         moves.className = "admin-moves";
 
@@ -536,7 +569,7 @@ function renderShowOrder() {
         later.addEventListener("click", () => moveShow(index, index + 1));
 
         moves.append(earlier, later);
-        tile.append(picture, label, moves);
+        tile.append(picture, label, moves, edit);
         grid.appendChild(tile);
     });
 }
@@ -605,7 +638,7 @@ $("saveShowsButton").addEventListener("click", async () => {
         };
         const sorted = [...entries].sort((a, b) => position(a) - position(b));
 
-        const updated = `${before}\n    ${sorted.join(",\n    ")}\n${after}`;
+        const updated = joinProjects({ before, after }, sorted);
         await commit("Update show order (admin page)", [
             { path: "projects.js", base64: textToBase64(updated) }
         ]);
@@ -624,6 +657,153 @@ $("saveShowsButton").addEventListener("click", async () => {
 });
 
 $("undoShowsButton").addEventListener("click", startShowOrder);
+
+
+/* =========================
+   EDIT AND DELETE SHOWS
+========================= */
+
+const SHOW_FIELDS = ["folder", "title", "type", "date", "description", "notes"];
+
+/* Reads the "key": "value" fields of one projects.js entry */
+function entryFields(entry) {
+    const fields = {};
+    for (const key of SHOW_FIELDS) {
+        const match = entry.match(new RegExp(`\\b${key}:\\s*("(?:[^"\\\\]|\\\\.)*")`));
+        fields[key] = match ? JSON.parse(match[1]) : "";
+    }
+    return fields;
+}
+
+/* Writes one projects.js entry in the same layout as the rest of the list */
+function entryText(fields) {
+    const lines = [
+        `        folder: ${JSON.stringify(fields.folder)},`,
+        `        title: ${JSON.stringify(fields.title)},`,
+        `        type: ${JSON.stringify(fields.type || "Lighting")},`
+    ];
+    if (fields.date) lines.push(`        date: ${JSON.stringify(fields.date)},`);
+    lines.push("        description:", `            ${JSON.stringify(fields.description || "")}`);
+    if (fields.notes) {
+        lines[lines.length - 1] += ",";
+        lines.push(`        notes: ${JSON.stringify(fields.notes)}`);
+    }
+    return `{\n${lines.join("\n")}\n    }`;
+}
+
+function joinProjects({ before, after }, entries) {
+    return `${before}\n    ${entries.join(",\n    ")}\n${after}`;
+}
+
+let editingShow = null; // folder of the show in the editor
+
+function openEditor(folder) {
+    const show = shows.find((item) => item.folder === folder);
+    if (!show) return;
+
+    editingShow = folder;
+    $("editorHeading").textContent = `Edit “${show.title}”`;
+    $("editTitle").value = show.title;
+    $("editType").value = show.type;
+    $("editDate").value = show.date;
+    $("editDescription").value = show.description;
+    $("editNotes").value = show.notes;
+    $("editStatus").textContent = "";
+    $("showEditor").hidden = false;
+    $("showEditor").scrollIntoView({ behavior: "smooth", block: "center" });
+    $("editTitle").focus({ preventScroll: true });
+}
+
+function closeEditor() {
+    editingShow = null;
+    $("showEditor").hidden = true;
+}
+
+function setEditStatus(text, kind = "") {
+    $("editStatus").className = `form-status ${kind}`;
+    $("editStatus").textContent = text;
+}
+
+$("cancelEdit").addEventListener("click", closeEditor);
+
+$("showEditor").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const folder = editingShow;
+    const title = $("editTitle").value.trim();
+    if (!folder || !title) return;
+
+    setEditStatus("Saving…");
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const parts = splitProjects(projectsFile);
+        const index = parts.entries.findIndex((entry) => entryFolder(entry) === folder);
+        if (index === -1) throw new Error("That show is no longer in projects.js.");
+
+        const entries = [...parts.entries];
+        entries[index] = entryText({
+            ...entryFields(entries[index]),
+            title,
+            type: $("editType").value.trim(),
+            date: $("editDate").value.trim(),
+            description: $("editDescription").value.trim(),
+            notes: $("editNotes").value.trim()
+        });
+
+        await commit(`Update details for ${title} (admin page)`, [
+            { path: "projects.js", base64: textToBase64(joinProjects(parts, entries)) }
+        ]);
+
+        await loadShows();
+        closeEditor();
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = `Saved “${title}”. The site updates in a minute or two.`;
+    }
+
+    catch (error) {
+        setEditStatus(`Couldn't save: ${error.message}`, "error");
+    }
+});
+
+$("deleteShow").addEventListener("click", async () => {
+    const folder = editingShow;
+    const show = shows.find((item) => item.folder === folder);
+    if (!show) return;
+
+    const photoCount = (photosByFolder[folder] || []).length;
+    const photoText = photoCount === 1 ? "its 1 photo" : `its ${photoCount} photos`;
+    if (!confirm(`Delete “${show.title}” and ${photoText} from the website?`)) return;
+
+    setEditStatus("Deleting…");
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const parts = splitProjects(projectsFile);
+        const entries = parts.entries.filter((entry) => entryFolder(entry) !== folder);
+
+        const changes = [
+            { path: "projects.js", base64: textToBase64(joinProjects(parts, entries)) },
+            ...repoPaths
+                .filter((path) => path.startsWith(`images/${folder}/`))
+                .map((path) => ({ path, remove: true }))
+        ];
+
+        const info = { ...photoInfo };
+        delete info[folder];
+        changes.push(photoInfoChange(info, photosByFolder[folder] || []));
+
+        await commit(`Delete show ${show.title} (admin page)`, changes);
+
+        closeEditor();
+        await loadShows();
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = `Deleted “${show.title}”. The site updates in a minute or two.`;
+    }
+
+    catch (error) {
+        setEditStatus(`Couldn't delete: ${error.message}`, "error");
+    }
+});
 
 
 /* =========================
@@ -825,18 +1005,6 @@ async function preparePhoto(file) {
    UPLOAD
 ========================= */
 
-function projectEntry(folder, title, type, description) {
-    return [
-        "    {",
-        `        folder: ${JSON.stringify(folder)},`,
-        `        title: ${JSON.stringify(title)},`,
-        `        type: ${JSON.stringify(type || "Lighting")},`,
-        "        description:",
-        `            ${JSON.stringify(description || "")}`,
-        "    },"
-    ].join("\n");
-}
-
 $("uploadButton").addEventListener("click", async () => {
     const isNew = $("showSelect").value === "__new";
     const folder = selectedFolder();
@@ -863,10 +1031,15 @@ $("uploadButton").addEventListener("click", async () => {
         if (isNew) {
             title = $("newTitle").value.trim();
             const projectsFile = await readText("projects.js");
-            const entry = projectEntry(
-                folder, title, $("newType").value.trim(), $("newDescription").value.trim()
-            );
-            const updated = projectsFile.replace("const projects = [", `const projects = [\n${entry}`);
+            const entry = entryText({
+                folder,
+                title,
+                type: $("newType").value.trim(),
+                date: $("newDate").value.trim(),
+                description: $("newDescription").value.trim(),
+                notes: $("newNotes").value.trim()
+            });
+            const updated = projectsFile.replace("const projects = [", `const projects = [\n    ${entry},`);
             if (updated === projectsFile) throw new Error("Couldn't find the projects list in projects.js.");
             changes.push({ path: "projects.js", base64: textToBase64(updated) });
         }
@@ -889,7 +1062,7 @@ $("uploadButton").addEventListener("click", async () => {
         renderPending();
 
         if (isNew) {
-            $("newTitle").value = $("newType").value = $("newDescription").value = "";
+            for (const id of ["newTitle", "newType", "newDate", "newDescription", "newNotes"]) $(id).value = "";
         }
         await loadShows();
         $("showSelect").value = folder;
