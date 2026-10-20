@@ -47,13 +47,6 @@ const projects = [
         type: "Lighting Design",
         description:
             "Lighting design, programming and operation."
-    },
-    {
-        folder: "aladdin",
-        title: "Aladdin Jr.",
-        type: "Lighting Programming & Operation",
-        description:
-            "Console programming and show operation."
     }
 ];
 
