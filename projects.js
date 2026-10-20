@@ -34,7 +34,7 @@ const projects = [
         type: "Lighting Designer",
         date: "August 2026",
         description:
-            "Lighting design, program and operation for Addams family performance, including a DMX controled moon!"
+            "Lighting design, program and operation for Addams family performance. Featuring a DMX controled moon!"
     },
     {
         folder: "beauty-and-the-beast",
