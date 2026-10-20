@@ -127,6 +127,7 @@ async function connect(newToken) {
         $("signIn").hidden = true;
         $("photosPanel").hidden = false;
         $("enquiriesPanel").hidden = false;
+        $("worksPanel").hidden = false;
 
         await Promise.all([loadShows(), loadEnquirySettings()]);
     }
@@ -193,6 +194,7 @@ async function loadShows() {
     }
 
     showChanged();
+    startShowOrder();
 }
 
 function slugify(text) {
@@ -432,6 +434,196 @@ async function deletePhoto(path) {
         setOrderStatus(`Couldn't delete: ${error.message}`, "error");
     }
 }
+
+
+/* =========================
+   SHOW ORDER
+========================= */
+
+/*
+    The order of shows on the lighting page is the order of the entries
+    in the projects list in projects.js, so saving rewrites that list
+    with the same entries moved around.
+*/
+
+let showOrder = []; // folders, in the order being edited
+let showDragFrom = null;
+
+function startShowOrder() {
+    showOrder = shows.map((show) => show.folder);
+    setShowsDirty(false);
+    renderShowOrder();
+}
+
+function setShowsDirty(dirty) {
+    $("saveShowsButton").disabled = !dirty;
+    $("undoShowsButton").hidden = !dirty;
+}
+
+function moveShow(from, to) {
+    if (to < 0 || to >= showOrder.length || from === to) return;
+    showOrder.splice(to, 0, showOrder.splice(from, 1)[0]);
+    setShowsDirty(true);
+    renderShowOrder();
+}
+
+function renderShowOrder() {
+    const grid = $("showOrderGrid");
+    grid.innerHTML = "";
+
+    showOrder.forEach((folder, index) => {
+        const title = shows.find((show) => show.folder === folder)?.title || folder;
+        const cover = orderedPhotos(folder)[0];
+
+        const tile = document.createElement("figure");
+        tile.className = "admin-thumb admin-photo admin-show";
+        tile.draggable = true;
+
+        tile.addEventListener("dragstart", (event) => {
+            showDragFrom = index;
+            tile.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", title);
+        });
+        tile.addEventListener("dragend", () => {
+            showDragFrom = null;
+            tile.classList.remove("dragging");
+        });
+        tile.addEventListener("dragover", (event) => {
+            if (showDragFrom === null) return;
+            event.preventDefault();
+            tile.classList.add("drop-target");
+        });
+        tile.addEventListener("dragleave", () => tile.classList.remove("drop-target"));
+        tile.addEventListener("drop", (event) => {
+            if (showDragFrom === null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moveShow(showDragFrom, index);
+        });
+
+        let picture;
+        if (cover) {
+            picture = document.createElement("img");
+            picture.src = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${cover}`;
+            picture.alt = title;
+            picture.loading = "lazy";
+            picture.draggable = false;
+        } else {
+            picture = document.createElement("div");
+            picture.className = "admin-no-photo";
+            picture.textContent = "No photos yet";
+        }
+
+        const label = document.createElement("figcaption");
+        label.textContent = `${index + 1}. ${title}`;
+
+        const moves = document.createElement("div");
+        moves.className = "admin-moves";
+
+        const earlier = document.createElement("button");
+        earlier.type = "button";
+        earlier.textContent = "◀";
+        earlier.setAttribute("aria-label", `Move ${title} earlier`);
+        earlier.disabled = index === 0;
+        earlier.addEventListener("click", () => moveShow(index, index - 1));
+
+        const later = document.createElement("button");
+        later.type = "button";
+        later.textContent = "▶";
+        later.setAttribute("aria-label", `Move ${title} later`);
+        later.disabled = index === showOrder.length - 1;
+        later.addEventListener("click", () => moveShow(index, index + 1));
+
+        moves.append(earlier, later);
+        tile.append(picture, label, moves);
+        grid.appendChild(tile);
+    });
+}
+
+/*
+    Splits projects.js into the text before the list, each { … } entry,
+    and the text after, skipping braces inside strings and comments.
+*/
+function splitProjects(text) {
+    const listStart = text.indexOf("const projects = [");
+    if (listStart === -1) throw new Error("Couldn't find the projects list in projects.js.");
+
+    const entries = [];
+    let i = listStart + "const projects = [".length;
+    let depth = 0;
+    let entryStart = -1;
+
+    for (; i < text.length; i++) {
+        const char = text[i];
+
+        if (char === '"' || char === "'" || char === "`") {
+            for (i++; i < text.length && text[i] !== char; i++) {
+                if (text[i] === "\\") i++;
+            }
+        } else if (char === "/" && text[i + 1] === "/") {
+            i = text.indexOf("\n", i);
+        } else if (char === "/" && text[i + 1] === "*") {
+            i = text.indexOf("*/", i) + 1;
+        } else if (char === "{") {
+            if (depth === 0) entryStart = i;
+            depth++;
+        } else if (char === "}") {
+            depth--;
+            if (depth === 0) entries.push(text.slice(entryStart, i + 1));
+        } else if (char === "]" && depth === 0) {
+            break;
+        }
+    }
+
+    if (i >= text.length) throw new Error("Couldn't read the projects list in projects.js.");
+
+    return {
+        before: text.slice(0, listStart + "const projects = [".length),
+        entries,
+        after: text.slice(i)
+    };
+}
+
+function entryFolder(entry) {
+    return (entry.match(/folder:\s*"([^"]+)"/) || [])[1];
+}
+
+$("saveShowsButton").addEventListener("click", async () => {
+    $("saveShowsButton").disabled = true;
+    $("showsStatus").className = "form-status";
+    $("showsStatus").textContent = "Saving show order…";
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const { before, entries, after } = splitProjects(projectsFile);
+
+        /* Shows added since this page loaded keep their place at the end */
+        const position = (entry) => {
+            const index = showOrder.indexOf(entryFolder(entry));
+            return index === -1 ? showOrder.length : index;
+        };
+        const sorted = [...entries].sort((a, b) => position(a) - position(b));
+
+        const updated = `${before}\n    ${sorted.join(",\n    ")}\n${after}`;
+        await commit("Update show order (admin page)", [
+            { path: "projects.js", base64: textToBase64(updated) }
+        ]);
+
+        shows.sort((a, b) => showOrder.indexOf(a.folder) - showOrder.indexOf(b.folder));
+        setShowsDirty(false);
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = "Saved. The site updates in a minute or two.";
+    }
+
+    catch (error) {
+        $("saveShowsButton").disabled = false;
+        $("showsStatus").className = "form-status error";
+        $("showsStatus").textContent = `Couldn't save: ${error.message}`;
+    }
+});
+
+$("undoShowsButton").addEventListener("click", startShowOrder);
 
 
 /* =========================

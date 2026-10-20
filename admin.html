@@ -113,6 +113,26 @@
 </section>
 
 <!-- =========================
+     WORK ORDER
+========================= -->
+
+<section id="worksPanel" class="section admin-panel" hidden>
+    <p class="small-title">Work</p>
+    <h2>Order of your shows</h2>
+    <p class="admin-help">
+        Drag shows (or use the arrows) into the order they should appear on
+        the lighting page. The first one shows first. Click <strong>Save</strong>
+        when you're done.
+    </p>
+    <div id="showOrderGrid" class="admin-thumbs admin-photos"></div>
+    <div class="admin-actions">
+        <button id="saveShowsButton" type="button" class="button" disabled>Save show order</button>
+        <button id="undoShowsButton" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="showsStatus" class="form-status"></p>
+</section>
+
+<!-- =========================
      ENQUIRIES
 ========================= -->
 

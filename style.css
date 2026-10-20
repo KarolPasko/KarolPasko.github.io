@@ -1373,6 +1373,25 @@ body.home {
     right: 14px;
 }
 
+.admin-show figcaption {
+    display: block;
+    white-space: normal;
+}
+
+.admin-show .admin-moves {
+    float: none;
+}
+
+.admin-no-photo {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 13px;
+}
+
 .admin-photo.dragging {
     opacity: 0.4;
 }
