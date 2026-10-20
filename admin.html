@@ -99,7 +99,17 @@
     <p id="photoStatus" class="form-status"></p>
 
     <h3 class="admin-subheading">Already on the site</h3>
-    <div id="existingGrid" class="admin-thumbs"></div>
+    <p class="admin-help">
+        Drag photos to change their order (or use the arrows), and add a
+        comment under any photo. The first photo is the cover. Click
+        <strong>Save</strong> when you're done.
+    </p>
+    <div id="existingGrid" class="admin-thumbs admin-photos"></div>
+    <div id="orderActions" class="admin-actions" hidden>
+        <button id="saveOrderButton" type="button" class="button" disabled>Save order and comments</button>
+        <button id="undoOrderButton" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="orderStatus" class="form-status"></p>
 </section>
 
 <!-- =========================

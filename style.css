@@ -1032,6 +1032,14 @@ body.home {
     font-size: 14px;
 }
 
+.lightbox figcaption strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 500;
+}
+
 .lightbox-arrow {
     position: absolute;
     top: 50%;
@@ -1344,6 +1352,87 @@ body.home {
 
 .admin-thumb-remove:hover {
     background: #dc2626;
+}
+
+.admin-photos {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 16px;
+}
+
+.admin-photo {
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-alt);
+    cursor: grab;
+    transition: opacity 0.2s, border-color 0.2s;
+}
+
+.admin-photo .admin-thumb-remove {
+    top: 14px;
+    right: 14px;
+}
+
+.admin-photo.dragging {
+    opacity: 0.4;
+}
+
+.admin-photo.drop-target {
+    border-color: var(--accent);
+}
+
+.admin-photo figcaption {
+    display: inline-block;
+    margin: 8px 0 0;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.admin-moves {
+    float: right;
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.admin-moves button {
+    width: 30px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.admin-moves button:hover:not(:disabled) {
+    border-color: var(--accent);
+}
+
+.admin-moves button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.admin .admin-caption {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+    cursor: text;
+}
+
+.admin .admin-caption:focus {
+    outline: none;
+    border-color: var(--accent);
 }
 
 .admin-actions {

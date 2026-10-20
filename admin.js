@@ -20,12 +20,18 @@ const OTHER_PHOTO_TYPES = /\.(heic|heif|avif|tiff?|bmp)$/i;
 const MAX_SIDE = 2000;
 const MAX_BYTES = 1024 * 1024;
 
+/* Saved photo order and captions, read by projects.js too */
+const PHOTO_INFO = "images/photos.json";
+
 const $ = (id) => document.getElementById(id);
 
 let token = "";
 let shows = [];          // [{ folder, title }]
 let photosByFolder = {}; // { folder: ["images/folder/1.jpg", …] }
 let pending = [];        // [{ file, name, preview }]
+let photoInfo = {};      // images/photos.json: { folder: [{ file, caption }] }
+let editing = [];        // photos of the chosen show being reordered: [{ path, caption }]
+let editingDirty = false;
 
 
 /* =========================
@@ -151,10 +157,13 @@ $("signOut").addEventListener("click", () => {
 ========================= */
 
 async function loadShows() {
-    const [projectsFile, repoTree] = await Promise.all([
+    const [projectsFile, repoTree, infoFile] = await Promise.all([
         readText("projects.js"),
-        github(`/git/trees/${BRANCH}?recursive=1`)
+        github(`/git/trees/${BRANCH}?recursive=1`),
+        readText(PHOTO_INFO).catch(() => "{}")
     ]);
+
+    try { photoInfo = JSON.parse(infoFile) || {}; } catch (error) { photoInfo = {}; }
 
     shows = [...projectsFile.matchAll(/folder:\s*"([^"]+)",\s*title:\s*"([^"]+)"/g)]
         .map(([, folder, title]) => ({ folder, title }));
@@ -205,11 +214,20 @@ function selectedFolder() {
 function showChanged() {
     const isNew = $("showSelect").value === "__new";
     $("newShow").hidden = !isNew;
-    renderExisting();
+    currentShow = $("showSelect").value;
+    setOrderStatus("");
+    startEditing();
     updateUploadButton();
 }
 
-$("showSelect").addEventListener("change", showChanged);
+let currentShow = "";
+$("showSelect").addEventListener("change", () => {
+    if (editingDirty && !confirm("You have unsaved changes to the photo order or comments. Discard them?")) {
+        $("showSelect").value = currentShow;
+        return;
+    }
+    showChanged();
+});
 $("newTitle").addEventListener("input", updateUploadButton);
 
 
@@ -217,55 +235,193 @@ $("newTitle").addEventListener("input", updateUploadButton);
    EXISTING PHOTOS
 ========================= */
 
+/* Photos in the saved order first, then any not ordered yet by number */
+function orderedPhotos(folder) {
+    const photos = photosByFolder[folder] || [];
+    const saved = (photoInfo[folder] || []).map((entry) => `images/${folder}/${entry.file}`);
+    return [
+        ...saved.filter((path) => photos.includes(path)),
+        ...photos.filter((path) => !saved.includes(path))
+    ];
+}
+
+function savedCaption(path) {
+    const [, folder, file] = path.split("/");
+    return (photoInfo[folder] || []).find((entry) => entry.file === file)?.caption || "";
+}
+
+function startEditing() {
+    editing = orderedPhotos($("showSelect").value)
+        .map((path) => ({ path, caption: savedCaption(path) }));
+    setDirty(false);
+    renderExisting();
+}
+
+function setOrderStatus(text, kind = "") {
+    $("orderStatus").className = `form-status ${kind}`;
+    $("orderStatus").textContent = text;
+}
+
+function setDirty(dirty) {
+    editingDirty = dirty;
+    $("saveOrderButton").disabled = !dirty;
+    $("undoOrderButton").hidden = !dirty;
+}
+
+function movePhoto(from, to) {
+    if (to < 0 || to >= editing.length || from === to) return;
+    editing.splice(to, 0, editing.splice(from, 1)[0]);
+    setDirty(true);
+    renderExisting();
+}
+
+let dragFrom = null;
+
 function renderExisting() {
     const grid = $("existingGrid");
     grid.innerHTML = "";
+    $("orderActions").hidden = editing.length === 0;
 
-    const folder = $("showSelect").value;
-    const photos = photosByFolder[folder] || [];
-
-    if (photos.length === 0) {
+    if (editing.length === 0) {
         grid.innerHTML = '<p class="admin-help">No photos yet.</p>';
         return;
     }
 
-    photos.forEach((path, index) => {
+    editing.forEach((item, index) => {
+        const name = item.path.split("/").pop();
+
         const tile = document.createElement("figure");
-        tile.className = "admin-thumb";
+        tile.className = "admin-thumb admin-photo";
+        tile.draggable = true;
+
+        tile.addEventListener("dragstart", (event) => {
+            dragFrom = index;
+            tile.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", name);
+        });
+        tile.addEventListener("dragend", () => {
+            dragFrom = null;
+            tile.classList.remove("dragging");
+        });
+        tile.addEventListener("dragover", (event) => {
+            if (dragFrom === null) return;
+            event.preventDefault();
+            tile.classList.add("drop-target");
+        });
+        tile.addEventListener("dragleave", () => tile.classList.remove("drop-target"));
+        tile.addEventListener("drop", (event) => {
+            if (dragFrom === null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            movePhoto(dragFrom, index);
+        });
 
         const img = document.createElement("img");
-        img.src = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${path}`;
-        img.alt = path.split("/").pop();
+        img.src = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${item.path}`;
+        img.alt = name;
         img.loading = "lazy";
+        img.draggable = false;
 
-        const caption = document.createElement("figcaption");
-        caption.textContent = index === 0 ? `${img.alt} (cover)` : img.alt;
+        const label = document.createElement("figcaption");
+        label.textContent = index === 0 ? `${index + 1}. Cover` : `${index + 1}.`;
+
+        const caption = document.createElement("textarea");
+        caption.className = "admin-caption";
+        caption.rows = 2;
+        caption.placeholder = "Add a comment…";
+        caption.value = item.caption;
+        caption.setAttribute("aria-label", `Comment for photo ${index + 1}`);
+        caption.addEventListener("input", () => {
+            item.caption = caption.value;
+            setDirty(true);
+        });
+
+        const moves = document.createElement("div");
+        moves.className = "admin-moves";
+
+        const earlier = document.createElement("button");
+        earlier.type = "button";
+        earlier.textContent = "◀";
+        earlier.setAttribute("aria-label", `Move photo ${index + 1} earlier`);
+        earlier.disabled = index === 0;
+        earlier.addEventListener("click", () => movePhoto(index, index - 1));
+
+        const later = document.createElement("button");
+        later.type = "button";
+        later.textContent = "▶";
+        later.setAttribute("aria-label", `Move photo ${index + 1} later`);
+        later.disabled = index === editing.length - 1;
+        later.addEventListener("click", () => movePhoto(index, index + 1));
+
+        moves.append(earlier, later);
 
         const remove = document.createElement("button");
         remove.type = "button";
         remove.className = "admin-thumb-remove";
-        remove.setAttribute("aria-label", `Delete ${img.alt}`);
+        remove.setAttribute("aria-label", `Delete photo ${index + 1}`);
         remove.textContent = "×";
-        remove.addEventListener("click", () => deletePhoto(path));
+        remove.addEventListener("click", () => deletePhoto(item.path));
 
-        tile.append(img, caption, remove);
+        tile.append(img, remove, label, moves, caption);
         grid.appendChild(tile);
     });
 }
 
-async function deletePhoto(path) {
-    if (!confirm(`Delete ${path.split("/").pop()} from the website?`)) return;
+function photoInfoChange(info) {
+    return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(info, null, 2) + "\n") };
+}
 
-    setPhotoStatus("Deleting…");
+$("saveOrderButton").addEventListener("click", async () => {
+    const folder = $("showSelect").value;
+    const info = { ...photoInfo };
+    info[folder] = editing.map(({ path, caption }) => {
+        const entry = { file: path.split("/").pop() };
+        if (caption.trim()) entry.caption = caption.trim();
+        return entry;
+    });
+
+    $("saveOrderButton").disabled = true;
+    setOrderStatus("Saving order and comments…");
+
     try {
-        await commit(`Delete ${path} (admin page)`, [{ path, remove: true }]);
-        photosByFolder[$("showSelect").value] =
-            photosByFolder[$("showSelect").value].filter((p) => p !== path);
-        renderExisting();
-        setPhotoStatus("Deleted. The site updates in a minute or two.", "success");
+        const title = shows.find((show) => show.folder === folder)?.title || folder;
+        await commit(`Update photo order and comments for ${title} (admin page)`, [photoInfoChange(info)]);
+        photoInfo = info;
+        setDirty(false);
+        setOrderStatus("Saved. The site updates in a minute or two.", "success");
     }
     catch (error) {
-        setPhotoStatus(`Couldn't delete: ${error.message}`, "error");
+        $("saveOrderButton").disabled = false;
+        setOrderStatus(`Couldn't save: ${error.message}`, "error");
+    }
+});
+
+$("undoOrderButton").addEventListener("click", startEditing);
+
+async function deletePhoto(path) {
+    if (!confirm(`Delete photo ${path.split("/").pop()} from the website?`)) return;
+
+    const [, folder, file] = path.split("/");
+    const changes = [{ path, remove: true }];
+    let info = photoInfo;
+
+    if ((photoInfo[folder] || []).some((entry) => entry.file === file)) {
+        info = { ...photoInfo, [folder]: photoInfo[folder].filter((entry) => entry.file !== file) };
+        changes.push(photoInfoChange(info));
+    }
+
+    setOrderStatus("Deleting…");
+    try {
+        await commit(`Delete ${path} (admin page)`, changes);
+        photoInfo = info;
+        photosByFolder[folder] = photosByFolder[folder].filter((p) => p !== path);
+        editing = editing.filter((item) => item.path !== path);
+        renderExisting();
+        setOrderStatus("Deleted. The site updates in a minute or two.", "success");
+    }
+    catch (error) {
+        setOrderStatus(`Couldn't delete: ${error.message}`, "error");
     }
 }
 

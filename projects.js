@@ -47,14 +47,29 @@ const projects = [
 /*
     GitHub Pages can't list a folder, so the site asks GitHub's API for
     the list of files in this repository (one request for all projects).
+
+    images/photos.json (written by the admin page) holds the photo order
+    and comments for each project. Photos not in it come last, by number.
 */
 
 const GITHUB_REPO = "KarolPasko/KarolPasko.github.io";
 const GITHUB_BRANCH = "main";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
 
+const photoCaptions = {}; // "images/folder/1.jpg" -> comment
+
+async function getPhotoInfo() {
+    try {
+        const response = await fetch("images/photos.json", { cache: "no-cache" });
+        return response.ok ? await response.json() : {};
+    } catch (error) {
+        return {};
+    }
+}
+
 async function getImagesByFolder() {
     const byFolder = {};
+    const photoInfoRequest = getPhotoInfo();
 
     try {
         const response = await fetch(
@@ -80,10 +95,23 @@ async function getImagesByFolder() {
             }
         }
 
+        const photoInfo = await photoInfoRequest;
+
         for (const folder in byFolder) {
             byFolder[folder].sort((a, b) =>
                 a.localeCompare(b, undefined, { numeric: true })
             );
+
+            const saved = (photoInfo[folder] || []).map((entry) => {
+                const path = `images/${folder}/${entry.file}`;
+                if (entry.caption) photoCaptions[path] = entry.caption;
+                return path;
+            });
+
+            byFolder[folder] = [
+                ...saved.filter((path) => byFolder[folder].includes(path)),
+                ...byFolder[folder].filter((path) => !saved.includes(path))
+            ];
         }
     }
 
@@ -179,7 +207,7 @@ function openGallery(project, images) {
 
         const img = document.createElement("img");
         img.src = src;
-        img.alt = `${project.title} photo ${index + 1}`;
+        img.alt = photoCaptions[src] || `${project.title} photo ${index + 1}`;
         img.loading = "lazy";
 
         thumb.appendChild(img);
@@ -199,9 +227,15 @@ function closeGallery() {
 function openLightbox(index) {
     currentIndex = (index + currentImages.length) % currentImages.length;
     lightboxImage.src = currentImages[currentIndex];
-    lightboxImage.alt = `${currentTitle} photo ${currentIndex + 1}`;
+    const comment = photoCaptions[currentImages[currentIndex]];
+    lightboxImage.alt = comment || `${currentTitle} photo ${currentIndex + 1}`;
     lightboxCaption.textContent =
         `${currentTitle}  ·  ${currentIndex + 1} / ${currentImages.length}`;
+    if (comment) {
+        const text = document.createElement("strong");
+        text.textContent = comment;
+        lightboxCaption.prepend(text);
+    }
     lightbox.classList.add("active");
 }
 
