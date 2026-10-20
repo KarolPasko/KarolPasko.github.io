@@ -32,6 +32,7 @@ const projects = [
         folder: "addams-family",
         title: "Addams Family",
         type: "Lighting Designer",
+        date: "August 2026",
         description:
             "Lighting design, program and operation for Addams family performance, including a DMX controled moon!"
     },
