@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Admin | Karol Pasko Technical</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23070817'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='%23a855f7'>KP</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <nav>
+        <a href="index.html" class="brand">
+            <span class="brand-mark">KP</span>
+            <span class="brand-name">Karol Pasko <strong>Admin</strong></span>
+        </a>
+        <ul class="admin-nav">
+            <li><a href="technical.html">View site</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="admin">
+
+<!-- =========================
+     SIGN IN
+========================= -->
+
+<section id="signIn" class="section admin-panel">
+    <p class="small-title">Admin</p>
+    <h2>Connect to GitHub</h2>
+    <p class="admin-help">
+        Paste your GitHub access token to manage photos. It is saved only in
+        this browser and is never put on the website.
+    </p>
+
+    <form id="tokenForm" class="admin-row">
+        <input id="tokenInput" type="password" placeholder="github_pat_…" autocomplete="off" required>
+        <button type="submit" class="button">Connect</button>
+    </form>
+    <p id="signInStatus" class="form-status"></p>
+
+    <details class="admin-steps">
+        <summary>How do I get a token? (one time, about 2 minutes)</summary>
+        <ol>
+            <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub &rarr; New fine-grained token</a> (sign in if asked).</li>
+            <li>Name it <em>Website admin</em> and set <strong>Expiration</strong> to a date you like (for example 1 year).</li>
+            <li>Under <strong>Repository access</strong>, choose <strong>Only select repositories</strong> and pick <strong>KarolPasko.github.io</strong>.</li>
+            <li>Under <strong>Permissions &rarr; Repository permissions</strong>, set <strong>Contents</strong> to <strong>Read and write</strong>.</li>
+            <li>Click <strong>Generate token</strong>, copy it, and paste it above.</li>
+        </ol>
+        <p>Don't share the token. If it ever leaks, delete it on that GitHub page and make a new one.</p>
+    </details>
+</section>
+
+<!-- =========================
+     PHOTOS
+========================= -->
+
+<section id="photosPanel" class="section admin-panel" hidden>
+    <div class="admin-heading">
+        <div>
+            <p class="small-title">Photos</p>
+            <h2>Add photos to a show</h2>
+        </div>
+        <button id="signOut" type="button" class="button button-ghost">Forget token</button>
+    </div>
+
+    <label class="admin-label">Show
+        <select id="showSelect"></select>
+    </label>
+
+    <div id="newShow" class="admin-new-show" hidden>
+        <label class="admin-label">Show name
+            <input id="newTitle" type="text" placeholder="e.g. The Lion King Jr.">
+        </label>
+        <label class="admin-label">Your role
+            <input id="newType" type="text" placeholder="e.g. Lighting Design">
+        </label>
+        <label class="admin-label">Short description
+            <input id="newDescription" type="text" placeholder="e.g. Lighting design, programming and operation.">
+        </label>
+    </div>
+
+    <div id="dropZone" class="drop-zone" tabindex="0" role="button">
+        <p><strong>Drag photos here</strong> or click to choose</p>
+        <p class="admin-help">Big photos are shrunk automatically so the site stays fast.</p>
+        <input id="fileInput" type="file" accept="image/*" multiple hidden>
+    </div>
+
+    <div id="pendingGrid" class="admin-thumbs"></div>
+
+    <div class="admin-actions">
+        <button id="uploadButton" type="button" class="button" disabled>Upload to website</button>
+        <button id="clearButton" type="button" class="button button-ghost" hidden>Clear</button>
+    </div>
+    <p id="photoStatus" class="form-status"></p>
+
+    <h3 class="admin-subheading">Already on the site</h3>
+    <div id="existingGrid" class="admin-thumbs"></div>
+</section>
+
+<!-- =========================
+     ENQUIRIES
+========================= -->
+
+<section id="enquiriesPanel" class="section admin-panel" hidden>
+    <p class="small-title">Enquiries</p>
+    <h2>Who has been in touch</h2>
+
+    <div id="enquiriesReady" hidden>
+        <p class="admin-help">
+            Every enquiry sent from the &ldquo;Send enquiry&rdquo; form is listed in
+            your Formspree inbox, and you also get a copy by email.
+        </p>
+        <div class="admin-actions">
+            <a id="enquiriesLink" class="button" target="_blank" rel="noopener">Open enquiries</a>
+            <a href="https://mail.google.com/mail/u/0/#search/from%3Aformspree" class="button button-ghost" target="_blank" rel="noopener">Search Gmail</a>
+        </div>
+    </div>
+
+    <div id="enquiriesSetup">
+        <p class="admin-help">
+            Right now the form opens the visitor's email app and the enquiry
+            lands in your Gmail. To collect enquiries in one list instead:
+        </p>
+        <ol class="admin-steps-list">
+            <li>Sign up free at <a href="https://formspree.io/register" target="_blank" rel="noopener">formspree.io</a> with karolek01122@gmail.com and create a new form.</li>
+            <li>Copy the form's ID (the code after <code>/f/</code> in its endpoint, like <code>xyzabcde</code>) and paste it here.</li>
+        </ol>
+    </div>
+
+    <form id="formspreeForm" class="admin-row">
+        <input id="formspreeInput" type="text" placeholder="Formspree form ID" autocomplete="off">
+        <button type="submit" class="button button-ghost">Save</button>
+    </form>
+    <p id="enquiryStatus" class="form-status"></p>
+</section>
+
+</main>
+
+<footer>
+    <p>Changes go live on the website a minute or two after you save them.</p>
+</footer>
+
+<script src="site-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

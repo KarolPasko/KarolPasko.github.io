@@ -24,6 +24,13 @@
           "name": "Karol Pasko Technical",
           "alternateName": "Karol Pasko Lighting",
           "url": "https://karolpasko.github.io/technical.html",
+          "email": "karolek01122@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Blackpool",
+            "addressRegion": "Lancashire",
+            "addressCountry": "GB"
+          },
           "description": "Freelance lighting design, programming and operation for theatres, schools, festivals and live events.",
           "founder": {
             "@id": "https://karolpasko.github.io/#karol-pasko"
@@ -212,8 +219,9 @@
 
     <p class="services-note">
         <strong>Need sound or video too?</strong>
-        I can rig sound and visual equipment as part of a production,
-        but my main service is lighting.
+        Lighting is my main service, but I can rig sound and video
+        equipment as part of a production, and I can put you in touch
+        with trusted colleagues for sound and video design and operation.
     </p>
 </section>
 
@@ -315,8 +323,9 @@
             </p>
             <p>
                 I combine technical knowledge with creative problem solving.
-                I can also rig sound and video when a production needs it,
-                but lighting is where I focus.
+                Lighting is where I focus. I can rig sound and video when a
+                production needs it, and for anything more I'll refer you to
+                colleagues I trust.
             </p>
         </div>
 
@@ -324,8 +333,7 @@
             <li><strong>Theatre</strong><span>Musicals, plays and school productions</span></li>
             <li><strong>Live events</strong><span>Festivals, concerts and corporate</span></li>
             <li><strong>Main desk</strong><span>Avolites Titan</span></li>
-            <!-- PLACEHOLDER: add your base location and area covered -->
-            <li><strong>Based in</strong><span>[Your town, region]</span></li>
+            <li><strong>Based in</strong><span>Blackpool, Lancashire</span></li>
         </ul>
     </div>
 </section>
@@ -342,8 +350,36 @@
         to you with availability and a quote.
     </p>
 
-    <!-- PLACEHOLDER: replace with your business email address -->
-    <a href="mailto:hello@example.com" class="button">hello@example.com</a>
+    <!-- Enquiries go to Formspree when site-config.js has a form ID, otherwise they open an email -->
+    <form id="enquiryForm" class="enquiry-form">
+        <div class="form-row">
+            <label>Your name
+                <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label>Your email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Show date(s)
+                <input type="text" name="date" placeholder="e.g. 14&ndash;16 March">
+            </label>
+            <label>Venue
+                <input type="text" name="venue" placeholder="Venue and town">
+            </label>
+        </div>
+        <label>What do you need?
+            <textarea name="message" rows="5" required></textarea>
+        </label>
+        <input type="text" name="_gotcha" class="form-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="button">Send enquiry</button>
+        <p id="enquiryStatus" class="form-status" role="status"></p>
+    </form>
+
+    <p class="contact-email">
+        Or email me directly at
+        <a href="mailto:karolek01122@gmail.com">karolek01122@gmail.com</a>
+    </p>
 </section>
 
 </main>
@@ -357,6 +393,8 @@
 </footer>
 
 <script src="site.js"></script>
+<script src="site-config.js"></script>
+<script src="contact.js"></script>
 <script src="projects.js"></script>
 </body>
 </html>
