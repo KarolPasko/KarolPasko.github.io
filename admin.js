@@ -26,7 +26,8 @@ const PHOTO_INFO = "images/photos.json";
 const $ = (id) => document.getElementById(id);
 
 let token = "";
-let shows = [];          // [{ folder, title }]
+let shows = [];          // [{ folder, title, type, date, description, notes }]
+let repoPaths = [];      // every file path in the repository
 let photosByFolder = {}; // { folder: ["images/folder/1.jpg", …] }
 let pending = [];        // [{ file, name, preview }]
 let photoInfo = {};      // images/photos.json: { folder: [{ file, caption }] }
@@ -127,6 +128,7 @@ async function connect(newToken) {
         $("signIn").hidden = true;
         $("photosPanel").hidden = false;
         $("enquiriesPanel").hidden = false;
+        $("worksPanel").hidden = false;
 
         await Promise.all([loadShows(), loadEnquirySettings()]);
     }
@@ -165,8 +167,8 @@ async function loadShows() {
 
     try { photoInfo = JSON.parse(infoFile) || {}; } catch (error) { photoInfo = {}; }
 
-    shows = [...projectsFile.matchAll(/folder:\s*"([^"]+)",\s*title:\s*"([^"]+)"/g)]
-        .map(([, folder, title]) => ({ folder, title }));
+    shows = splitProjects(projectsFile).entries.map(entryFields);
+    repoPaths = repoTree.tree.filter((file) => file.type === "blob").map((file) => file.path);
 
     photosByFolder = {};
     for (const file of repoTree.tree) {
@@ -193,6 +195,7 @@ async function loadShows() {
     }
 
     showChanged();
+    startShowOrder();
 }
 
 function slugify(text) {
@@ -378,8 +381,26 @@ function folderEntries(paths) {
     });
 }
 
-function photoInfoChange(info) {
-    return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(info, null, 2) + "\n") };
+/*
+    Writes photos.json. Any photo in the repo that it doesn't list yet
+    (for example uploaded on GitHub directly) is added at the end of its
+    show, so the site can always show every photo without GitHub's API.
+    removed = paths being deleted in the same commit.
+*/
+function photoInfoChange(info, removed = []) {
+    const complete = { ...info };
+    for (const folder in photosByFolder) {
+        const listed = (complete[folder] || []).map((entry) => `images/${folder}/${entry.file}`);
+        const missing = photosByFolder[folder]
+            .filter((path) => !listed.includes(path) && !removed.includes(path));
+        if (missing.length) {
+            complete[folder] = [
+                ...(complete[folder] || []),
+                ...missing.map((path) => ({ file: path.split("/").pop() }))
+            ];
+        }
+    }
+    return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(complete, null, 2) + "\n") };
 }
 
 $("saveOrderButton").addEventListener("click", async () => {
@@ -417,7 +438,7 @@ async function deletePhoto(path) {
         ...photoInfo,
         [folder]: folderEntries(orderedPhotos(folder).filter((p) => p !== path))
     };
-    const changes = [{ path, remove: true }, photoInfoChange(info)];
+    const changes = [{ path, remove: true }, photoInfoChange(info, [path])];
 
     setOrderStatus("Deleting…");
     try {
@@ -432,6 +453,357 @@ async function deletePhoto(path) {
         setOrderStatus(`Couldn't delete: ${error.message}`, "error");
     }
 }
+
+
+/* =========================
+   SHOW ORDER
+========================= */
+
+/*
+    The order of shows on the lighting page is the order of the entries
+    in the projects list in projects.js, so saving rewrites that list
+    with the same entries moved around.
+*/
+
+let showOrder = []; // folders, in the order being edited
+let showDragFrom = null;
+
+function startShowOrder() {
+    showOrder = shows.map((show) => show.folder);
+    setShowsDirty(false);
+    renderShowOrder();
+}
+
+function setShowsDirty(dirty) {
+    $("saveShowsButton").disabled = !dirty;
+    $("undoShowsButton").hidden = !dirty;
+}
+
+function moveShow(from, to) {
+    if (to < 0 || to >= showOrder.length || from === to) return;
+    showOrder.splice(to, 0, showOrder.splice(from, 1)[0]);
+    setShowsDirty(true);
+    renderShowOrder();
+}
+
+function renderShowOrder() {
+    const grid = $("showOrderGrid");
+    grid.innerHTML = "";
+
+    showOrder.forEach((folder, index) => {
+        const title = shows.find((show) => show.folder === folder)?.title || folder;
+        const cover = orderedPhotos(folder)[0];
+
+        const tile = document.createElement("figure");
+        tile.className = "admin-thumb admin-photo admin-show";
+        tile.draggable = true;
+
+        tile.addEventListener("dragstart", (event) => {
+            showDragFrom = index;
+            tile.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", title);
+        });
+        tile.addEventListener("dragend", () => {
+            showDragFrom = null;
+            tile.classList.remove("dragging");
+        });
+        tile.addEventListener("dragover", (event) => {
+            if (showDragFrom === null) return;
+            event.preventDefault();
+            tile.classList.add("drop-target");
+        });
+        tile.addEventListener("dragleave", () => tile.classList.remove("drop-target"));
+        tile.addEventListener("drop", (event) => {
+            if (showDragFrom === null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moveShow(showDragFrom, index);
+        });
+
+        let picture;
+        if (cover) {
+            picture = document.createElement("img");
+            picture.src = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${cover}`;
+            picture.alt = title;
+            picture.loading = "lazy";
+            picture.draggable = false;
+        } else {
+            picture = document.createElement("div");
+            picture.className = "admin-no-photo";
+            picture.textContent = "No photos yet";
+        }
+
+        const label = document.createElement("figcaption");
+        label.textContent = `${index + 1}. ${title}`;
+
+        const date = shows.find((show) => show.folder === folder)?.date;
+        if (date) {
+            const when = document.createElement("span");
+            when.className = "admin-show-date";
+            when.textContent = date;
+            label.append(document.createElement("br"), when);
+        }
+
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "admin-show-edit";
+        edit.textContent = "Edit";
+        edit.addEventListener("click", () => openEditor(folder));
+
+        const moves = document.createElement("div");
+        moves.className = "admin-moves";
+
+        const earlier = document.createElement("button");
+        earlier.type = "button";
+        earlier.textContent = "◀";
+        earlier.setAttribute("aria-label", `Move ${title} earlier`);
+        earlier.disabled = index === 0;
+        earlier.addEventListener("click", () => moveShow(index, index - 1));
+
+        const later = document.createElement("button");
+        later.type = "button";
+        later.textContent = "▶";
+        later.setAttribute("aria-label", `Move ${title} later`);
+        later.disabled = index === showOrder.length - 1;
+        later.addEventListener("click", () => moveShow(index, index + 1));
+
+        moves.append(earlier, later);
+        tile.append(picture, label, moves, edit);
+        grid.appendChild(tile);
+    });
+}
+
+/*
+    Splits projects.js into the text before the list, each { … } entry,
+    and the text after, skipping braces inside strings and comments.
+*/
+function splitProjects(text) {
+    const listStart = text.indexOf("const projects = [");
+    if (listStart === -1) throw new Error("Couldn't find the projects list in projects.js.");
+
+    const entries = [];
+    let i = listStart + "const projects = [".length;
+    let depth = 0;
+    let entryStart = -1;
+
+    for (; i < text.length; i++) {
+        const char = text[i];
+
+        if (char === '"' || char === "'" || char === "`") {
+            for (i++; i < text.length && text[i] !== char; i++) {
+                if (text[i] === "\\") i++;
+            }
+        } else if (char === "/" && text[i + 1] === "/") {
+            i = text.indexOf("\n", i);
+        } else if (char === "/" && text[i + 1] === "*") {
+            i = text.indexOf("*/", i) + 1;
+        } else if (char === "{") {
+            if (depth === 0) entryStart = i;
+            depth++;
+        } else if (char === "}") {
+            depth--;
+            if (depth === 0) entries.push(text.slice(entryStart, i + 1));
+        } else if (char === "]" && depth === 0) {
+            break;
+        }
+    }
+
+    if (i >= text.length) throw new Error("Couldn't read the projects list in projects.js.");
+
+    return {
+        before: text.slice(0, listStart + "const projects = [".length),
+        entries,
+        after: text.slice(i)
+    };
+}
+
+function entryFolder(entry) {
+    return (entry.match(/folder:\s*"([^"]+)"/) || [])[1];
+}
+
+$("saveShowsButton").addEventListener("click", async () => {
+    $("saveShowsButton").disabled = true;
+    $("showsStatus").className = "form-status";
+    $("showsStatus").textContent = "Saving show order…";
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const { before, entries, after } = splitProjects(projectsFile);
+
+        /* Shows added since this page loaded keep their place at the end */
+        const position = (entry) => {
+            const index = showOrder.indexOf(entryFolder(entry));
+            return index === -1 ? showOrder.length : index;
+        };
+        const sorted = [...entries].sort((a, b) => position(a) - position(b));
+
+        const updated = joinProjects({ before, after }, sorted);
+        await commit("Update show order (admin page)", [
+            { path: "projects.js", base64: textToBase64(updated) }
+        ]);
+
+        shows.sort((a, b) => showOrder.indexOf(a.folder) - showOrder.indexOf(b.folder));
+        setShowsDirty(false);
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = "Saved. The site updates in a minute or two.";
+    }
+
+    catch (error) {
+        $("saveShowsButton").disabled = false;
+        $("showsStatus").className = "form-status error";
+        $("showsStatus").textContent = `Couldn't save: ${error.message}`;
+    }
+});
+
+$("undoShowsButton").addEventListener("click", startShowOrder);
+
+
+/* =========================
+   EDIT AND DELETE SHOWS
+========================= */
+
+const SHOW_FIELDS = ["folder", "title", "type", "date", "description", "notes"];
+
+/* Reads the "key": "value" fields of one projects.js entry */
+function entryFields(entry) {
+    const fields = {};
+    for (const key of SHOW_FIELDS) {
+        const match = entry.match(new RegExp(`\\b${key}:\\s*("(?:[^"\\\\]|\\\\.)*")`));
+        fields[key] = match ? JSON.parse(match[1]) : "";
+    }
+    return fields;
+}
+
+/* Writes one projects.js entry in the same layout as the rest of the list */
+function entryText(fields) {
+    const lines = [
+        `        folder: ${JSON.stringify(fields.folder)},`,
+        `        title: ${JSON.stringify(fields.title)},`,
+        `        type: ${JSON.stringify(fields.type || "Lighting")},`
+    ];
+    if (fields.date) lines.push(`        date: ${JSON.stringify(fields.date)},`);
+    lines.push("        description:", `            ${JSON.stringify(fields.description || "")}`);
+    if (fields.notes) {
+        lines[lines.length - 1] += ",";
+        lines.push(`        notes: ${JSON.stringify(fields.notes)}`);
+    }
+    return `{\n${lines.join("\n")}\n    }`;
+}
+
+function joinProjects({ before, after }, entries) {
+    return `${before}\n    ${entries.join(",\n    ")}\n${after}`;
+}
+
+let editingShow = null; // folder of the show in the editor
+
+function openEditor(folder) {
+    const show = shows.find((item) => item.folder === folder);
+    if (!show) return;
+
+    editingShow = folder;
+    $("editorHeading").textContent = `Edit “${show.title}”`;
+    $("editTitle").value = show.title;
+    $("editType").value = show.type;
+    $("editDate").value = show.date;
+    $("editDescription").value = show.description;
+    $("editNotes").value = show.notes;
+    $("editStatus").textContent = "";
+    $("showEditor").hidden = false;
+    $("showEditor").scrollIntoView({ behavior: "smooth", block: "center" });
+    $("editTitle").focus({ preventScroll: true });
+}
+
+function closeEditor() {
+    editingShow = null;
+    $("showEditor").hidden = true;
+}
+
+function setEditStatus(text, kind = "") {
+    $("editStatus").className = `form-status ${kind}`;
+    $("editStatus").textContent = text;
+}
+
+$("cancelEdit").addEventListener("click", closeEditor);
+
+$("showEditor").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const folder = editingShow;
+    const title = $("editTitle").value.trim();
+    if (!folder || !title) return;
+
+    setEditStatus("Saving…");
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const parts = splitProjects(projectsFile);
+        const index = parts.entries.findIndex((entry) => entryFolder(entry) === folder);
+        if (index === -1) throw new Error("That show is no longer in projects.js.");
+
+        const entries = [...parts.entries];
+        entries[index] = entryText({
+            ...entryFields(entries[index]),
+            title,
+            type: $("editType").value.trim(),
+            date: $("editDate").value.trim(),
+            description: $("editDescription").value.trim(),
+            notes: $("editNotes").value.trim()
+        });
+
+        await commit(`Update details for ${title} (admin page)`, [
+            { path: "projects.js", base64: textToBase64(joinProjects(parts, entries)) }
+        ]);
+
+        await loadShows();
+        closeEditor();
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = `Saved “${title}”. The site updates in a minute or two.`;
+    }
+
+    catch (error) {
+        setEditStatus(`Couldn't save: ${error.message}`, "error");
+    }
+});
+
+$("deleteShow").addEventListener("click", async () => {
+    const folder = editingShow;
+    const show = shows.find((item) => item.folder === folder);
+    if (!show) return;
+
+    const photoCount = (photosByFolder[folder] || []).length;
+    const photoText = photoCount === 1 ? "its 1 photo" : `its ${photoCount} photos`;
+    if (!confirm(`Delete “${show.title}” and ${photoText} from the website?`)) return;
+
+    setEditStatus("Deleting…");
+
+    try {
+        const projectsFile = await readText("projects.js");
+        const parts = splitProjects(projectsFile);
+        const entries = parts.entries.filter((entry) => entryFolder(entry) !== folder);
+
+        const changes = [
+            { path: "projects.js", base64: textToBase64(joinProjects(parts, entries)) },
+            ...repoPaths
+                .filter((path) => path.startsWith(`images/${folder}/`))
+                .map((path) => ({ path, remove: true }))
+        ];
+
+        const info = { ...photoInfo };
+        delete info[folder];
+        changes.push(photoInfoChange(info, photosByFolder[folder] || []));
+
+        await commit(`Delete show ${show.title} (admin page)`, changes);
+
+        closeEditor();
+        await loadShows();
+        $("showsStatus").className = "form-status success";
+        $("showsStatus").textContent = `Deleted “${show.title}”. The site updates in a minute or two.`;
+    }
+
+    catch (error) {
+        setEditStatus(`Couldn't delete: ${error.message}`, "error");
+    }
+});
 
 
 /* =========================
@@ -633,18 +1005,6 @@ async function preparePhoto(file) {
    UPLOAD
 ========================= */
 
-function projectEntry(folder, title, type, description) {
-    return [
-        "    {",
-        `        folder: ${JSON.stringify(folder)},`,
-        `        title: ${JSON.stringify(title)},`,
-        `        type: ${JSON.stringify(type || "Lighting")},`,
-        "        description:",
-        `            ${JSON.stringify(description || "")}`,
-        "    },"
-    ].join("\n");
-}
-
 $("uploadButton").addEventListener("click", async () => {
     const isNew = $("showSelect").value === "__new";
     const folder = selectedFolder();
@@ -671,10 +1031,15 @@ $("uploadButton").addEventListener("click", async () => {
         if (isNew) {
             title = $("newTitle").value.trim();
             const projectsFile = await readText("projects.js");
-            const entry = projectEntry(
-                folder, title, $("newType").value.trim(), $("newDescription").value.trim()
-            );
-            const updated = projectsFile.replace("const projects = [", `const projects = [\n${entry}`);
+            const entry = entryText({
+                folder,
+                title,
+                type: $("newType").value.trim(),
+                date: $("newDate").value.trim(),
+                description: $("newDescription").value.trim(),
+                notes: $("newNotes").value.trim()
+            });
+            const updated = projectsFile.replace("const projects = [", `const projects = [\n    ${entry},`);
             if (updated === projectsFile) throw new Error("Couldn't find the projects list in projects.js.");
             changes.push({ path: "projects.js", base64: textToBase64(updated) });
         }
@@ -697,7 +1062,7 @@ $("uploadButton").addEventListener("click", async () => {
         renderPending();
 
         if (isNew) {
-            $("newTitle").value = $("newType").value = $("newDescription").value = "";
+            for (const id of ["newTitle", "newType", "newDate", "newDescription", "newNotes"]) $(id).value = "";
         }
         await loadShows();
         $("showSelect").value = folder;

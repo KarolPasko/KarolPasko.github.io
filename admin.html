@@ -79,8 +79,14 @@
         <label class="admin-label">Your role
             <input id="newType" type="text" placeholder="e.g. Lighting Design">
         </label>
+        <label class="admin-label">Date
+            <input id="newDate" type="text" placeholder="e.g. March 2025">
+        </label>
         <label class="admin-label">Short description
             <input id="newDescription" type="text" placeholder="e.g. Lighting design, programming and operation.">
+        </label>
+        <label class="admin-label">Notes
+            <textarea id="newNotes" rows="3" placeholder="Anything else worth mentioning (optional)"></textarea>
         </label>
     </div>
 
@@ -110,6 +116,51 @@
         <button id="undoOrderButton" type="button" class="button button-ghost" hidden>Undo changes</button>
     </div>
     <p id="orderStatus" class="form-status"></p>
+</section>
+
+<!-- =========================
+     WORK ORDER
+========================= -->
+
+<section id="worksPanel" class="section admin-panel" hidden>
+    <p class="small-title">Work</p>
+    <h2>Your shows</h2>
+    <p class="admin-help">
+        Drag shows (or use the arrows) into the order they should appear on
+        the lighting page, then click <strong>Save show order</strong>. Click
+        <strong>Edit</strong> on a show to rename it, change its details or delete it.
+    </p>
+    <div id="showOrderGrid" class="admin-thumbs admin-photos"></div>
+    <div class="admin-actions">
+        <button id="saveShowsButton" type="button" class="button" disabled>Save show order</button>
+        <button id="undoShowsButton" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="showsStatus" class="form-status"></p>
+
+    <form id="showEditor" class="admin-new-show admin-editor" hidden>
+        <h3 id="editorHeading">Edit show</h3>
+        <label class="admin-label">Show name
+            <input id="editTitle" type="text" required>
+        </label>
+        <label class="admin-label">Your role
+            <input id="editType" type="text" placeholder="e.g. Lighting Design">
+        </label>
+        <label class="admin-label">Date
+            <input id="editDate" type="text" placeholder="e.g. March 2025">
+        </label>
+        <label class="admin-label">Short description
+            <input id="editDescription" type="text">
+        </label>
+        <label class="admin-label">Notes
+            <textarea id="editNotes" rows="4" placeholder="Anything else worth mentioning (optional)"></textarea>
+        </label>
+        <div class="admin-actions">
+            <button type="submit" class="button">Save details</button>
+            <button id="cancelEdit" type="button" class="button button-ghost">Cancel</button>
+            <button id="deleteShow" type="button" class="button button-danger">Delete show</button>
+        </div>
+        <p id="editStatus" class="form-status"></p>
+    </form>
 </section>
 
 <!-- =========================
