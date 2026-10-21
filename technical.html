@@ -70,8 +70,8 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -108,6 +108,19 @@
 ========================= -->
 
 <section id="home" class="hero">
+    <!-- Photos and notes are set on the admin page (images/site-photos.json) -->
+    <div id="heroPhoto" class="hero-photo" hidden>
+        <img id="heroImage" alt="">
+        <div class="hero-photo-caption">
+            <span id="heroCount" class="hero-photo-count"></span>
+            <p id="heroNote"></p>
+            <div id="heroPhotoNav" class="hero-photo-nav">
+                <button id="heroPrev" type="button" aria-label="Previous photo">&#8592;</button>
+                <button id="heroNext" type="button" aria-label="Next photo">&#8594;</button>
+            </div>
+        </div>
+    </div>
+
     <div class="hero-content">
         <p class="small-title">Karol Pasko Lighting &bull; Design &bull; Programming &bull; Operation</p>
 
@@ -345,13 +358,19 @@
             </ul>
         </div>
 
-        <ul class="about-facts">
-            <li><strong>Based in</strong><span>Blackpool, Lancashire</span></li>
-            <li><strong>Area</strong><span>Fylde Coast and the North West</span></li>
-            <li><strong>Work</strong><span>Theatre, concerts, schools and live events</span></li>
-            <li><strong>Main desk</strong><span>Avolites Titan</span></li>
-            <li><strong>Also runs</strong><span>grandMA2, grandMA3, ChamSys</span></li>
-        </ul>
+        <div class="about-side">
+            <figure id="aboutPhoto" class="about-photo" hidden>
+                <img alt="Karol Pasko">
+            </figure>
+
+            <ul class="about-facts">
+                <li><strong>Based in</strong><span>Blackpool, Lancashire</span></li>
+                <li><strong>Area</strong><span>Fylde Coast and the North West</span></li>
+                <li><strong>Work</strong><span>Theatre, concerts, schools and live events</span></li>
+                <li><strong>Main desk</strong><span>Avolites Titan</span></li>
+                <li><strong>Also runs</strong><span>grandMA2, grandMA3, ChamSys</span></li>
+            </ul>
+        </div>
     </div>
 </section>
 
@@ -413,5 +432,6 @@
 <script src="site-config.js"></script>
 <script src="contact.js"></script>
 <script src="projects.js"></script>
+<script src="site-photos.js"></script>
 </body>
 </html>

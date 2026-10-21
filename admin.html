@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Admin | Karol Pasko Technical</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23070817'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='%23a855f7'>KP</text></svg>">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23141414'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='%23f4f3ef'>KP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -161,6 +164,63 @@
         </div>
         <p id="editStatus" class="form-status"></p>
     </form>
+</section>
+
+<!-- =========================
+     LIGHTING PAGE PHOTOS
+========================= -->
+
+<section id="heroPanel" class="section admin-panel" hidden>
+    <p class="small-title">Lighting page</p>
+    <h2>Photos at the top of the lighting page</h2>
+    <p class="admin-help">
+        These show behind the title at the top of the lighting page, one at a
+        time. Visitors can click through them. Give each one a note, for
+        example the show, venue or what the lighting is doing. The first photo
+        shows first. Click <strong>Save lighting photos</strong> when you're done.
+    </p>
+
+    <div id="heroDropZone" class="drop-zone" tabindex="0" role="button">
+        <p><strong>Drag photos here</strong> or click to choose</p>
+        <p class="admin-help">Landscape photos work best. iPhone HEIC is fine.</p>
+        <input id="heroFileInput" type="file" accept="image/*,.heic,.heif,.avif,.tif,.tiff,.bmp" multiple hidden>
+    </div>
+
+    <div id="heroGrid" class="admin-thumbs admin-photos"></div>
+
+    <div class="admin-actions">
+        <button id="saveHeroButton" type="button" class="button" disabled>Save lighting photos</button>
+        <button id="undoHeroButton" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="heroStatus" class="form-status"></p>
+</section>
+
+<!-- =========================
+     ABOUT PHOTO
+========================= -->
+
+<section id="aboutPanel" class="section admin-panel" hidden>
+    <p class="small-title">About me</p>
+    <h2>Your photo</h2>
+    <p class="admin-help">
+        This photo shows next to the About section on the lighting page. A
+        portrait (taller than wide) looks best.
+    </p>
+
+    <div class="admin-about">
+        <figure id="aboutPreview" class="admin-about-preview">
+            <p class="admin-help">No photo yet.</p>
+        </figure>
+        <div>
+            <input id="aboutFileInput" type="file" accept="image/*,.heic,.heif,.avif,.tif,.tiff,.bmp" hidden>
+            <div class="admin-actions">
+                <button id="chooseAboutButton" type="button" class="button button-ghost">Choose photo</button>
+                <button id="saveAboutButton" type="button" class="button" disabled>Save photo</button>
+                <button id="removeAboutButton" type="button" class="button button-danger" hidden>Remove photo</button>
+            </div>
+            <p id="aboutStatus" class="form-status"></p>
+        </div>
+    </div>
 </section>
 
 <!-- =========================
