@@ -1,4 +1,9 @@
 {
-  "hero": [],
+  "hero": [
+    {
+      "file": "images/hero/1792587853805-1.jpg",
+      "note": "Lytham Festival lighting PBH DJ"
+    }
+  ],
   "about": ""
 }
