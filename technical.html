@@ -71,7 +71,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 
@@ -110,15 +110,13 @@
 <section id="home" class="hero">
     <!-- Photos and notes are set on the admin page (images/site-photos.json) -->
     <div id="heroPhoto" class="hero-photo" hidden>
-        <img id="heroImage" alt="">
-        <div class="hero-photo-caption">
-            <span id="heroCount" class="hero-photo-count"></span>
-            <p id="heroNote"></p>
-            <div id="heroPhotoNav" class="hero-photo-nav">
-                <button id="heroPrev" type="button" aria-label="Previous photo">&#8592;</button>
-                <button id="heroNext" type="button" aria-label="Next photo">&#8594;</button>
-            </div>
-        </div>
+        <img class="hero-slide" alt="">
+        <img class="hero-slide" alt="">
+    </div>
+    <div id="heroCaption" class="hero-caption" hidden>
+        <span id="heroCount" class="hero-caption-count"></span>
+        <p id="heroNote" class="hero-caption-note"></p>
+        <div id="heroDots" class="hero-caption-dots"></div>
     </div>
 
     <div class="hero-content">
@@ -432,6 +430,6 @@
 <script src="site-config.js"></script>
 <script src="contact.js"></script>
 <script src="projects.js"></script>
-<script src="site-photos.js"></script>
+<script src="site-photos.js?v=2"></script>
 </body>
 </html>
