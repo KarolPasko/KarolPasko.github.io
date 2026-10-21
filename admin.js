@@ -129,8 +129,10 @@ async function connect(newToken) {
         $("photosPanel").hidden = false;
         $("enquiriesPanel").hidden = false;
         $("worksPanel").hidden = false;
+        $("heroPanel").hidden = false;
+        $("aboutPanel").hidden = false;
 
-        await Promise.all([loadShows(), loadEnquirySettings()]);
+        await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos()]);
     }
 
     catch (error) {
@@ -1133,6 +1135,344 @@ $("formspreeForm").addEventListener("submit", async (event) => {
     catch (error) {
         $("enquiryStatus").className = "form-status error";
         $("enquiryStatus").textContent = `Couldn't save: ${error.message}`;
+    }
+});
+
+
+/* =========================
+   LIGHTING PAGE + ABOUT PHOTOS
+   Listed in images/site-photos.json:
+   { hero: [{ file, note }], about: "images/about/…" }
+========================= */
+
+const SITE_PHOTOS = "images/site-photos.json";
+
+let sitePhotos = { hero: [], about: "" };
+let heroItems = [];   // [{ path, note }] saved photos, or [{ file, preview, note }] new ones
+let heroDirty = false;
+let heroDragFrom = null;
+let aboutFile = null;  // new About photo waiting to be saved
+
+function rawUrl(path) {
+    return `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${path}`;
+}
+
+async function loadSitePhotos() {
+    try {
+        const saved = JSON.parse(await readText(SITE_PHOTOS));
+        sitePhotos = { hero: saved.hero || [], about: saved.about || "" };
+    } catch (error) {
+        sitePhotos = { hero: [], about: "" }; // no file yet
+    }
+    resetHero();
+    renderAbout();
+}
+
+function sitePhotosChange(info) {
+    return { path: SITE_PHOTOS, base64: textToBase64(JSON.stringify(info, null, 2) + "\n") };
+}
+
+function setHeroStatus(text, kind = "") {
+    $("heroStatus").className = `form-status ${kind}`;
+    $("heroStatus").textContent = text;
+}
+
+function setHeroDirty(dirty) {
+    heroDirty = dirty;
+    $("saveHeroButton").disabled = !dirty;
+    $("undoHeroButton").hidden = !dirty;
+}
+
+function resetHero() {
+    heroItems.forEach((item) => item.preview && URL.revokeObjectURL(item.preview));
+    heroItems = sitePhotos.hero.map((entry) => ({ path: entry.file, note: entry.note || "" }));
+    setHeroDirty(false);
+    renderHero();
+}
+
+function moveHero(from, to) {
+    if (to < 0 || to >= heroItems.length || from === to) return;
+    heroItems.splice(to, 0, heroItems.splice(from, 1)[0]);
+    setHeroDirty(true);
+    renderHero();
+}
+
+function renderHero() {
+    const grid = $("heroGrid");
+    grid.innerHTML = "";
+
+    if (heroItems.length === 0) {
+        grid.innerHTML = '<p class="admin-help">No photos yet. The lighting page shows its plain title until you add some.</p>';
+        return;
+    }
+
+    heroItems.forEach((item, index) => {
+        const tile = document.createElement("figure");
+        tile.className = "admin-thumb admin-photo";
+        tile.draggable = true;
+
+        tile.addEventListener("dragstart", (event) => {
+            heroDragFrom = index;
+            tile.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", String(index));
+        });
+        tile.addEventListener("dragend", () => {
+            heroDragFrom = null;
+            tile.classList.remove("dragging");
+        });
+        tile.addEventListener("dragover", (event) => {
+            if (heroDragFrom === null) return;
+            event.preventDefault();
+            tile.classList.add("drop-target");
+        });
+        tile.addEventListener("dragleave", () => tile.classList.remove("drop-target"));
+        tile.addEventListener("drop", (event) => {
+            if (heroDragFrom === null) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moveHero(heroDragFrom, index);
+        });
+
+        const img = document.createElement("img");
+        img.src = item.preview || rawUrl(item.path);
+        img.alt = `Lighting photo ${index + 1}`;
+        img.loading = "lazy";
+        img.draggable = false;
+
+        const label = document.createElement("figcaption");
+        label.textContent = `${index + 1}.${index === 0 ? " Shows first" : ""}${item.file ? " (new)" : ""}`;
+
+        const note = document.createElement("textarea");
+        note.className = "admin-caption";
+        note.rows = 2;
+        note.placeholder = "Note shown on the photo…";
+        note.value = item.note;
+        note.setAttribute("aria-label", `Note for photo ${index + 1}`);
+        note.addEventListener("input", () => {
+            item.note = note.value;
+            setHeroDirty(true);
+        });
+
+        const moves = document.createElement("div");
+        moves.className = "admin-moves";
+
+        const earlier = document.createElement("button");
+        earlier.type = "button";
+        earlier.textContent = "◀";
+        earlier.setAttribute("aria-label", `Move photo ${index + 1} earlier`);
+        earlier.disabled = index === 0;
+        earlier.addEventListener("click", () => moveHero(index, index - 1));
+
+        const later = document.createElement("button");
+        later.type = "button";
+        later.textContent = "▶";
+        later.setAttribute("aria-label", `Move photo ${index + 1} later`);
+        later.disabled = index === heroItems.length - 1;
+        later.addEventListener("click", () => moveHero(index, index + 1));
+
+        moves.append(earlier, later);
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "admin-thumb-remove";
+        remove.setAttribute("aria-label", `Remove photo ${index + 1}`);
+        remove.textContent = "×";
+        remove.addEventListener("click", () => {
+            if (item.preview) URL.revokeObjectURL(item.preview);
+            heroItems.splice(index, 1);
+            setHeroDirty(true);
+            renderHero();
+        });
+
+        tile.append(img, remove, label, moves, note);
+        grid.appendChild(tile);
+    });
+}
+
+async function addHeroFiles(fileList) {
+    const files = [...fileList].filter(isPhoto);
+    const failed = [];
+
+    for (let i = 0; i < files.length; i++) {
+        setHeroStatus(`Reading photo ${i + 1} of ${files.length}…`);
+        try {
+            const file = await toWebPhoto(files[i]);
+            heroItems.push({ file, preview: URL.createObjectURL(file), note: "" });
+            setHeroDirty(true);
+        } catch (error) {
+            console.error(`Could not read ${files[i].name}:`, error);
+            failed.push(files[i].name);
+        }
+        renderHero();
+    }
+
+    setHeroStatus(
+        failed.length ? `Couldn't open ${failed.join(", ")}. Try exporting it as a JPEG first.` : "",
+        failed.length ? "error" : ""
+    );
+}
+
+const heroDropZone = $("heroDropZone");
+heroDropZone.addEventListener("click", () => $("heroFileInput").click());
+heroDropZone.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        $("heroFileInput").click();
+    }
+});
+heroDropZone.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    heroDropZone.classList.add("dragging");
+});
+heroDropZone.addEventListener("dragleave", () => heroDropZone.classList.remove("dragging"));
+heroDropZone.addEventListener("drop", (event) => {
+    event.preventDefault();
+    heroDropZone.classList.remove("dragging");
+    addHeroFiles(event.dataTransfer.files);
+});
+$("heroFileInput").addEventListener("change", (event) => {
+    addHeroFiles(event.target.files);
+    event.target.value = "";
+});
+
+$("undoHeroButton").addEventListener("click", () => {
+    resetHero();
+    setHeroStatus("");
+});
+
+$("saveHeroButton").addEventListener("click", async () => {
+    $("saveHeroButton").disabled = true;
+    const changes = [];
+    const stamp = Date.now();
+
+    try {
+        const hero = [];
+        let added = 0;
+        for (const item of heroItems) {
+            if (item.file) {
+                added++;
+                setHeroStatus(`Preparing new photo ${added}…`);
+                const { base64, ext } = await preparePhoto(item.file);
+                const path = `images/hero/${stamp}-${added}.${ext}`;
+                changes.push({ path, base64 });
+                hero.push({ file: path, note: item.note.trim() });
+            } else {
+                hero.push({ file: item.path, note: item.note.trim() });
+            }
+        }
+
+        /* Delete photos that were removed from the list */
+        const kept = new Set(hero.map((entry) => entry.file));
+        for (const entry of sitePhotos.hero) {
+            if (!kept.has(entry.file)) changes.push({ path: entry.file, remove: true });
+        }
+
+        const info = { ...sitePhotos, hero };
+        changes.push(sitePhotosChange(info));
+
+        setHeroStatus("Saving to GitHub…");
+        await commit("Update lighting page photos (admin page)", changes);
+
+        sitePhotos = info;
+        resetHero();
+        setHeroStatus("Saved. The lighting page updates in a minute or two.", "success");
+    }
+
+    catch (error) {
+        setHeroStatus(`Couldn't save: ${error.message}`, "error");
+        $("saveHeroButton").disabled = false;
+    }
+});
+
+function setAboutStatus(text, kind = "") {
+    $("aboutStatus").className = `form-status ${kind}`;
+    $("aboutStatus").textContent = text;
+}
+
+function renderAbout() {
+    const preview = $("aboutPreview");
+    preview.innerHTML = "";
+
+    const src = aboutFile ? aboutFile.preview : sitePhotos.about && rawUrl(sitePhotos.about);
+    if (src) {
+        const img = document.createElement("img");
+        img.src = src;
+        img.alt = "Your About photo";
+        preview.appendChild(img);
+    } else {
+        preview.innerHTML = '<p class="admin-help">No photo yet.</p>';
+    }
+
+    $("saveAboutButton").disabled = !aboutFile;
+    $("removeAboutButton").hidden = !sitePhotos.about || Boolean(aboutFile);
+}
+
+$("chooseAboutButton").addEventListener("click", () => $("aboutFileInput").click());
+
+$("aboutFileInput").addEventListener("change", async (event) => {
+    const picked = event.target.files[0];
+    event.target.value = "";
+    if (!picked) return;
+
+    setAboutStatus("Reading photo…");
+    try {
+        const file = await toWebPhoto(picked);
+        if (aboutFile) URL.revokeObjectURL(aboutFile.preview);
+        aboutFile = { file, preview: URL.createObjectURL(file) };
+        setAboutStatus("Click Save photo to put it on the site.");
+    } catch (error) {
+        setAboutStatus(`Couldn't open ${picked.name}. Try exporting it as a JPEG first.`, "error");
+    }
+    renderAbout();
+});
+
+$("saveAboutButton").addEventListener("click", async () => {
+    $("saveAboutButton").disabled = true;
+    setAboutStatus("Preparing photo…");
+
+    try {
+        const { base64, ext } = await preparePhoto(aboutFile.file);
+        const path = `images/about/${Date.now()}.${ext}`;
+        const changes = [{ path, base64 }];
+        if (sitePhotos.about) changes.push({ path: sitePhotos.about, remove: true });
+
+        const info = { ...sitePhotos, about: path };
+        changes.push(sitePhotosChange(info));
+
+        setAboutStatus("Saving to GitHub…");
+        await commit("Update About photo (admin page)", changes);
+
+        sitePhotos = info;
+        URL.revokeObjectURL(aboutFile.preview);
+        aboutFile = null;
+        renderAbout();
+        setAboutStatus("Saved. The About section updates in a minute or two.", "success");
+    }
+
+    catch (error) {
+        setAboutStatus(`Couldn't save: ${error.message}`, "error");
+        $("saveAboutButton").disabled = false;
+    }
+});
+
+$("removeAboutButton").addEventListener("click", async () => {
+    if (!confirm("Remove your photo from the About section?")) return;
+    setAboutStatus("Removing…");
+
+    try {
+        const info = { ...sitePhotos, about: "" };
+        await commit("Remove About photo (admin page)", [
+            { path: sitePhotos.about, remove: true },
+            sitePhotosChange(info)
+        ]);
+        sitePhotos = info;
+        renderAbout();
+        setAboutStatus("Removed.", "success");
+    }
+
+    catch (error) {
+        setAboutStatus(`Couldn't remove: ${error.message}`, "error");
     }
 });
 

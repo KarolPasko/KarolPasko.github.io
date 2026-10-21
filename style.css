@@ -1,7 +1,7 @@
 /* =========================
    THEME
    Modern, architectural: warm white, charcoal type, thin rules,
-   square corners and one tungsten accent. Nothing on the page moves.
+   square corners and one purple accent. Nothing on the page moves.
 ========================= */
 
 :root {
@@ -12,15 +12,17 @@
     --line: #141414;
     --text: #141414;
     --muted: #5d5b56;
-    --accent: #b4530f;
-    --accent-2: #b4530f;
-    --accent-tint: rgba(180, 83, 15, 0.08);
+    --accent: #6b3fd6;
+    --accent-2: #6b3fd6;
+    --accent-soft: #c9b6ff;
+    --accent-tint: rgba(107, 63, 214, 0.08);
     --inverse-bg: #141414;
     --inverse-text: #f4f3ef;
     --inverse-muted: #a9a69f;
     --radius: 0;
-    --heading-font: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
-    --body-font: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --heading-font: "Syne", "Helvetica Neue", Arial, sans-serif;
+    --body-font: "DM Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono-font: "DM Mono", ui-monospace, Menlo, monospace;
 }
 
 
@@ -60,8 +62,13 @@ a {
     color: inherit;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 .small-title {
     color: var(--muted);
+    font-family: var(--mono-font);
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.18em;
@@ -141,8 +148,8 @@ nav {
     place-items: center;
     width: 36px;
     height: 36px;
-    background: var(--line);
-    color: var(--bg);
+    background: var(--accent);
+    color: #fff;
     font-family: var(--heading-font);
     font-weight: 600;
     font-size: 14px;
@@ -237,7 +244,7 @@ nav ul a.nav-cta:hover {
 
 .hero h1 span {
     display: block;
-    color: var(--muted);
+    color: var(--accent);
 }
 
 .hero-lead {
@@ -1404,6 +1411,199 @@ body.home {
 
 
 /* =========================
+   TYPE DETAILS
+   Technical labels use the mono face, like cue numbers on a desk.
+========================= */
+
+.card .project-role,
+.card .project-count,
+.console-badge,
+.hero-consoles li,
+.credit-list time,
+.about-facts strong,
+.enquiry-form label,
+.home-choice-link,
+.hero-photo-count {
+    font-family: var(--mono-font);
+}
+
+::selection {
+    background: var(--accent);
+    color: #fff;
+}
+
+
+/* =========================
+   LIGHTING PAGE PHOTOS
+   Set on the admin page. One photo at a time behind the title, with its
+   note; it only changes when a visitor clicks the arrows.
+========================= */
+
+.hero-photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: var(--inverse-bg);
+}
+
+.hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Darken the left side so the title stays readable */
+.hero-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(14, 12, 20, 0.88) 0%, rgba(14, 12, 20, 0.6) 45%, rgba(14, 12, 20, 0.15) 100%),
+        linear-gradient(0deg, rgba(14, 12, 20, 0.55), transparent 40%);
+}
+
+.hero.has-photo {
+    min-height: 88vh;
+    color: var(--inverse-text);
+    background: var(--inverse-bg);
+    border-bottom-color: var(--inverse-bg);
+}
+
+.hero.has-photo .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+}
+
+.hero.has-photo .small-title,
+.hero.has-photo .hero-lead,
+.hero.has-photo .hero-consoles li {
+    color: rgba(244, 243, 239, 0.78);
+}
+
+.hero.has-photo h1 span,
+.hero.has-photo .hero-consoles li.preferred {
+    color: var(--accent-soft);
+}
+
+.hero.has-photo .hero-consoles {
+    border-top-color: rgba(244, 243, 239, 0.25);
+}
+
+.hero.has-photo .hero-consoles li {
+    border-right-color: rgba(244, 243, 239, 0.25);
+}
+
+.hero.has-photo .hero-consoles li.preferred::before {
+    background: var(--accent-soft);
+}
+
+.hero.has-photo .button {
+    background: var(--inverse-text);
+    border-color: var(--inverse-text);
+    color: var(--inverse-bg);
+}
+
+.hero.has-photo .button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.hero.has-photo .button-ghost {
+    background: transparent;
+    color: var(--inverse-text);
+}
+
+.hero-photo-caption {
+    position: absolute;
+    right: 6%;
+    bottom: 90px;
+    z-index: 2;
+    width: 340px;
+    padding: 20px 22px;
+    background: rgba(14, 12, 20, 0.78);
+    border-left: 2px solid var(--accent-soft);
+    color: var(--inverse-text);
+}
+
+.hero-photo-count {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--accent-soft);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+}
+
+.hero-photo-caption p {
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.hero-photo-caption p:empty {
+    display: none;
+}
+
+.hero-photo-nav {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.hero-photo-nav[hidden] {
+    display: none;
+}
+
+.hero-photo-nav button {
+    width: 40px;
+    height: 36px;
+    border: 1px solid rgba(244, 243, 239, 0.4);
+    background: transparent;
+    color: var(--inverse-text);
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.hero-photo-nav button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+@media (max-width: 1100px) {
+    .hero.has-photo {
+        flex-wrap: wrap;
+    }
+
+    .hero-photo-caption {
+        position: relative;
+        right: auto;
+        bottom: auto;
+        width: 100%;
+        max-width: 520px;
+        margin-top: 44px;
+    }
+}
+
+
+/* =========================
+   ABOUT PHOTO
+========================= */
+
+.about-photo {
+    margin-bottom: 30px;
+    background: var(--inverse-bg);
+}
+
+.about-photo img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+}
+
+
+/* =========================
    ADMIN
 ========================= */
 
@@ -1757,4 +1957,47 @@ body.home {
         border: none;
         background: none;
     }
+}
+
+.admin-about {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.admin-about-preview {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    border: 1px dashed var(--border);
+    background: var(--surface);
+    text-align: center;
+    padding: 10px;
+}
+
+.admin-about-preview:has(img) {
+    padding: 0;
+    border-style: solid;
+}
+
+.admin-about-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 600px) {
+    .admin-about {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-about-preview {
+        max-width: 220px;
+    }
+}
+
+.admin-thumbs > .admin-help {
+    grid-column: 1 / -1;
 }
