@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -56,6 +56,49 @@
         </ol>
         <p>Don't share the token. If it ever leaks, delete it on that GitHub page and make a new one.</p>
     </details>
+</section>
+
+<!-- =========================
+     VISITORS
+========================= -->
+
+<section id="statsPanel" class="section admin-panel" hidden>
+    <div class="admin-heading">
+        <div>
+            <p class="small-title">Analytics</p>
+            <h2>Visitors</h2>
+        </div>
+        <button id="refreshStats" type="button" class="button button-ghost">Refresh</button>
+    </div>
+    <p class="admin-help">
+        A visit is one person opening the site (counted once per browser tab
+        session). Days are UK time. Your own visits from this browser aren't
+        counted once you've opened this admin page.
+    </p>
+
+    <ul class="stat-tiles">
+        <li><strong id="statToday">–</strong><span>Today</span></li>
+        <li><strong id="statWeek">–</strong><span>Last 7 days</span></li>
+        <li><strong id="statFortnight">–</strong><span>Last 14 days</span></li>
+        <li><strong id="statTotal">–</strong><span>All time</span></li>
+    </ul>
+
+    <div class="stat-columns">
+        <div>
+            <h3>Visits per day</h3>
+            <ul id="statDays" class="stat-bars"></ul>
+        </div>
+        <div>
+            <h3>Page views</h3>
+            <ul id="statPages" class="stat-bars"></ul>
+        </div>
+    </div>
+
+    <label class="stat-ignore">
+        <input id="ignoreMe" type="checkbox" checked>
+        Don't count my visits on this device
+    </label>
+    <p id="statsStatus" class="form-status"></p>
 </section>
 
 <!-- =========================
@@ -268,6 +311,7 @@
 </footer>
 
 <script src="site-config.js"></script>
+<script src="counter.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
