@@ -126,6 +126,8 @@ async function connect(newToken) {
         try { localStorage.setItem(TOKEN_KEY, token); } catch (error) { /* private window */ }
 
         $("signIn").hidden = true;
+        $("statsPanel").hidden = false;
+        loadStats();
         $("photosPanel").hidden = false;
         $("enquiriesPanel").hidden = false;
         $("worksPanel").hidden = false;
@@ -1473,6 +1475,113 @@ $("removeAboutButton").addEventListener("click", async () => {
 
     catch (error) {
         setAboutStatus(`Couldn't remove: ${error.message}`, "error");
+    }
+});
+
+
+/* =========================
+   VISITORS
+   Counters are kept by counter.js on abacus.jasoncameron.dev.
+========================= */
+
+const STAT_DAYS = 14;
+const STAT_PAGES = [
+    ["index", "Home"],
+    ["technical", "Lighting"],
+    ["education", "Education"],
+    ["how-light-travels", "How Light Travels"]
+];
+
+/* A counter that has never been hit doesn't exist yet: that's 0 */
+async function readCounter(key) {
+    const response = await fetch(`${COUNTER.api}/get/${COUNTER.namespace}/${key}`);
+    if (response.status === 404) return 0;
+    if (!response.ok) throw new Error(`counter service replied ${response.status}`);
+    return (await response.json()).value || 0;
+}
+
+function renderBars(listId, rows) {
+    const max = Math.max(1, ...rows.map((row) => row.value));
+    const list = $(listId);
+    list.innerHTML = "";
+
+    rows.forEach((row) => {
+        const item = document.createElement("li");
+        const label = document.createElement("span");
+        const bar = document.createElement("span");
+        const value = document.createElement("strong");
+
+        label.textContent = row.label;
+        bar.className = "stat-bar";
+        bar.style.setProperty("--fill", `${(row.value / max) * 100}%`);
+        value.textContent = row.value.toLocaleString();
+
+        item.append(label, bar, value);
+        list.appendChild(item);
+    });
+}
+
+async function loadStats() {
+    $("statsStatus").className = "form-status";
+    $("statsStatus").textContent = "Loading…";
+
+    const days = [];
+    for (let i = 0; i < STAT_DAYS; i++) {
+        days.push(new Date(Date.now() - i * 86400000));
+    }
+
+    try {
+        const [total, dayCounts, pageCounts] = await Promise.all([
+            readCounter("visits"),
+            Promise.all(days.map((day) => readCounter(`day-${counterDay(day)}`))),
+            Promise.all(STAT_PAGES.map(([key]) => readCounter(`page-${key}`)))
+        ]);
+
+        const sum = (values) => values.reduce((a, b) => a + b, 0);
+
+        $("statToday").textContent = dayCounts[0].toLocaleString();
+        $("statWeek").textContent = sum(dayCounts.slice(0, 7)).toLocaleString();
+        $("statFortnight").textContent = sum(dayCounts).toLocaleString();
+        $("statTotal").textContent = total.toLocaleString();
+
+        renderBars("statDays", days.map((day, i) => ({
+            label: day.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" }),
+            value: dayCounts[i]
+        })));
+
+        renderBars("statPages", STAT_PAGES.map(([, label], i) => ({
+            label,
+            value: pageCounts[i]
+        })));
+
+        $("statsStatus").textContent = "";
+    }
+
+    catch (error) {
+        $("statsStatus").className = "form-status error";
+        $("statsStatus").textContent = `Couldn't load visitor numbers: ${error.message}`;
+    }
+}
+
+$("refreshStats").addEventListener("click", loadStats);
+
+function setIgnoreMe(ignore) {
+    try {
+        if (ignore) localStorage.setItem(COUNTER.ignoreKey, "1");
+        else localStorage.removeItem(COUNTER.ignoreKey);
+    } catch (error) { /* private window */ }
+}
+
+/* Opening the admin page stops this browser counting itself, unless unticked */
+let countMe = false;
+try { countMe = localStorage.getItem(COUNTER.ignoreKey) === "count"; } catch (error) { /* ignore */ }
+$("ignoreMe").checked = !countMe;
+if (!countMe) setIgnoreMe(true);
+
+$("ignoreMe").addEventListener("change", (event) => {
+    if (event.target.checked) setIgnoreMe(true);
+    else {
+        try { localStorage.setItem(COUNTER.ignoreKey, "count"); } catch (error) { /* ignore */ }
     }
 });
 
