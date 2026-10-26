@@ -166,6 +166,9 @@ async function loadProjects() {
     const grid = document.getElementById("projectGrid");
     const imagesByFolder = await getImagesByFolder();
 
+    // Replace the plain list written for search engines (scripts/build-credits.js)
+    grid.textContent = "";
+
     for (const project of projects) {
         const images = imagesByFolder[project.folder] || [];
 

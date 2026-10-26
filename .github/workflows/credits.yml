@@ -1,0 +1,46 @@
+# Keeps the crawlable show list on the lighting page in step with projects.js.
+name: Update show credits for search engines
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - projects.js
+      - index.html
+      - scripts/build-credits.js
+      - .github/workflows/credits.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: credits
+  cancel-in-progress: false
+
+jobs:
+  credits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/build-credits.js
+      - name: Commit if anything changed
+        run: |
+          if git diff --quiet; then
+            echo "Credits already up to date"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git commit -am "Update show credits for search engines"
+          git pull --rebase origin main
+          git push origin HEAD:main
+      - name: Rebuild the site so the new credits go live
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds || true
