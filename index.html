@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Karol Pasko is a freelance lighting technician and designer running Karol Pasko Technical, and a Maths and Computer Science student. Lighting design, programming and operation for theatre and live events.">
+    <meta name="description" content="Karol Pasko Lighting: Karol Pasko Technical is Karol Pasko's freelance lighting service for theatres, schools and live events, from lighting design and Avolites Titan programming to running the show.">
     <meta name="author" content="Karol Pasko">
-    <title>Karol Pasko | Lighting Technician &amp; Karol Pasko Technical</title>
+    <title>Karol Pasko Lighting | Karol Pasko Technical, Freelance Lighting Design &amp; Programming</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23141414'/><text x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='%23f4f3ef'>KP</text></svg>">
     <link rel="canonical" href="https://karolpasko.github.io/">
-    <meta property="og:title" content="Karol Pasko | Lighting &amp; Karol Pasko Technical">
-    <meta property="og:description" content="Karol Pasko: freelance lighting design, programming and operation through Karol Pasko Technical, plus education and academics.">
+    <meta property="og:title" content="Karol Pasko Lighting | Karol Pasko Technical">
+    <meta property="og:description" content="Freelance lighting design, programming and operation by Karol Pasko for theatre, schools and live events.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://karolpasko.github.io/">
     <meta property="og:site_name" content="Karol Pasko">
@@ -32,32 +32,18 @@
           }
         },
         {
-          "@type": "Person",
-          "@id": "https://karolpasko.github.io/#karol-pasko",
-          "name": "Karol Pasko",
-          "url": "https://karolpasko.github.io/",
-          "jobTitle": "Lighting Technician and Designer",
-          "worksFor": {
-            "@id": "https://karolpasko.github.io/technical.html#business"
-          },
-          "knowsAbout": [
-            "Stage lighting",
-            "Lighting design",
-            "Lighting programming",
-            "Avolites Titan",
-            "grandMA",
-            "ChamSys"
-          ],
-          "sameAs": [
-            "https://github.com/KarolPasko"
-          ]
-        },
-        {
           "@type": "ProfessionalService",
-          "@id": "https://karolpasko.github.io/technical.html#business",
+          "@id": "https://karolpasko.github.io/#business",
           "name": "Karol Pasko Technical",
           "alternateName": "Karol Pasko Lighting",
-          "url": "https://karolpasko.github.io/technical.html",
+          "url": "https://karolpasko.github.io/",
+          "email": "karolek01122@gmail.com",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Blackpool",
+            "addressRegion": "Lancashire",
+            "addressCountry": "GB"
+          },
           "description": "Freelance lighting design, programming and operation for theatres, schools, festivals and live events.",
           "founder": {
             "@id": "https://karolpasko.github.io/#karol-pasko"
@@ -70,6 +56,27 @@
             "Lighting programming",
             "Lighting operation"
           ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://karolpasko.github.io/#karol-pasko",
+          "name": "Karol Pasko",
+          "url": "https://karolpasko.github.io/",
+          "jobTitle": "Lighting Technician and Designer",
+          "worksFor": {
+            "@id": "https://karolpasko.github.io/#business"
+          },
+          "knowsAbout": [
+            "Stage lighting",
+            "Lighting design",
+            "Lighting programming",
+            "Avolites Titan",
+            "grandMA",
+            "ChamSys"
+          ],
+          "sameAs": [
+            "https://github.com/KarolPasko"
+          ]
         }
       ]
     }
@@ -79,55 +86,360 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=7">
 </head>
-<body class="home">
+<body>
 
+<!-- =========================
+     NAVIGATION
+========================= -->
 
-<main class="home-main">
+<header>
+    <nav>
+        <a href="index.html" class="brand">
+            <span class="brand-mark">KP</span>
+            <span class="brand-name">Karol Pasko <strong>Technical</strong></span>
+        </a>
 
-    <section class="home-intro">
-        <span class="brand-mark brand-mark-large">KP</span>
-        <h1>Karol Pasko</h1>
-        <p>Lighting technician and designer at Karol Pasko Technical, student and educator. Pick where you'd like to go.</p>
-    </section>
+        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks">
+            <span></span><span></span><span></span>
+        </button>
 
-    <div class="home-choices">
+        <ul id="navLinks">
+            <li><a href="#services">Services</a></li>
+            <li><a href="#consoles">Consoles</a></li>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="education.html">Education</a></li>
+            <li><a href="#contact" class="nav-cta">Get a quote</a></li>
+        </ul>
+    </nav>
+</header>
 
-        <a href="technical.html" class="home-choice">
+<main>
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section id="home" class="hero">
+    <!-- Photos and notes are set on the admin page (images/site-photos.json) -->
+    <div id="heroPhoto" class="hero-photo" hidden>
+        <img class="hero-slide" alt="">
+        <img class="hero-slide" alt="">
+    </div>
+    <div id="heroCaption" class="hero-caption" hidden>
+        <span id="heroCount" class="hero-caption-count"></span>
+        <p id="heroNote" class="hero-caption-note"></p>
+        <div id="heroDots" class="hero-caption-dots"></div>
+    </div>
+
+    <div class="hero-content">
+        <p class="small-title">Karol Pasko Lighting &bull; Design &bull; Programming &bull; Operation</p>
+
+        <h1>
+            Lighting you can
+            <span>rely on.</span>
+        </h1>
+
+        <p class="hero-lead">
+            Karol Pasko Technical is a freelance lighting service for theatres,
+            schools, festivals and live events, from design and console
+            programming to running the show on the night.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#contact" class="button">Get a quote</a>
+            <a href="#services" class="button button-ghost">See services</a>
+        </div>
+
+        <ul class="hero-consoles" aria-label="Consoles">
+            <li class="preferred">Avolites Titan</li>
+            <li>grandMA2</li>
+            <li>grandMA3</li>
+            <li>ChamSys</li>
+        </ul>
+    </div>
+</section>
+
+<!-- =========================
+     SERVICES
+========================= -->
+
+<section id="services" class="section">
+    <div class="section-header">
+        <p class="small-title">What I offer</p>
+        <h2>Services</h2>
+        <p>
+            Lighting is what I do. Hire me for a single show, a full
+            production run or ongoing lighting support.
+        </p>
+    </div>
+
+    <div class="card-grid">
+
+        <article class="card">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.4 1 1.1 1 1.8V16h5v-.3c0-.7.4-1.4 1-1.8A6 6 0 0 0 12 3z"/></svg>
             </div>
-            <p class="small-title">Karol Pasko Technical</p>
-            <h2>Lighting &amp; Technical</h2>
+            <h3>Lighting Design</h3>
             <p>
-                Freelance lighting design, programming and operation for
-                theatre, schools and live events.
+                Designs for theatre, musicals, concerts and events, from
+                plots and paperwork through focus to opening night.
             </p>
-            <span class="home-choice-link">Visit the lighting site &rarr;</span>
-        </a>
+        </article>
 
-        <a href="education.html" class="home-choice">
+        <article class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+            </div>
+            <h3>Programming &amp; Operation</h3>
+            <p>
+                Showfile building, cueing, effects and busking, ideally on
+                Avolites Titan, and also on grandMA and ChamSys.
+            </p>
+        </article>
+
+        <article class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 4h18M7 4v5M17 4v5M5 9h4v4H5zM15 9h4v4h-4zM7 13l-2 7M17 13l2 7"/></svg>
+            </div>
+            <h3>Rigging &amp; Focus</h3>
+            <p>
+                Hanging, cabling, patching and focusing fixtures, so the rig
+                is safe and ready for programming.
+            </p>
+        </article>
+
+        <article class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h3>Technical Management</h3>
+            <p>
+                Planning the lighting side of a production, sourcing equipment,
+                working with suppliers, and keeping it on time and on budget.
+            </p>
+        </article>
+
+        <article class="card">
             <div class="card-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5zM6 12v5c3 2 9 2 12 0v-5"/></svg>
             </div>
-            <p class="small-title">Student &amp; Academic</p>
-            <h2>Education &amp; Academics</h2>
+            <h3>Lighting Training</h3>
             <p>
-                My studies, qualifications and academic projects.
+                Teaching students and staff how to rig, program and run a
+                lighting desk safely and confidently.
             </p>
-            <span class="home-choice-link">See my academic work &rarr;</span>
-        </a>
+        </article>
+
+        <article class="card">
+            <div class="card-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h3>Show-Day Crew</h3>
+            <p>
+                An extra lighting tech for load-ins, focus and operation, who
+                adapts quickly to new venues and kit.
+            </p>
+        </article>
 
     </div>
 
+    <p class="services-note">
+        <strong>Need sound or video too?</strong>
+        Lighting is my main service, but I can rig sound and video
+        equipment as part of a production, and I can put you in touch
+        with trusted colleagues for sound and video design and operation.
+    </p>
+</section>
+
+<!-- =========================
+     CONSOLES
+========================= -->
+
+<section id="consoles" class="section">
+    <div class="section-header">
+        <p class="small-title">Consoles</p>
+        <h2>Desks I run</h2>
+        <p>
+            Avolites Titan is my desk of choice. I can also program and run a
+            full show on grandMA2, grandMA3 and ChamSys.
+        </p>
+    </div>
+
+    <div class="console-grid">
+        <article class="console console-preferred">
+            <span class="console-badge">Preferred</span>
+            <h3>Avolites Titan</h3>
+            <p>
+                The desk I use most and know best. If the choice is mine, this is
+                what I'll bring or ask for.
+            </p>
+        </article>
+
+        <article class="console">
+            <h3>grandMA2</h3>
+            <p>Confident programming and operation for a full show.</p>
+        </article>
+
+        <article class="console">
+            <h3>grandMA3</h3>
+            <p>Confident programming and operation for a full show.</p>
+        </article>
+
+        <article class="console">
+            <h3>ChamSys</h3>
+            <p>Confident programming and operation for a full show.</p>
+        </article>
+    </div>
+</section>
+
+<!-- =========================
+     WORK
+========================= -->
+
+<section id="work" class="section section-alt">
+    <div class="section-header">
+        <p class="small-title">Portfolio</p>
+        <h2>Recent work</h2>
+        <p>
+            A selection of productions I've designed, programmed and operated.
+        </p>
+    </div>
+
+    <!-- Projects are listed in projects.js, photos live in images/<folder>/ -->
+    <div id="projectGrid" class="card-grid project-grid"></div>
+</section>
+
+<!-- =========================
+     PROJECT GALLERY
+========================= -->
+
+<div id="gallery" class="gallery" role="dialog" aria-modal="true" aria-labelledby="galleryTitle">
+    <div class="gallery-window">
+        <button id="galleryClose" class="close-button" aria-label="Close">&times;</button>
+        <h2 id="galleryTitle"></h2>
+        <p id="galleryDescription"></p>
+        <div id="galleryGrid" class="gallery-grid"></div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button id="lightboxClose" class="close-button" aria-label="Close">&times;</button>
+    <button id="lightboxPrev" class="lightbox-arrow prev" aria-label="Previous photo">&#8249;</button>
+    <figure>
+        <img id="lightboxImage" src="" alt="">
+        <figcaption id="lightboxCaption"></figcaption>
+    </figure>
+    <button id="lightboxNext" class="lightbox-arrow next" aria-label="Next photo">&#8250;</button>
+</div>
+
+<!-- =========================
+     ABOUT
+========================= -->
+
+<section id="about" class="section">
+    <div class="about">
+        <div class="about-text">
+            <p class="small-title">About</p>
+            <h2>Hi, I'm Karol.</h2>
+            <p class="about-lead">
+                I'm a lighting designer and technician based in Blackpool,
+                working across the Fylde Coast and the North West.
+            </p>
+            <p>
+                Through Karol Pasko Technical I design, program and operate
+                lighting for theatre, concerts, school productions and live
+                events, on my own or as part of a larger technical team. My desk
+                of choice is the Avolites Titan, and I'm equally at home on
+                grandMA and ChamSys.
+            </p>
+            <p>
+                Lighting is where I focus. I can rig sound and video when a
+                production needs it, and for anything more I'll put you in touch
+                with colleagues I trust. Alongside the work I study Mathematics,
+                Further Mathematics and Computer Science at Lancaster University
+                School of Mathematics.
+            </p>
+            <p class="about-more">
+                <a class="text-link" href="education.html">See my education and academic projects &rarr;</a>
+            </p>
+        </div>
+
+        <div class="about-side">
+            <figure id="aboutPhoto" class="about-photo" hidden>
+                <img alt="Karol Pasko">
+            </figure>
+
+            <ul class="about-facts">
+                <li><strong>Based in</strong><span>Blackpool, Lancashire</span></li>
+                <li><strong>Area</strong><span>Fylde Coast and the North West</span></li>
+                <li><strong>Work</strong><span>Theatre, concerts, schools and live events</span></li>
+                <li><strong>Main desk</strong><span>Avolites Titan</span></li>
+                <li><strong>Also runs</strong><span>grandMA2, grandMA3, ChamSys</span></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- =========================
+     CONTACT
+========================= -->
+
+<section id="contact" class="section contact">
+    <p class="small-title">Get in touch</p>
+    <h2>Let's talk about your next show.</h2>
+    <p>
+        Tell me about the date, venue and what you need, and I'll get back
+        to you with availability and a quote.
+    </p>
+
+    <!-- Enquiries go to Formspree when site-config.js has a form ID, otherwise they open an email -->
+    <form id="enquiryForm" class="enquiry-form">
+        <div class="form-row">
+            <label>Your name
+                <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label>Your email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Show date(s)
+                <input type="text" name="date" placeholder="e.g. 14&ndash;16 March">
+            </label>
+            <label>Venue
+                <input type="text" name="venue" placeholder="Venue and town">
+            </label>
+        </div>
+        <label>What do you need?
+            <textarea name="message" rows="5" required></textarea>
+        </label>
+        <input type="text" name="_gotcha" class="form-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="button">Send enquiry</button>
+        <p id="enquiryStatus" class="form-status" role="status"></p>
+    </form>
+
+    <p class="contact-email">
+        Or email me directly at
+        <a href="mailto:karolek01122@gmail.com">karolek01122@gmail.com</a>
+    </p>
+</section>
+
 </main>
 
+<!-- =========================
+     FOOTER
+========================= -->
+
 <footer>
-    <p>&copy; <span id="year">2026</span> Karol Pasko. All rights reserved.</p>
+    <p>&copy; <span id="year">2026</span> Karol Pasko Technical. All rights reserved.</p>
 </footer>
 
-<script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+<script src="site.js"></script>
+<script src="site-config.js"></script>
+<script src="contact.js"></script>
+<script src="projects.js"></script>
+<script src="site-photos.js?v=2"></script>
 <script src="counter.js"></script>
 </body>
 </html>
