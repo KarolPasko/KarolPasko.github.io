@@ -1,6 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://karolpasko.github.io/</loc><lastmod>2026-10-26</lastmod><priority>1.0</priority></url>
-  <url><loc>https://karolpasko.github.io/education.html</loc><lastmod>2026-10-20</lastmod><priority>0.7</priority></url>
-  <url><loc>https://karolpasko.github.io/how-light-travels.html</loc><lastmod>2026-10-20</lastmod><priority>0.6</priority></url>
+<!-- Written by scripts/build-credits.js; edit PAGES there to add a page -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://karolpasko.github.io/</loc>
+    <image:image><image:loc>https://karolpasko.github.io/images/hero/1792587853805-1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/about/1792588092756.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/7.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/8.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/9.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/addams-family/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/oliver/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/oliver/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/oliver/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/oliver/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/oliver/5.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://karolpasko.github.io/education.html</loc>
+    <image:image><image:loc>https://karolpasko.github.io/images/about/1792588092756.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://karolpasko.github.io/how-light-travels.html</loc>
+  </url>
 </urlset>

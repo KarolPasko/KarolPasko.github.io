@@ -1,4 +1,4 @@
-# Keeps the crawlable show list on the lighting page in step with projects.js.
+# Keeps the crawlable show list, photo data and sitemap in step with projects.js and the photos.
 name: Update show credits for search engines
 
 on:
@@ -7,6 +7,10 @@ on:
     paths:
       - projects.js
       - index.html
+      - education.html
+      - how-light-travels.html
+      - sitemap.xml
+      - images/**
       - scripts/build-credits.js
       - .github/workflows/credits.yml
   workflow_dispatch:
