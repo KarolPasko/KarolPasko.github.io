@@ -44,6 +44,7 @@
             current = index;
             front = 1 - front;
             slides[front].src = hero[index].file;
+            slides[front].alt = hero[index].note || "Lighting by Karol Pasko";
             slides[front].classList.add("is-active");
             slides[1 - front].classList.remove("is-active");
             note.textContent = hero[index].note || "";
