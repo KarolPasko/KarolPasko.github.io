@@ -22,7 +22,7 @@
     --radius: 0;
     --heading-font: "Archivo", "Helvetica Neue", Arial, sans-serif;
     --body-font: "Archivo", "Helvetica Neue", Arial, sans-serif;
-    --mono-font: "DM Mono", ui-monospace, Menlo, monospace;
+    --mono-font: var(--body-font);
 }
 
 
@@ -69,10 +69,9 @@ a {
 .small-title {
     color: var(--muted);
     font-family: var(--mono-font);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     margin-bottom: 18px;
 }
 
@@ -91,7 +90,7 @@ a {
     font-family: var(--body-font);
     font-size: 14px;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     text-decoration: none;
 }
 
@@ -154,8 +153,7 @@ nav {
     border-left: 1px solid var(--border);
     font-family: var(--mono-font);
     font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--muted);
 }
 
@@ -175,7 +173,7 @@ nav {
     font-family: var(--heading-font);
     font-weight: 600;
     font-size: 14px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
 }
 
 .brand-name {
@@ -257,8 +255,8 @@ nav ul a.nav-cta:hover {
 
 .hero h1 {
     text-wrap: balance;
-    font-size: clamp(44px, 8vw, 104px);
-    font-weight: 400;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 600;
     line-height: 0.98;
     letter-spacing: -0.025em;
     margin-bottom: 36px;
@@ -294,8 +292,7 @@ nav ul a.nav-cta:hover {
 
 .hero-consoles li {
     font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--muted);
     padding-right: 22px;
     margin-right: 22px;
@@ -349,9 +346,7 @@ main {
 }
 
 .section-header {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    column-gap: 40px;
+    display: block;
     align-items: start;
     max-width: none;
     margin-bottom: 64px;
@@ -360,14 +355,7 @@ main {
 }
 
 .section-header .small-title {
-    grid-row: 1 / span 3;
-    counter-increment: section;
-}
-
-.section-header .small-title::before {
-    content: counter(section, decimal-leading-zero) "  /  ";
-    color: var(--accent);
-    white-space: pre;
+    display: none;
 }
 
 .section-header > p:last-child {
@@ -465,8 +453,7 @@ main {
 .card .project-count {
     margin-top: 18px;
     font-size: 13px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--text);
 }
 
@@ -484,8 +471,7 @@ main {
     color: var(--accent);
     font-size: 12px;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
+    letter-spacing: 0;
     margin-bottom: 10px;
 }
 
@@ -533,8 +519,7 @@ main {
 .about-facts strong {
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: 0;
     color: var(--muted);
     padding-top: 3px;
 }
@@ -589,8 +574,7 @@ main {
     color: var(--inverse-muted);
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    letter-spacing: 0;
 }
 
 .enquiry-form input,
@@ -719,128 +703,56 @@ footer {
 }
 
 .site-footer {
-    padding: 72px 6% 28px;
+    padding: 48px 6% 24px;
     background: var(--inverse-bg);
     color: var(--inverse-muted);
     border-top: 0;
-    font-size: 14px;
+    font-size: 15px;
 }
 
-.footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1.3fr;
-    gap: 48px;
-    padding-bottom: 48px;
+.site-footer a {
+    color: var(--inverse-text);
+}
+
+.footer-main {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    padding-bottom: 28px;
     border-bottom: 1px solid rgba(242, 245, 250, 0.14);
 }
 
-.footer-brand p {
-    max-width: 36ch;
-    margin-top: 20px;
-    line-height: 1.7;
-}
-
-.site-footer .brand,
-.site-footer .brand-name {
-    color: var(--inverse-text);
-    text-decoration: none;
-}
-
-.site-footer .brand-mark {
-    background: var(--inverse-text);
-    color: var(--inverse-bg);
-    border-color: var(--inverse-text);
+.footer-main p {
+    max-width: 52ch;
+    line-height: 1.6;
 }
 
 .footer-logo .brand-logo {
-    height: 52px;
-}
-
-.footer-brand .footer-by {
-    color: var(--inverse-text);
-    font-weight: 500;
-    margin-top: 18px;
-}
-
-.footer-brand .footer-by + p {
-    margin-top: 8px;
-}
-
-.footer-heading {
-    color: var(--inverse-text);
-    font-family: var(--mono-font);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-}
-
-.footer-col ul {
-    list-style: none;
-    display: grid;
-    gap: 10px;
-}
-
-.footer-col a,
-.footer-top {
-    color: var(--inverse-muted);
-    text-decoration: none;
-    overflow-wrap: anywhere;
-}
-
-.footer-col a:hover,
-.footer-top:hover {
-    color: var(--accent-soft);
-}
-
-.footer-tags {
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 32px 0;
-    border-bottom: 1px solid rgba(242, 245, 250, 0.14);
-}
-
-.footer-tags li {
-    font-family: var(--mono-font);
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 12px;
-    border: 1px solid rgba(242, 245, 250, 0.22);
-    color: var(--inverse-muted);
-}
-
-.footer-tags li:first-child {
-    border-color: var(--accent-soft);
-    color: var(--accent-soft);
+    height: 48px;
 }
 
 .footer-bottom {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px 24px;
     flex-wrap: wrap;
-    padding-top: 24px;
-    font-size: 13px;
+    padding-top: 20px;
+    font-size: 14px;
 }
 
-@media (max-width: 900px) {
-    .footer-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 36px;
-    }
-
-    .footer-brand {
-        grid-column: 1 / -1;
-    }
+.footer-links a {
+    color: var(--inverse-muted);
+    text-decoration: none;
+    margin-left: 20px;
 }
 
-@media (max-width: 520px) {
-    .footer-grid {
-        grid-template-columns: 1fr;
-    }
+.footer-links a:first-child {
+    margin-left: 0;
+}
+
+.footer-links a:hover {
+    color: var(--inverse-text);
 }
 
 
@@ -931,7 +843,7 @@ body.home {
 .home-choice-link {
     font-size: 14px;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
     border-bottom: 1px solid var(--line);
     padding-bottom: 3px;
 }
@@ -996,8 +908,7 @@ body.home {
     color: var(--accent);
     font-size: 12px;
     font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
+    letter-spacing: 0;
 }
 
 .services-note {
@@ -1058,7 +969,7 @@ body.home {
     border: 1px solid var(--line);
     font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0;
 }
 
 .card p + p {
@@ -1663,7 +1574,7 @@ body.home {
 .hero-caption-count {
     font-family: var(--mono-font);
     font-size: 12px;
-    letter-spacing: 0.16em;
+    letter-spacing: 0;
     color: var(--accent-soft);
 }
 

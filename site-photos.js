@@ -23,7 +23,6 @@
         const note = document.getElementById("heroNote");
         const count = document.getElementById("heroCount");
         const dots = document.getElementById("heroDots");
-        const pad = (n) => String(n).padStart(2, "0");
         let current = -1;
         let front = 0;
         let timer = null;
@@ -48,7 +47,7 @@
             slides[front].classList.add("is-active");
             slides[1 - front].classList.remove("is-active");
             note.textContent = hero[index].note || "";
-            count.textContent = `${pad(index + 1)} / ${pad(hero.length)}`;
+            count.textContent = `${index + 1} of ${hero.length}`;
             [...dots.children].forEach((dot, i) => dot.classList.toggle("is-active", i === index));
         }
 
