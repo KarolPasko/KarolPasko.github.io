@@ -32,14 +32,19 @@
         const update = () => {
             ticking = false;
             const rect = burst.getBoundingClientRect();
-            const travel = rect.height - window.innerHeight;
-            const p = clamp(-rect.top / travel); // 0 at top of section, 1 at the end
+            // Starts as the section enters from the bottom of the screen, so the
+            // chunks come together while it scrolls up and little extra scrolling is needed.
+            const vh = window.innerHeight;
+            const range = rect.height; // from entering to the end of the pinned part
+            const p = clamp((vh - rect.top) / range);
+            const pinned = vh / range; // the point where the panel locks in place
 
-            // 0 → 0.4 chunks come together, 0.4 → 0.62 hold, 0.62 → 1 break apart
+            // chunks come together until the panel locks, hold briefly, then break apart
+            const holdEnd = pinned + (1 - pinned) * 0.35;
             let spread;
-            if (p < 0.4) spread = 1 - ease(p / 0.4);
-            else if (p < 0.62) spread = 0;
-            else spread = ease((p - 0.62) / 0.38) * 1.6;
+            if (p < pinned) spread = 1 - ease(p / pinned);
+            else if (p < holdEnd) spread = 0;
+            else spread = ease((p - holdEnd) / (1 - holdEnd)) * 1.6;
 
             const dist = 260; // logo units at full spread
             chunks.forEach((c) => {
@@ -50,7 +55,7 @@
                 c.el.style.opacity = String(1 - clamp((s - 0.9) / 0.7));
             });
 
-            const held = p >= 0.36 && p < 0.7 ? 1 : 0;
+            const held = p >= pinned * 0.9 && p < holdEnd + (1 - holdEnd) * 0.25 ? 1 : 0;
             if (word) word.style.opacity = String(held);
             if (caption) caption.classList.toggle("on", held === 1);
         };
@@ -67,7 +72,7 @@
 
     /* ---- Fade up on scroll ---- */
     const targets = document.querySelectorAll(
-        ".section-header, .card, .console, .about-text, .about-side, .contact h2, .enquiry-form, .photo-band img"
+        ".section-header, .card, .console, .about-text, .about-side, .contact h2, .enquiry-form"
     );
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver((entries) => {
@@ -83,7 +88,7 @@
         // stagger cards that sit side by side in a grid
         const siblings = el.parentElement ? Array.from(el.parentElement.children) : [];
         const index = siblings.indexOf(el);
-        if (el.matches(".card, .console, .photo-band img")) {
+        if (el.matches(".card, .console")) {
             el.style.transitionDelay = `${(index % 4) * 80}ms`;
         }
         el.classList.add("reveal");
