@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -266,6 +266,30 @@
             <p id="aboutStatus" class="form-status"></p>
         </div>
     </div>
+</section>
+
+<!-- =========================
+     EQUIPMENT HIRE
+========================= -->
+
+<section id="equipmentPanel" class="section admin-panel" hidden>
+    <p class="small-title">Hire</p>
+    <h2>Your equipment</h2>
+    <p class="admin-help">
+        These are listed on the <a href="hire.html">hire page</a>. Visitors
+        add them to a list and send it to you with an enquiry, so there are no
+        prices. Give each item a photo, a name and a short description. Use the
+        arrows to change the order, then click <strong>Save equipment</strong>.
+    </p>
+
+    <div id="equipmentList" class="admin-equipment"></div>
+
+    <div class="admin-actions">
+        <button id="addEquipmentButton" type="button" class="button button-ghost">Add an item</button>
+        <button id="saveEquipmentButton" type="button" class="button" disabled>Save equipment</button>
+        <button id="undoEquipmentButton" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="equipmentStatus" class="form-status"></p>
 </section>
 
 <!-- =========================

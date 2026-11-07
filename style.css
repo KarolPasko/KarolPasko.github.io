@@ -2470,3 +2470,261 @@ body.home {
     opacity: 1;
     transform: none;
 }
+
+
+/* =========================
+   EQUIPMENT HIRE (hire.html)
+========================= */
+
+.hire-grid .hire-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.hire-card img {
+    width: calc(100% + 60px);
+    margin: -34px -30px 26px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+    background: var(--inverse-bg);
+}
+
+.hire-card .hire-description {
+    white-space: pre-line;
+    margin-bottom: 24px;
+}
+
+.hire-card .hire-toggle {
+    margin-top: auto;
+    align-self: flex-start;
+    cursor: pointer;
+}
+
+.hire-card.is-added {
+    box-shadow: inset 0 -4px 0 var(--accent);
+}
+
+.hire-empty {
+    grid-column: 1 / -1;
+    padding: 34px 30px;
+    color: var(--muted);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.hire-empty a {
+    color: var(--text);
+}
+
+.hire-list-wrap {
+    max-width: 820px;
+    margin-bottom: 50px;
+}
+
+.hire-list {
+    list-style: none;
+    border-top: 1px solid #3a4760;
+}
+
+.hire-list li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 0;
+    border-bottom: 1px solid #3a4760;
+}
+
+.hire-list-name {
+    font-size: 17px;
+    color: var(--inverse-text);
+}
+
+.hire-qty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--inverse-muted);
+    font-size: 13px;
+}
+
+.hire-qty input {
+    width: 64px;
+    padding: 8px 10px;
+    border: 1px solid #3a4760;
+    border-radius: 0;
+    background: transparent;
+    color: var(--inverse-text);
+    font: inherit;
+    font-size: 16px;
+}
+
+.hire-qty input:focus {
+    outline: none;
+    border-color: var(--inverse-text);
+}
+
+.hire-remove {
+    padding: 8px 0;
+    border: none;
+    background: none;
+    color: var(--inverse-muted);
+    font: inherit;
+    font-size: 13px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.hire-remove:hover {
+    color: var(--inverse-text);
+}
+
+.hire-list-empty {
+    padding: 18px 0;
+    border-top: 1px solid #3a4760;
+    border-bottom: 1px solid #3a4760;
+    color: var(--inverse-muted);
+}
+
+.hire-list-empty a {
+    color: var(--inverse-text);
+}
+
+.enquiry-form .button:disabled:not(:hover) {
+    cursor: not-allowed;
+}
+
+.hire-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 6%;
+    background: var(--inverse-bg);
+    color: var(--inverse-text);
+    border-top: 1px solid #3a4760;
+}
+
+.hire-bar .button {
+    background: var(--inverse-text);
+    border-color: var(--inverse-text);
+    color: var(--inverse-bg);
+}
+
+.hire-bar .button:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .hire-list li {
+        grid-template-columns: 1fr auto;
+        gap: 8px 16px;
+    }
+
+    .hire-list-name {
+        grid-column: 1 / -1;
+    }
+
+    .hire-bar {
+        padding: 12px 16px;
+    }
+}
+
+
+/* =========================
+   ADMIN: EQUIPMENT
+========================= */
+
+.admin-equipment {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.admin-equipment-item {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 18px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+}
+
+.admin-equipment-photo {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+}
+
+.admin-equipment-photo img,
+.admin-equipment-photo .admin-equipment-nophoto {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.admin-equipment-photo .button,
+.admin-equipment-tools .button {
+    padding: 8px 12px;
+    font-size: 13px;
+}
+
+.admin-equipment-fields .admin-label {
+    margin-bottom: 10px;
+}
+
+.admin-equipment-fields textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 400;
+    resize: vertical;
+}
+
+.admin-equipment-tools {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+@media (max-width: 600px) {
+    .admin-equipment-item {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-equipment-photo {
+        grid-template-columns: 120px 1fr;
+        align-items: start;
+    }
+}
+
+/* Keeps the menu on one line on smaller laptops and tablets */
+nav ul a {
+    white-space: nowrap;
+}
+
+@media (min-width: 761px) and (max-width: 1000px) {
+    nav ul {
+        gap: 18px;
+    }
+}

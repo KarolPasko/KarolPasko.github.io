@@ -23,7 +23,7 @@ const PERSON_ID = SITE + "#karol-pasko";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
 
 /* Pages search engines should list, in sitemap order */
-const PAGES = ["index.html", "education.html", "how-light-travels.html"];
+const PAGES = ["index.html", "hire.html", "education.html", "how-light-travels.html"];
 
 function readProjects() {
     const text = fs.readFileSync("projects.js", "utf8");
@@ -164,10 +164,21 @@ function shareImageHtml(image, alt) {
     ].join("\n");
 }
 
+/* Photos of the hire equipment (images/equipment.json, set on the admin page) */
+function equipmentPhotos() {
+    try {
+        const info = JSON.parse(fs.readFileSync("images/equipment.json", "utf8"));
+        return (info.items || []).map((item) => item.photo).filter(Boolean);
+    } catch (error) {
+        return [];
+    }
+}
+
 function sitemapXml(projects, photos, site) {
     const images = {
         "index.html": [...site.hero.map((photo) => photo.path), site.about, ...projects.flatMap((project) => photos[project.folder].map((photo) => photo.path))],
-        "education.html": [site.about]
+        "education.html": [site.about],
+        "hire.html": equipmentPhotos()
     };
     const entries = PAGES.filter((page) => fs.existsSync(page)).map((page) => {
         const loc = page === "index.html" ? SITE : SITE + page;
