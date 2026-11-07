@@ -11,16 +11,28 @@
 const enquiryForm = document.getElementById("enquiryForm");
 const enquiryStatus = document.getElementById("enquiryStatus");
 
+/* The hire page adds an "equipment" field listing what's on the visitor's list */
+function enquirySubject(data) {
+    return data.get("equipment")
+        ? `Equipment hire enquiry from ${data.get("name")}`
+        : `Enquiry from ${data.get("name")}`;
+}
+
 function enquiryAsEmail(data) {
-    const subject = `Enquiry from ${data.get("name")}`;
-    const body = [
+    const subject = enquirySubject(data);
+    const lines = [
         `Name: ${data.get("name")}`,
         `Email: ${data.get("email")}`,
         `Date(s): ${data.get("date") || "-"}`,
-        `Venue: ${data.get("venue") || "-"}`,
-        "",
-        data.get("message")
-    ].join("\n");
+        `Venue: ${data.get("venue") || "-"}`
+    ];
+    if (data.get("equipment")) {
+        lines.push("", "Equipment:", data.get("equipment"));
+    }
+    if (data.get("message")) {
+        lines.push("", data.get("message"));
+    }
+    const body = lines.join("\n");
 
     window.location.href =
         `mailto:${SITE_CONFIG.contactEmail}` +
@@ -43,7 +55,9 @@ enquiryForm.addEventListener("submit", async (event) => {
     enquiryStatus.className = "form-status";
     enquiryStatus.textContent = "Sending…";
 
-    data.append("_subject", `New enquiry from ${data.get("name")}`);
+    data.append("_subject", data.get("equipment")
+        ? `New equipment hire enquiry from ${data.get("name")}`
+        : `New enquiry from ${data.get("name")}`);
 
     try {
         const response = await fetch(
@@ -69,4 +83,9 @@ enquiryForm.addEventListener("submit", async (event) => {
     }
 
     button.disabled = false;
+
+    /* Lets the hire page clear the visitor's list once it has been sent */
+    if (enquiryStatus.classList.contains("success")) {
+        enquiryForm.dispatchEvent(new CustomEvent("enquiry-sent"));
+    }
 });

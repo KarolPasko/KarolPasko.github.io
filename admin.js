@@ -133,8 +133,9 @@ async function connect(newToken) {
         $("worksPanel").hidden = false;
         $("heroPanel").hidden = false;
         $("aboutPanel").hidden = false;
+        $("equipmentPanel").hidden = false;
 
-        await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos()]);
+        await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos(), loadEquipment()]);
     }
 
     catch (error) {
@@ -1480,6 +1481,246 @@ $("removeAboutButton").addEventListener("click", async () => {
 
 
 /* =========================
+   EQUIPMENT HIRE
+   Listed in images/equipment.json, read by hire.js:
+   { items: [{ id, name, description, photo: "images/equipment/…" }] }
+========================= */
+
+const EQUIPMENT = "images/equipment.json";
+
+let savedEquipment = [];   // what's on the site now
+let equipmentItems = [];   // being edited: [{ id, name, description, photo, file, preview }]
+
+async function loadEquipment() {
+    try {
+        savedEquipment = JSON.parse(await readText(EQUIPMENT)).items || [];
+    } catch (error) {
+        savedEquipment = []; // no file yet
+    }
+    resetEquipment();
+}
+
+function setEquipmentStatus(text, kind = "") {
+    $("equipmentStatus").className = `form-status ${kind}`;
+    $("equipmentStatus").textContent = text;
+}
+
+function setEquipmentDirty(dirty) {
+    $("saveEquipmentButton").disabled = !dirty;
+    $("undoEquipmentButton").hidden = !dirty;
+}
+
+function resetEquipment() {
+    equipmentItems.forEach((item) => item.preview && URL.revokeObjectURL(item.preview));
+    equipmentItems = savedEquipment.map((item) => ({ ...item, file: null, preview: "" }));
+    setEquipmentDirty(false);
+    renderEquipment();
+}
+
+function moveEquipment(from, to) {
+    if (to < 0 || to >= equipmentItems.length) return;
+    equipmentItems.splice(to, 0, equipmentItems.splice(from, 1)[0]);
+    setEquipmentDirty(true);
+    renderEquipment();
+}
+
+function equipmentId(name) {
+    return `${slugify(name) || "item"}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+}
+
+function renderEquipment() {
+    const list = $("equipmentList");
+    list.innerHTML = "";
+
+    if (equipmentItems.length === 0) {
+        list.innerHTML = '<p class="admin-help">No equipment yet. Click <strong>Add an item</strong> to start the list.</p>';
+        return;
+    }
+
+    equipmentItems.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "admin-equipment-item";
+
+        /* Photo */
+        const photoBox = document.createElement("div");
+        photoBox.className = "admin-equipment-photo";
+
+        const src = item.preview || (item.photo && rawUrl(item.photo));
+        if (src) {
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = item.name || "Equipment photo";
+            photoBox.appendChild(img);
+        } else {
+            const none = document.createElement("div");
+            none.className = "admin-equipment-nophoto";
+            none.textContent = "No photo";
+            photoBox.appendChild(none);
+        }
+
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "image/*,.heic,.heif,.avif,.tif,.tiff,.bmp";
+        fileInput.hidden = true;
+        fileInput.addEventListener("change", async () => {
+            const picked = fileInput.files[0];
+            if (!picked) return;
+            setEquipmentStatus("Reading photo…");
+            try {
+                const file = await toWebPhoto(picked);
+                if (item.preview) URL.revokeObjectURL(item.preview);
+                item.file = file;
+                item.preview = URL.createObjectURL(file);
+                setEquipmentDirty(true);
+                setEquipmentStatus("");
+            } catch (error) {
+                setEquipmentStatus(`Couldn't open ${picked.name}. Try exporting it as a JPEG first.`, "error");
+            }
+            renderEquipment();
+        });
+
+        const choose = document.createElement("button");
+        choose.type = "button";
+        choose.className = "button button-ghost";
+        choose.textContent = src ? "Change photo" : "Add photo";
+        choose.addEventListener("click", () => fileInput.click());
+
+        photoBox.append(fileInput, choose);
+
+        /* Name, description and tools */
+        const fields = document.createElement("div");
+        fields.className = "admin-equipment-fields";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.className = "admin-label";
+        nameLabel.textContent = "Name";
+        const name = document.createElement("input");
+        name.type = "text";
+        name.value = item.name || "";
+        name.placeholder = "e.g. Chauvet Rogue R2 Wash";
+        name.addEventListener("input", () => {
+            item.name = name.value;
+            setEquipmentDirty(true);
+        });
+        nameLabel.appendChild(name);
+
+        const descLabel = document.createElement("label");
+        descLabel.className = "admin-label";
+        descLabel.textContent = "Description";
+        const desc = document.createElement("textarea");
+        desc.rows = 3;
+        desc.value = item.description || "";
+        desc.placeholder = "e.g. LED wash mover. I have 8 of these.";
+        desc.addEventListener("input", () => {
+            item.description = desc.value;
+            setEquipmentDirty(true);
+        });
+        descLabel.appendChild(desc);
+
+        const tools = document.createElement("div");
+        tools.className = "admin-equipment-tools";
+
+        const up = document.createElement("button");
+        up.type = "button";
+        up.className = "button button-ghost";
+        up.textContent = "▲ Up";
+        up.disabled = index === 0;
+        up.addEventListener("click", () => moveEquipment(index, index - 1));
+
+        const down = document.createElement("button");
+        down.type = "button";
+        down.className = "button button-ghost";
+        down.textContent = "▼ Down";
+        down.disabled = index === equipmentItems.length - 1;
+        down.addEventListener("click", () => moveEquipment(index, index + 1));
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "button button-danger";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", () => {
+            if (!confirm(`Remove ${item.name || "this item"} from the hire page?`)) return;
+            if (item.preview) URL.revokeObjectURL(item.preview);
+            equipmentItems.splice(index, 1);
+            setEquipmentDirty(true);
+            renderEquipment();
+        });
+
+        tools.append(up, down, remove);
+        fields.append(nameLabel, descLabel, tools);
+
+        row.append(photoBox, fields);
+        list.appendChild(row);
+    });
+}
+
+$("addEquipmentButton").addEventListener("click", () => {
+    equipmentItems.push({ id: "", name: "", description: "", photo: "", file: null, preview: "" });
+    setEquipmentDirty(true);
+    renderEquipment();
+    const inputs = $("equipmentList").querySelectorAll(".admin-equipment-fields input");
+    if (inputs.length) inputs[inputs.length - 1].focus();
+});
+
+$("undoEquipmentButton").addEventListener("click", () => {
+    resetEquipment();
+    setEquipmentStatus("");
+});
+
+$("saveEquipmentButton").addEventListener("click", async () => {
+    if (equipmentItems.some((item) => !(item.name || "").trim())) {
+        setEquipmentStatus("Every item needs a name before saving.", "error");
+        return;
+    }
+
+    $("saveEquipmentButton").disabled = true;
+    const changes = [];
+    const stamp = Date.now();
+
+    try {
+        const items = [];
+        let added = 0;
+        for (const item of equipmentItems) {
+            const entry = {
+                id: item.id || equipmentId(item.name),
+                name: item.name.trim(),
+                description: (item.description || "").trim(),
+                photo: item.photo || ""
+            };
+            if (item.file) {
+                added++;
+                setEquipmentStatus(`Preparing photo ${added}…`);
+                const { base64, ext } = await preparePhoto(item.file);
+                entry.photo = `images/equipment/${stamp}-${added}.${ext}`;
+                changes.push({ path: entry.photo, base64 });
+            }
+            items.push(entry);
+        }
+
+        /* Delete photos that were replaced or whose item was removed */
+        const kept = new Set(items.map((entry) => entry.photo).filter(Boolean));
+        for (const entry of savedEquipment) {
+            if (entry.photo && !kept.has(entry.photo)) changes.push({ path: entry.photo, remove: true });
+        }
+
+        changes.push({ path: EQUIPMENT, base64: textToBase64(JSON.stringify({ items }, null, 2) + "\n") });
+
+        setEquipmentStatus("Saving to GitHub…");
+        await commit("Update hire equipment (admin page)", changes);
+
+        savedEquipment = items;
+        resetEquipment();
+        setEquipmentStatus("Saved. The hire page updates in a minute or two.", "success");
+    }
+
+    catch (error) {
+        setEquipmentStatus(`Couldn't save: ${error.message}`, "error");
+        $("saveEquipmentButton").disabled = false;
+    }
+});
+
+
+/* =========================
    VISITORS
    Counters are kept by counter.js on abacus.jasoncameron.dev.
 ========================= */
@@ -1488,6 +1729,7 @@ const STAT_DAYS = 14;
 const STAT_PAGES = [
     ["index", "Home"],
     ["technical", "Lighting"],
+    ["hire", "Hire"],
     ["education", "Education"],
     ["how-light-travels", "How Light Travels"]
 ];
