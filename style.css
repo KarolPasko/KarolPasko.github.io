@@ -2342,3 +2342,160 @@ body.home {
         transform: none;
     }
 }
+
+
+/* =========================
+   ANIMATIONS (2026-11)
+   Driven by animations.js, which adds .motion to <html> unless the
+   visitor has asked for reduced motion. Without it everything is static.
+========================= */
+
+/* Header logo builds itself on load */
+.kld-intro {
+    overflow: visible;
+}
+
+.kld-intro .kp,
+.kld-intro .kld-rule,
+.kld-intro .kld-word,
+.kld-intro .kld-sub {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+
+.motion .kld-intro .kp {
+    animation: kp-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.motion .kld-intro .kp1 { --dx: -40px; --dy: 18px; --r: -20deg; animation-delay: 0.05s; }
+.motion .kld-intro .kp2 { --dx: -10px; --dy: -36px; --r: 25deg; animation-delay: 0.15s; }
+.motion .kld-intro .kp3 { --dx: 12px; --dy: 34px; --r: -30deg; animation-delay: 0.25s; }
+.motion .kld-intro .kp4 { --dx: 0px; --dy: -40px; --r: 0deg; animation-delay: 0.32s; }
+.motion .kld-intro .kp5 { --dx: 40px; --dy: 0px; --r: 15deg; animation-delay: 0.4s; }
+
+@keyframes kp-in {
+    from {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.6);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.motion .kld-intro .kld-rule {
+    transform-origin: center top;
+    animation: rule-in 0.45s ease-out 0.75s both;
+}
+
+@keyframes rule-in {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+.motion .kld-intro .kld-word,
+.motion .kld-intro .kld-sub {
+    animation: word-in 0.6s ease-out both;
+}
+
+.motion .kld-intro .kld-word { animation-delay: 0.95s; }
+.motion .kld-intro .kld-sub { animation-delay: 1.1s; }
+
+@keyframes word-in {
+    from { opacity: 0; transform: translateX(-14px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Replay the build when you hover the header logo */
+.brand:hover .kld-intro .kp {
+    animation-name: kp-in-again;
+}
+
+@keyframes kp-in-again {
+    from { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.6); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Hero text rises in on load */
+.motion .hero-content > * {
+    animation: rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.motion .hero-content > *:nth-child(2) { animation-delay: 0.12s; }
+.motion .hero-content > *:nth-child(3) { animation-delay: 0.24s; }
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: none; }
+}
+
+/* Logo burst: a tall section with the logo pinned in the middle */
+.logo-burst {
+    position: relative;
+    height: 100vh;
+    background: var(--inverse-bg);
+}
+
+.motion .logo-burst {
+    height: 260vh;
+}
+
+.logo-burst-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    padding: 0 6%;
+    overflow: hidden;
+}
+
+.burst-logo {
+    width: min(620px, 78vw);
+    height: auto;
+    overflow: visible;
+}
+
+.burst-logo .chunk,
+.burst-logo .burst-word {
+    transform-box: fill-box;
+    transform-origin: center;
+    will-change: transform, opacity;
+}
+
+.burst-logo .burst-word {
+    transition: opacity 0.4s;
+}
+
+.burst-caption {
+    color: var(--inverse-muted);
+    font-size: clamp(16px, 1.6vw, 20px);
+    text-align: center;
+}
+
+.motion .burst-caption {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s, transform 0.5s;
+}
+
+.motion .burst-caption.on {
+    opacity: 1;
+    transform: none;
+}
+
+/* Fade up as things scroll into view */
+.motion .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s, box-shadow 0.2s;
+}
+
+.motion .reveal.in {
+    opacity: 1;
+    transform: none;
+}
