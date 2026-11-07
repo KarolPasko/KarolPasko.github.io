@@ -2277,35 +2277,6 @@ body.home {
     background: var(--bg-alt);
 }
 
-/* Photo band */
-.photo-band {
-    display: grid;
-    grid-template-columns: 1.4fr 1fr 1fr;
-    gap: 4px;
-    background: var(--inverse-bg);
-}
-
-.photo-band img {
-    width: 100%;
-    height: clamp(220px, 32vw, 460px);
-    object-fit: cover;
-    display: block;
-}
-
-@media (max-width: 760px) {
-    .photo-band {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .photo-band img:first-child {
-        grid-column: 1 / -1;
-    }
-
-    .photo-band img {
-        height: 200px;
-    }
-}
-
 /* Work cards: photo zooms a touch on hover, blue rule underneath */
 .project-card img {
     transition: transform 0.4s ease;
@@ -2438,7 +2409,7 @@ body.home {
 }
 
 .motion .logo-burst {
-    height: 260vh;
+    height: 170vh;
 }
 
 .logo-burst-stage {
