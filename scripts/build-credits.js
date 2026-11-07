@@ -121,8 +121,8 @@ function schemaJson(projects, photos, site) {
         "name": "Lighting credits of Karol Pasko",
         "itemListElement": projects.map((project, index) => {
             const caption = `${project.title}, lighting by Karol Pasko`;
-            const event = {
-                "@type": "Event",
+            const show = {
+                "@type": "CreativeWork",
                 "name": project.title,
                 "description": [project.description, project.notes].filter(Boolean).join(" "),
                 "url": SITE + "#work",
@@ -137,8 +137,8 @@ function schemaJson(projects, photos, site) {
                 }
             };
             const images = photos[project.folder].map((photo) => imageObject(photo, caption));
-            if (images.length) event.image = images;
-            return { "@type": "ListItem", "position": index + 1, "item": event };
+            if (images.length) show.image = images;
+            return { "@type": "ListItem", "position": index + 1, "item": show };
         })
     };
 
