@@ -5,6 +5,8 @@
 
     - index.html: the show cards, schema.org data for every show and
       lighting page photo, and the share image
+    - hire.html: the equipment cards and schema.org data for the hire kit
+      (from images/equipment.json, set on the admin page)
     - other pages in PAGES: the share image
     - sitemap.xml: every page plus every photo
 
@@ -164,14 +166,76 @@ function shareImageHtml(image, alt) {
     ].join("\n");
 }
 
-/* Photos of the hire equipment (images/equipment.json, set on the admin page) */
+/* The hire equipment (images/equipment.json, set on the admin page) */
+function equipmentItems() {
+    return (readJson("images/equipment.json", {}).items || []).filter((item) => item.id && item.name);
+}
+
 function equipmentPhotos() {
-    try {
-        const info = JSON.parse(fs.readFileSync("images/equipment.json", "utf8"));
-        return (info.items || []).map((item) => item.photo).filter(Boolean);
-    } catch (error) {
-        return [];
+    return equipmentItems().map((item) => item.photo).filter(Boolean);
+}
+
+const HIRE_AREA = "Blackpool, the Fylde Coast and Lancashire";
+
+/* Plain cards so search engines can read the kit list; hire.js swaps in the interactive ones */
+function equipmentHtml(items) {
+    if (!items.length) {
+        return `        <p class="hire-empty">I'm still putting the list together. <a href="index.html#contact">Ask me</a> about what you need.</p>`;
     }
+    return items.map((item) => {
+        const image = item.photo
+            ? `\n            <img src="${escapeHtml(item.photo)}" alt="${escapeHtml(item.name)} for hire in Blackpool from Karol Pasko" loading="lazy">`
+            : "";
+        const text = item.description
+            ? `\n            <p class="hire-description">${escapeHtml(item.description)}</p>`
+            : "";
+        return `        <article class="card hire-card" id="${escapeHtml(item.id)}">${image}
+            <h3>${escapeHtml(item.name)}</h3>${text}
+            <p class="hire-in-basket">Available to hire in ${HIRE_AREA}.</p>
+        </article>`;
+    }).join("\n");
+}
+
+function equipmentSchema(items) {
+    const data = {
+        "@context": "https://schema.org",
+        "@graph": [{
+            "@type": "Service",
+            "@id": SITE + "hire.html#hire",
+            "name": "Lighting equipment hire in Blackpool",
+            "serviceType": "Stage lighting and effects equipment hire",
+            "url": SITE + "hire.html",
+            "description": `Karol Pasko (KLD Lighting) hires out his own lighting, effects and control equipment across ${HIRE_AREA}, with or without someone to set it up and run the show.`,
+            "provider": { "@id": SITE + "#business" },
+            "areaServed": [
+                { "@type": "City", "name": "Blackpool" },
+                { "@type": "Place", "name": "Fylde Coast" },
+                { "@type": "AdministrativeArea", "name": "Lancashire" }
+            ],
+            "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Equipment for hire",
+                "itemListElement": items.map((item) => {
+                    const product = {
+                        "@type": "Product",
+                        "name": item.name,
+                        "description": item.description || `${item.name} for hire`,
+                        "category": "Lighting equipment hire"
+                    };
+                    if (item.photo) product.image = url(item.photo);
+                    return {
+                        "@type": "Offer",
+                        "name": `${item.name} hire`,
+                        "url": `${SITE}hire.html#${item.id}`,
+                        "areaServed": "Blackpool",
+                        "businessFunction": "http://purl.org/goodrelations/v1#LeaseOut",
+                        "itemOffered": product
+                    };
+                })
+            }
+        }]
+    };
+    return JSON.stringify(data, null, 2).replace(/<\//g, "<\\/").replace(/\n/g, "\n    ");
 }
 
 function sitemapXml(projects, photos, site) {
@@ -224,6 +288,18 @@ for (const page of PAGES) {
             /<div id="projectGrid"[^>]*>/, "after");
         if (!html) throw new Error(`${page}: couldn't find where to put the credits.`);
         console.log(`${page}: wrote ${projects.length} credits`);
+    }
+
+    if (page === "hire.html" && html.includes('id="equipmentGrid"')) {
+        const items = equipmentItems();
+        html = fillBlock(html, "equipment-schema",
+            `    <script type="application/ld+json">\n    ${equipmentSchema(items)}\n    </script>`,
+            /^<\/head>/m, "before");
+        html = html && fillBlock(html, "equipment",
+            equipmentHtml(items),
+            /<div id="equipmentGrid"[^>]*>/, "after");
+        if (!html) throw new Error(`${page}: couldn't find where to put the equipment.`);
+        console.log(`${page}: wrote ${items.length} hire items`);
     }
 
     const image = page === "index.html" && shareImage

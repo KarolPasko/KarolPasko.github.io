@@ -29,6 +29,7 @@
         items.forEach((item) => {
             const card = document.createElement("article");
             card.className = "card hire-card";
+            card.id = item.id;   /* matches the links in the schema.org data */
 
             if (item.photo) {
                 const img = document.createElement("img");
