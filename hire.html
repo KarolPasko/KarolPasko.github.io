@@ -26,7 +26,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=8">
+    <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body id="top">
 
@@ -49,7 +49,7 @@
             <li><a href="index.html#services">Services</a></li>
             <li><a href="index.html#work">Work</a></li>
             <li><a href="#equipment">Equipment</a></li>
-            <li><a href="#enquire" class="nav-cta">Enquire now</a></li>
+            <li><a href="basket.html" class="nav-cta">Basket <span data-basket-count></span></a></li>
         </ul>
     </nav>
 </header>
@@ -65,8 +65,9 @@
         </p>
         <p class="hero-lead">
             There are no prices on here because it depends on the dates and
-            what you need. Add anything you're interested in to your list,
-            press Enquire now, and I'll get back to you with a quote.
+            what you need. Add anything you're interested in to your basket,
+            check out with your dates and details, and I'll get back to you
+            with a quote.
         </p>
     </div>
 </section>
@@ -80,8 +81,8 @@
     <div class="section-header">
         <h2>My equipment</h2>
         <p>
-            Add what you need to your list. You can change how many of each
-            once it's in there.
+            Pick how many you need and add them to your basket. You can
+            still change it all before you send it.
         </p>
     </div>
 
@@ -91,62 +92,24 @@
 </section>
 
 <!-- =========================
-     ENQUIRY
+     NOT SURE
 ========================= -->
 
-<section id="enquire" class="section contact">
-    <h2>Your hire list</h2>
+<section class="section contact hire-help">
+    <h2>Not sure what you need?</h2>
     <p>
-        Check what's on your list, tell me the dates and where it's going,
-        and I'll get back to you with availability and a quote.
-    </p>
-
-    <div class="hire-list-wrap">
-        <ul id="hireList" class="hire-list"></ul>
-        <p id="hireListEmpty" class="hire-list-empty">
-            Nothing on your list yet. <a href="#equipment">Add some equipment</a> first.
-        </p>
-    </div>
-
-    <!-- Sent the same way as the enquiry form on the lighting page (contact.js) -->
-    <form id="enquiryForm" class="enquiry-form">
-        <div class="form-row">
-            <label>Your name
-                <input type="text" name="name" autocomplete="name" required>
-            </label>
-            <label>Your email
-                <input type="email" name="email" autocomplete="email" required>
-            </label>
-        </div>
-        <div class="form-row">
-            <label>Hire date(s)
-                <input type="text" name="date" placeholder="e.g. 14&ndash;16 March">
-            </label>
-            <label>Venue
-                <input type="text" name="venue" placeholder="Venue and town">
-            </label>
-        </div>
-        <label>Anything else?
-            <textarea name="message" rows="4" placeholder="e.g. whether you need me to set it up and run it, or just the kit"></textarea>
-        </label>
-        <input type="hidden" name="equipment" id="equipmentField">
-        <input type="text" name="_gotcha" class="form-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <button type="submit" class="button" id="hireSubmit" disabled>Enquire now</button>
-        <p id="enquiryStatus" class="form-status" role="status"></p>
-    </form>
-
-    <p class="contact-email">
-        Or email me directly at
+        Tell me about the event and I'll put a list together for you. Email me at
         <a href="mailto:karolek01122@gmail.com">karolek01122@gmail.com</a>
+        or use the <a href="index.html#contact">enquiry form</a> on the lighting page.
     </p>
 </section>
 
 </main>
 
-<!-- Shows once something is on the list -->
+<!-- Shows once something is in the basket -->
 <div id="hireBar" class="hire-bar" hidden>
     <p id="hireBarCount"></p>
-    <a href="#enquire" class="button">Enquire now</a>
+    <a href="basket.html" class="button">View basket</a>
 </div>
 
 <!-- =========================
@@ -166,9 +129,8 @@
 
 <script src="site.js"></script>
 <script src="animations.js"></script>
-<script src="site-config.js"></script>
-<script src="contact.js?v=2"></script>
-<script src="hire.js"></script>
+<script src="basket.js"></script>
+<script src="hire.js?v=2"></script>
 <script src="counter.js"></script>
 </body>
 </html>
