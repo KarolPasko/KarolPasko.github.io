@@ -26,7 +26,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body id="top">
 
@@ -49,7 +49,7 @@
             <li><a href="index.html#services">Services</a></li>
             <li><a href="index.html#work">Work</a></li>
             <li><a href="#equipment">Equipment</a></li>
-            <li><a href="basket.html" class="nav-cta">Basket <span data-basket-count></span></a></li>
+            <li><a href="basket.html" class="nav-cta">Your enquiry <span data-basket-count></span></a></li>
         </ul>
     </nav>
 </header>
@@ -65,9 +65,10 @@
         </p>
         <p class="hero-lead">
             There are no prices on here because it depends on the dates and
-            what you need. Add anything you're interested in to your basket,
-            check out with your dates and details, and I'll get back to you
-            with a quote.
+            what you need. Add anything you're interested in to your enquiry,
+            send it with your dates and details, and I'll get back to you
+            with availability and a quote. Nothing is booked until we've
+            agreed it.
         </p>
     </div>
 </section>
@@ -81,8 +82,9 @@
     <div class="section-header">
         <h2>My equipment</h2>
         <p>
-            Pick how many you need and add them to your basket. You can
-            still change it all before you send it.
+            Pick how many you think you need and add them to your enquiry.
+            You can change it all before you send it, and it doesn't commit
+            you to anything.
         </p>
     </div>
 
@@ -98,18 +100,47 @@
 <section class="section contact hire-help">
     <h2>Not sure what you need?</h2>
     <p>
-        Tell me about the event and I'll put a list together for you. Email me at
+        Tell me about the event and I'll put a list of kit together for you.
+    </p>
+
+    <form id="enquiryForm" class="enquiry-form">
+        <div class="form-row">
+            <label>Your name
+                <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label>Your email
+                <input type="email" name="email" autocomplete="email" required>
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Date(s)
+                <input type="text" name="date" placeholder="e.g. 14&ndash;16 March">
+            </label>
+            <label>Venue
+                <input type="text" name="venue" placeholder="Venue and town">
+            </label>
+        </div>
+        <label>About the event
+            <textarea name="message" rows="4" placeholder="What it is, how big the room is, and whether you'd like me to run it" required></textarea>
+        </label>
+        <input type="hidden" name="equipment" value="Not sure yet, asked for a list">
+        <input type="text" name="_gotcha" class="form-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button type="submit" class="button">Send enquiry</button>
+        <p id="enquiryStatus" class="form-status" role="status"></p>
+    </form>
+
+    <p class="contact-email">
+        Or email me directly at
         <a href="mailto:karolek01122@gmail.com">karolek01122@gmail.com</a>
-        or use the <a href="index.html#contact">enquiry form</a> on the lighting page.
     </p>
 </section>
 
 </main>
 
-<!-- Shows once something is in the basket -->
+<!-- Shows once something is on the enquiry -->
 <div id="hireBar" class="hire-bar" hidden>
     <p id="hireBarCount"></p>
-    <a href="basket.html" class="button">View basket</a>
+    <a href="basket.html" class="button">View your enquiry</a>
 </div>
 
 <!-- =========================
@@ -129,8 +160,10 @@
 
 <script src="site.js"></script>
 <script src="animations.js"></script>
+<script src="site-config.js"></script>
+<script src="contact.js?v=3"></script>
 <script src="basket.js"></script>
-<script src="hire.js?v=2"></script>
+<script src="hire.js?v=3"></script>
 <script src="counter.js"></script>
 </body>
 </html>

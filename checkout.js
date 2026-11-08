@@ -115,7 +115,7 @@
 
     function renderTotal() {
         const total = Basket.totalQty();
-        $("basketTotal").textContent = `${total} ${total === 1 ? "item" : "items"} in your basket`;
+        $("basketTotal").textContent = `${total} ${total === 1 ? "item" : "items"} on your enquiry`;
     }
 
     $("datesForm").addEventListener("submit", (event) => {
@@ -217,16 +217,9 @@
         return `mailto:${SITE_CONFIG.contactEmail}?subject=${encodeURIComponent(`Hire enquiry ${order.ref} from ${order.name}`)}&body=${encodeURIComponent(body)}`;
     }
 
-    form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        status.className = "form-status";
-        status.textContent = "";
-
-        if (!form.reportValidity()) return;
-        if (form.elements._honey.value) return;   /* a bot filled the hidden field */
-
+    function currentOrder() {
         const data = new FormData(form);
-        const order = {
+        return {
             ref: reference(),
             name: data.get("name").trim(),
             email: data.get("email").trim(),
@@ -238,6 +231,26 @@
             dates: Basket.dates(),
             entries: Basket.entries().map((entry) => ({ qty: entry.qty, name: byId(entry.id).name }))
         };
+    }
+
+    /* "Or send it from your email app": same enquiry, opened as an email */
+    $("mailtoAlt").addEventListener("click", (event) => {
+        if (!form.reportValidity()) {
+            event.preventDefault();
+            return;
+        }
+        event.currentTarget.href = mailtoLink(currentOrder());
+    });
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        status.className = "form-status";
+        status.textContent = "";
+
+        if (!form.reportValidity()) return;
+        if (form.elements._honey.value) return;   /* a bot filled the hidden field */
+
+        const order = currentOrder();
 
         sendButton.disabled = true;
         status.textContent = "Sending…";
