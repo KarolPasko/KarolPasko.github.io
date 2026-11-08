@@ -29,6 +29,7 @@
         items.forEach((item) => {
             const card = document.createElement("article");
             card.className = "card hire-card";
+            card.id = item.id;   /* matches the links in the schema.org data */
 
             if (item.photo) {
                 const img = document.createElement("img");
@@ -85,18 +86,18 @@
             const entry = Basket.get(item.id);
 
             parts.card.classList.toggle("is-added", Boolean(entry));
-            parts.add.textContent = entry ? "Remove" : "Add to basket";
+            parts.add.textContent = entry ? "Remove" : "Add to enquiry";
             parts.add.classList.toggle("button-ghost", Boolean(entry));
             if (entry && document.activeElement !== parts.stepper.input) {
                 parts.stepper.input.value = entry.qty;
             }
             parts.status.innerHTML = entry
-                ? `In your basket. <a href="basket.html">View basket</a>`
+                ? `On your enquiry. <a href="basket.html">View your enquiry</a>`
                 : "";
         });
 
         const count = Basket.totalQty();
-        barCount.textContent = `${count} ${count === 1 ? "item" : "items"} in your basket`;
+        barCount.textContent = `${count} ${count === 1 ? "item" : "items"} on your enquiry`;
         bar.hidden = count === 0;
         document.body.classList.toggle("has-hire-bar", count > 0);
     }

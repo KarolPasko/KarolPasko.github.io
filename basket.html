@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Your equipment hire basket. Pick your dates and send it to Karol Pasko for a quote.">
+    <meta name="description" content="Your equipment hire enquiry. Pick your dates and send it to Karol Pasko for availability and a quote.">
     <meta name="author" content="Karol Pasko">
-    <title>Your basket | Karol Pasko Lighting</title>
+    <title>Your hire enquiry | Karol Pasko Lighting</title>
     <link rel="icon" href="brand/kld-icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="brand/kld-icon.png">
     <meta name="robots" content="noindex, follow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=9">
+    <link rel="stylesheet" href="style.css?v=10">
 </head>
 <body id="top">
 
@@ -35,7 +35,7 @@
             <li><a href="index.html#services">Services</a></li>
             <li><a href="index.html#work">Work</a></li>
             <li><a href="hire.html">Equipment hire</a></li>
-            <li><a href="basket.html" class="nav-cta" aria-current="page">Basket <span data-basket-count></span></a></li>
+            <li><a href="basket.html" class="nav-cta" aria-current="page">Your enquiry <span data-basket-count></span></a></li>
         </ul>
     </nav>
 </header>
@@ -45,21 +45,21 @@
 <section class="section checkout-section">
     <a href="hire.html" class="checkout-back">&larr; Back to the equipment</a>
 
-    <ol class="checkout-steps" aria-label="Checkout progress">
-        <li data-step="basket">Basket</li>
+    <ol class="checkout-steps" aria-label="Enquiry progress">
+        <li data-step="basket">Your kit</li>
         <li data-step="details">Your details</li>
         <li data-step="sent">Sent</li>
     </ol>
 
     <!-- Step 1: the basket and the dates -->
     <div id="stepBasket" class="checkout-step">
-        <h1>Your basket</h1>
+        <h1>Your hire enquiry</h1>
 
         <div class="checkout-layout">
             <div>
                 <ul id="basketItems" class="basket-items"></ul>
                 <div id="basketEmpty" class="basket-empty" hidden>
-                    <p>Your basket is empty.</p>
+                    <p>You haven't added any equipment yet.</p>
                     <a href="hire.html" class="button">Browse the equipment</a>
                 </div>
             </div>
@@ -75,10 +75,11 @@
                     </label>
                     <p class="checkout-total" id="basketTotal"></p>
                     <p class="checkout-note">
-                        There's nothing to pay here. Once you send it, I'll check
-                        availability and email you a quote.
+                        This is just an enquiry, so nothing is booked and there's
+                        nothing to pay. Once you send it, I'll check availability
+                        and email you a quote.
                     </p>
-                    <button type="submit" class="button">Continue to checkout</button>
+                    <button type="submit" class="button">Continue</button>
                 </form>
             </aside>
         </div>
@@ -125,9 +126,13 @@
 
                 <div class="checkout-buttons">
                     <button type="submit" class="button" id="sendButton">Send enquiry</button>
-                    <a href="#basket" class="checkout-edit">Edit basket</a>
+                    <a href="#basket" class="checkout-edit">Change the kit</a>
                 </div>
                 <p id="checkoutStatus" class="form-status" role="status"></p>
+                <p class="checkout-alt">
+                    Or <a href="#" id="mailtoAlt">send it from your email app</a>, or
+                    email me at <a href="mailto:karolek01122@gmail.com">karolek01122@gmail.com</a>.
+                </p>
             </form>
 
             <aside class="checkout-summary">
@@ -175,7 +180,7 @@
 <script src="animations.js"></script>
 <script src="site-config.js"></script>
 <script src="basket.js"></script>
-<script src="checkout.js"></script>
+<script src="checkout.js?v=2"></script>
 <script src="counter.js"></script>
 </body>
 </html>

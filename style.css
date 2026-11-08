@@ -2902,6 +2902,15 @@ body.has-hire-bar footer {
     color: var(--muted);
 }
 
+.checkout-alt {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.checkout-alt a {
+    color: var(--text);
+}
+
 .checkout-lead {
     max-width: 640px;
     color: var(--muted);
