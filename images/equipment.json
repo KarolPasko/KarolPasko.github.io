@@ -1,3 +1,10 @@
 {
-  "items": []
+  "items": [
+    {
+      "id": "test-mw79cwx8pw1",
+      "name": "Test",
+      "description": "Test",
+      "photo": "images/equipment/1794107627180-1.png"
+    }
+  ]
 }
