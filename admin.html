@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -129,6 +129,9 @@
         <label class="admin-label">Date
             <input id="newDate" type="text" placeholder="e.g. March 2025">
         </label>
+        <label class="admin-label">Venue
+            <input id="newVenue" type="text" placeholder="e.g. Lowther Pavilion, Lytham (optional)">
+        </label>
         <label class="admin-label">Short description
             <input id="newDescription" type="text" placeholder="e.g. Lighting design, programming and operation.">
         </label>
@@ -195,11 +198,17 @@
         <label class="admin-label">Date
             <input id="editDate" type="text" placeholder="e.g. March 2025">
         </label>
+        <label class="admin-label">Venue
+            <input id="editVenue" type="text" placeholder="e.g. Lowther Pavilion, Lytham (optional)">
+        </label>
         <label class="admin-label">Short description
             <input id="editDescription" type="text">
         </label>
         <label class="admin-label">Notes
             <textarea id="editNotes" rows="4" placeholder="Anything else worth mentioning (optional)"></textarea>
+        </label>
+        <label class="admin-label">Google description
+            <textarea id="editSeo" rows="2" maxlength="300" placeholder="One or two sentences shown under the link in Google (optional). Leave empty and it's made from the details above."></textarea>
         </label>
         <div class="admin-actions">
             <button type="submit" class="button">Save details</button>

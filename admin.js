@@ -253,14 +253,37 @@ function orderedPhotos(folder) {
     ];
 }
 
-function savedCaption(path) {
+function savedEntry(path) {
     const [, folder, file] = path.split("/");
-    return (photoInfo[folder] || []).find((entry) => entry.file === file)?.caption || "";
+    return (photoInfo[folder] || []).find((entry) => entry.file === file) || {};
+}
+
+function savedCaption(path) {
+    return savedEntry(path).caption || "";
+}
+
+/* What the photo shows, in words: used as its alt text for Google and screen readers */
+function savedAlt(path) {
+    return savedEntry(path).alt || "";
+}
+
+/* A small "Describe the photo for Google" box under a photo */
+function altInput(value, label, onInput) {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "admin-caption admin-alt";
+    input.placeholder = "Describe the photo for Google…";
+    input.title = "What's in the photo, e.g. \"Blue wash and haze on the Lowther Pavilion stage\". Search engines and screen readers use this.";
+    input.maxLength = 200;
+    input.value = value || "";
+    input.setAttribute("aria-label", label);
+    input.addEventListener("input", () => onInput(input.value));
+    return input;
 }
 
 function startEditing() {
     editing = orderedPhotos($("showSelect").value)
-        .map((path) => ({ path, caption: savedCaption(path) }));
+        .map((path) => ({ path, caption: savedCaption(path), alt: savedAlt(path) }));
     setDirty(false);
     renderExisting();
 }
@@ -371,7 +394,12 @@ function renderExisting() {
         remove.textContent = "×";
         remove.addEventListener("click", () => deletePhoto(item.path));
 
-        tile.append(img, remove, label, moves, caption);
+        const alt = altInput(item.alt, `Description of photo ${index + 1} for search engines`, (value) => {
+            item.alt = value;
+            setDirty(true);
+        });
+
+        tile.append(img, remove, label, moves, caption, alt);
         grid.appendChild(tile);
     });
 }
@@ -382,6 +410,8 @@ function folderEntries(paths) {
         const entry = { file: path.split("/").pop() };
         const caption = savedCaption(path);
         if (caption) entry.caption = caption;
+        const alt = savedAlt(path);
+        if (alt) entry.alt = alt;
         return entry;
     });
 }
@@ -411,9 +441,10 @@ function photoInfoChange(info, removed = []) {
 $("saveOrderButton").addEventListener("click", async () => {
     const folder = $("showSelect").value;
     const info = { ...photoInfo };
-    info[folder] = editing.map(({ path, caption }) => {
+    info[folder] = editing.map(({ path, caption, alt }) => {
         const entry = { file: path.split("/").pop() };
         if (caption.trim()) entry.caption = caption.trim();
+        if ((alt || "").trim()) entry.alt = alt.trim();
         return entry;
     });
 
@@ -668,7 +699,7 @@ $("undoShowsButton").addEventListener("click", startShowOrder);
    EDIT AND DELETE SHOWS
 ========================= */
 
-const SHOW_FIELDS = ["folder", "title", "type", "date", "description", "notes"];
+const SHOW_FIELDS = ["folder", "title", "type", "date", "venue", "description", "notes", "seo"];
 
 /* Reads the "key": "value" fields of one projects.js entry */
 function entryFields(entry) {
@@ -688,10 +719,12 @@ function entryText(fields) {
         `        type: ${JSON.stringify(fields.type || "Lighting")},`
     ];
     if (fields.date) lines.push(`        date: ${JSON.stringify(fields.date)},`);
+    if (fields.venue) lines.push(`        venue: ${JSON.stringify(fields.venue)},`);
     lines.push("        description:", `            ${JSON.stringify(fields.description || "")}`);
-    if (fields.notes) {
+    for (const key of ["notes", "seo"]) {
+        if (!fields[key]) continue;
         lines[lines.length - 1] += ",";
-        lines.push(`        notes: ${JSON.stringify(fields.notes)}`);
+        lines.push(`        ${key}: ${JSON.stringify(fields[key])}`);
     }
     return `{\n${lines.join("\n")}\n    }`;
 }
@@ -711,8 +744,10 @@ function openEditor(folder) {
     $("editTitle").value = show.title;
     $("editType").value = show.type;
     $("editDate").value = show.date;
+    $("editVenue").value = show.venue;
     $("editDescription").value = show.description;
     $("editNotes").value = show.notes;
+    $("editSeo").value = show.seo;
     $("editStatus").textContent = "";
     $("showEditor").hidden = false;
     $("showEditor").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -751,8 +786,10 @@ $("showEditor").addEventListener("submit", async (event) => {
             title,
             type: $("editType").value.trim(),
             date: $("editDate").value.trim(),
+            venue: $("editVenue").value.trim(),
             description: $("editDescription").value.trim(),
-            notes: $("editNotes").value.trim()
+            notes: $("editNotes").value.trim(),
+            seo: $("editSeo").value.trim()
         });
 
         await commit(`Update details for ${title} (admin page)`, [
@@ -1041,6 +1078,7 @@ $("uploadButton").addEventListener("click", async () => {
                 title,
                 type: $("newType").value.trim(),
                 date: $("newDate").value.trim(),
+                venue: $("newVenue").value.trim(),
                 description: $("newDescription").value.trim(),
                 notes: $("newNotes").value.trim()
             });
@@ -1188,7 +1226,7 @@ function setHeroDirty(dirty) {
 
 function resetHero() {
     heroItems.forEach((item) => item.preview && URL.revokeObjectURL(item.preview));
-    heroItems = sitePhotos.hero.map((entry) => ({ path: entry.file, note: entry.note || "" }));
+    heroItems = sitePhotos.hero.map((entry) => ({ path: entry.file, note: entry.note || "", alt: entry.alt || "" }));
     setHeroDirty(false);
     renderHero();
 }
@@ -1288,7 +1326,12 @@ function renderHero() {
             renderHero();
         });
 
-        tile.append(img, remove, label, moves, note);
+        const alt = altInput(item.alt, `Description of photo ${index + 1} for search engines`, (value) => {
+            item.alt = value;
+            setHeroDirty(true);
+        });
+
+        tile.append(img, remove, label, moves, note, alt);
         grid.appendChild(tile);
     });
 }
@@ -1301,7 +1344,7 @@ async function addHeroFiles(fileList) {
         setHeroStatus(`Reading photo ${i + 1} of ${files.length}…`);
         try {
             const file = await toWebPhoto(files[i]);
-            heroItems.push({ file, preview: URL.createObjectURL(file), note: "" });
+            heroItems.push({ file, preview: URL.createObjectURL(file), note: "", alt: "" });
             setHeroDirty(true);
         } catch (error) {
             console.error(`Could not read ${files[i].name}:`, error);
@@ -1344,6 +1387,12 @@ $("undoHeroButton").addEventListener("click", () => {
     setHeroStatus("");
 });
 
+function heroEntry(file, item) {
+    const entry = { file, note: item.note.trim() };
+    if ((item.alt || "").trim()) entry.alt = item.alt.trim();
+    return entry;
+}
+
 $("saveHeroButton").addEventListener("click", async () => {
     $("saveHeroButton").disabled = true;
     const changes = [];
@@ -1359,9 +1408,9 @@ $("saveHeroButton").addEventListener("click", async () => {
                 const { base64, ext } = await preparePhoto(item.file);
                 const path = `images/hero/${stamp}-${added}.${ext}`;
                 changes.push({ path, base64 });
-                hero.push({ file: path, note: item.note.trim() });
+                hero.push(heroEntry(path, item));
             } else {
-                hero.push({ file: item.path, note: item.note.trim() });
+                hero.push(heroEntry(item.path, item));
             }
         }
 
@@ -1646,8 +1695,32 @@ function renderEquipment() {
             renderEquipment();
         });
 
+        const seoLabel = document.createElement("label");
+        seoLabel.className = "admin-label";
+        seoLabel.textContent = "Google description (optional)";
+        const seo = document.createElement("textarea");
+        seo.rows = 2;
+        seo.maxLength = 300;
+        seo.value = item.seo || "";
+        seo.placeholder = "One or two sentences shown under the link in Google. Leave empty to use the start of the description.";
+        seo.addEventListener("input", () => {
+            item.seo = seo.value;
+            setEquipmentDirty(true);
+        });
+        seoLabel.appendChild(seo);
+
+        const altLabel = document.createElement("label");
+        altLabel.className = "admin-label";
+        altLabel.textContent = "What's in the photo (optional)";
+        const alt = altInput(item.alt, `Description of the ${item.name || "equipment"} photo for search engines`, (value) => {
+            item.alt = value;
+            setEquipmentDirty(true);
+        });
+        alt.className = "";
+        altLabel.appendChild(alt);
+
         tools.append(up, down, remove);
-        fields.append(nameLabel, descLabel, tools);
+        fields.append(nameLabel, descLabel, seoLabel, altLabel, tools);
 
         row.append(photoBox, fields);
         list.appendChild(row);
@@ -1687,6 +1760,8 @@ $("saveEquipmentButton").addEventListener("click", async () => {
                 description: (item.description || "").trim(),
                 photo: item.photo || ""
             };
+            if ((item.seo || "").trim()) entry.seo = item.seo.trim();
+            if ((item.alt || "").trim()) entry.alt = item.alt.trim();
             if (item.file) {
                 added++;
                 setEquipmentStatus(`Preparing photo ${added}…`);

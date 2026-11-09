@@ -15,6 +15,9 @@
 
     const cards = {};
 
+    /* Each item has its own page at hire/<name>.html (written by scripts/build-credits.js) */
+    const pages = itemPages(items);
+
     function renderGrid() {
         grid.innerHTML = "";
 
@@ -34,13 +37,16 @@
             if (item.photo) {
                 const img = document.createElement("img");
                 img.src = item.photo;
-                img.alt = item.name;
+                img.alt = item.alt || `${item.name} for hire in Blackpool`;
                 img.loading = "lazy";
                 card.appendChild(img);
             }
 
             const name = document.createElement("h3");
-            name.textContent = item.name;
+            const link = document.createElement("a");
+            link.href = pages[item.id];
+            link.textContent = item.name;
+            name.appendChild(link);
             card.appendChild(name);
 
             if (item.description) {
@@ -106,3 +112,17 @@
     renderGrid();
     render();
 })();
+
+/* hire/<name>.html for each item; must match itemPages() in scripts/build-credits.js */
+function itemPages(items) {
+    const pages = {};
+    const used = new Set();
+    for (const item of items) {
+        const base = item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "item";
+        let slug = base;
+        for (let n = 2; used.has(slug); n++) slug = `${base}-${n}`;
+        used.add(slug);
+        pages[item.id] = `hire/${slug}.html`;
+    }
+    return pages;
+}

@@ -1,4 +1,4 @@
-# Keeps the crawlable show list, photo data and sitemap in step with projects.js and the photos.
+# Keeps the crawlable show list, show and hire item pages, photo data and sitemap in step with projects.js and the photos.
 name: Update show credits for search engines
 
 on:
@@ -13,6 +13,8 @@ on:
       - sitemap.xml
       - images/**
       - scripts/build-credits.js
+      - shows/**
+      - hire/**
       - .github/workflows/credits.yml
   workflow_dispatch:
 
@@ -35,13 +37,14 @@ jobs:
       - run: node scripts/build-credits.js
       - name: Commit if anything changed
         run: |
-          if git diff --quiet; then
+          git add -A index.html hire.html education.html how-light-travels.html sitemap.xml shows hire
+          if git diff --cached --quiet; then
             echo "Credits already up to date"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
-          git commit -am "Update show credits for search engines"
+          git commit -m "Update show credits for search engines"
           git pull --rebase origin main
           git push origin HEAD:main
       - name: Rebuild the site so the new credits go live
