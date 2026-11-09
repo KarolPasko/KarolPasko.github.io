@@ -3041,3 +3041,151 @@ nav ul a {
         gap: 18px;
     }
 }
+
+
+/* =========================
+   PHOTO CROPPER (admin page)
+========================= */
+
+.admin-crop {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border: none;
+    background: rgba(11, 20, 38, 0.85);
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-crop:hover {
+    background: var(--accent);
+}
+
+.admin-crop:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.cropper {
+    margin: auto;
+    overflow: auto;
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    padding: 0;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+.cropper::backdrop {
+    background: rgba(11, 20, 38, 0.7);
+}
+
+.cropper-inner {
+    display: grid;
+    gap: 14px;
+    padding: 22px;
+}
+
+.cropper h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.cropper-where {
+    margin: 0;
+}
+
+.cropper-stage {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+    background: var(--inverse-bg);
+}
+
+.cropper-canvas {
+    display: block;
+    max-width: 100%;
+    cursor: grab;
+    touch-action: none;
+}
+
+.cropper-canvas:active {
+    cursor: grabbing;
+}
+
+.cropper-canvas:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.cropper-shapes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cropper-shape {
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.cropper-shape:hover {
+    border-color: var(--accent);
+}
+
+.cropper-shape[aria-checked="true"] {
+    background: var(--text);
+    border-color: var(--text);
+    color: var(--surface);
+}
+
+.cropper-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.cropper-zoom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 220px;
+    font-size: 14px;
+}
+
+.cropper-zoom input {
+    flex: 1;
+    accent-color: var(--accent);
+}
+
+.cropper .button {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 16px;
+    cursor: pointer;
+}
+
+.cropper .button-ghost {
+    border: 1px solid var(--border);
+}
+
+.cropper-size {
+    margin: 0;
+}
+
+.cropper-actions {
+    justify-content: flex-end;
+}
