@@ -349,7 +349,7 @@ function renderExisting() {
         });
 
         const img = document.createElement("img");
-        img.src = `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${item.path}`;
+        img.src = siteUrl(item.path);
         img.alt = name;
         img.loading = "lazy";
         img.draggable = false;
@@ -394,12 +394,14 @@ function renderExisting() {
         remove.textContent = "×";
         remove.addEventListener("click", () => deletePhoto(item.path));
 
+        const crop = cropButton(`photo ${index + 1}`, () => cropSavedPhoto(item.path));
+
         const alt = altInput(item.alt, `Description of photo ${index + 1} for search engines`, (value) => {
             item.alt = value;
             setDirty(true);
         });
 
-        tile.append(img, remove, label, moves, caption, alt);
+        tile.append(img, remove, crop, label, moves, caption, alt);
         grid.appendChild(tile);
     });
 }
@@ -465,6 +467,32 @@ $("saveOrderButton").addEventListener("click", async () => {
 });
 
 $("undoOrderButton").addEventListener("click", startEditing);
+
+/* Crops a photo that's already in a show, saving it over the old one */
+async function cropSavedPhoto(path) {
+    const ext = path.split(".").pop().toLowerCase();
+    if (!CROP_TYPES[ext]) {
+        setOrderStatus(`${path.split("/").pop()} can't be cropped (${ext} photos keep their movement).`, "error");
+        return;
+    }
+
+    setOrderStatus("Opening photo…");
+    const original = await photoFromSite(path);
+    setOrderStatus("");
+    const file = await openCropper(original, { ...FRAMES.show, type: CROP_TYPES[ext] });
+    if (!file) return;
+
+    setOrderStatus("Saving cropped photo…");
+    try {
+        await commit(`Crop ${path} (admin page)`, [{ path, base64: await blobToBase64(file) }]);
+        photoVersions[path] = Date.now();
+        renderExisting();
+        setOrderStatus("Cropped. The site updates in a minute or two.", "success");
+    }
+    catch (error) {
+        setOrderStatus(`Couldn't save the crop: ${error.message}`, "error");
+    }
+}
 
 async function deletePhoto(path) {
     if (!confirm(`Delete photo ${path.split("/").pop()} from the website?`)) return;
@@ -910,6 +938,55 @@ async function canDecode(file) {
     }
 }
 
+/* =========================
+   CROPPING (see cropper.js)
+   Each place a photo goes has its frame shape on the site.
+========================= */
+
+const FRAMES = {
+    show: { frame: [4, 3], where: "the show's photo grid (the whole photo still opens when clicked)" },
+    hero: { frame: [16, 9], where: "the big photo at the top of the page on a laptop screen" },
+    about: { frame: [4, 5], where: "your photo in the About section" },
+    equipment: { frame: [4, 3], where: "the photo on the hire page" }
+};
+
+const CROP_TYPES = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp" };
+
+/* Cache-busting stamps for photos cropped in this visit, so the new version shows */
+const photoVersions = {};
+
+function siteUrl(path) {
+    return photoVersions[path] ? `${rawUrl(path)}?v=${photoVersions[path]}` : rawUrl(path);
+}
+
+/* Downloads a photo that's already on the site, so it can be cropped */
+async function photoFromSite(path) {
+    const response = await fetch(`${rawUrl(path)}?v=${Date.now()}`);
+    if (!response.ok) throw new Error(`Couldn't download ${path} (${response.status}).`);
+    const blob = await response.blob();
+    return new File([blob], path.split("/").pop(), { type: blob.type || "image/jpeg" });
+}
+
+function cropButton(label, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "admin-crop";
+    button.textContent = "Crop";
+    button.setAttribute("aria-label", `Crop ${label}`);
+    button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+            await onClick();
+        } catch (error) {
+            console.error(error);
+            alert(`Couldn't crop this photo: ${error.message}`);
+        } finally {
+            button.disabled = false;
+        }
+    });
+    return button;
+}
+
 /*
     Photos the browser can't show (HEIC in most browsers) are turned into
     JPEGs here, so they can be previewed and the
@@ -975,7 +1052,16 @@ function renderPending() {
             renderPending();
         });
 
-        tile.append(img, caption, remove);
+        const crop = cropButton(item.file.name, async () => {
+            const file = await openCropper(item.file, FRAMES.show);
+            if (!file) return;
+            URL.revokeObjectURL(item.preview);
+            item.file = file;
+            item.preview = URL.createObjectURL(file);
+            renderPending();
+        });
+
+        tile.append(img, caption, remove, crop);
         grid.appendChild(tile);
     });
 
@@ -1326,12 +1412,26 @@ function renderHero() {
             renderHero();
         });
 
+        const crop = cropButton(`photo ${index + 1}`, async () => {
+            setHeroStatus("Opening photo…");
+            const original = item.file || await photoFromSite(item.path);
+            setHeroStatus("");
+            const file = await openCropper(original, FRAMES.hero);
+            if (!file) return;
+            if (item.preview) URL.revokeObjectURL(item.preview);
+            item.file = file;
+            item.preview = URL.createObjectURL(file);
+            setHeroDirty(true);
+            renderHero();
+            setHeroStatus("Click Save to put the cropped photo on the site.");
+        });
+
         const alt = altInput(item.alt, `Description of photo ${index + 1} for search engines`, (value) => {
             item.alt = value;
             setHeroDirty(true);
         });
 
-        tile.append(img, remove, label, moves, note, alt);
+        tile.append(img, remove, crop, label, moves, note, alt);
         grid.appendChild(tile);
     });
 }
@@ -1457,10 +1557,27 @@ function renderAbout() {
     }
 
     $("saveAboutButton").disabled = !aboutFile;
+    $("cropAboutButton").hidden = !src;
     $("removeAboutButton").hidden = !sitePhotos.about || Boolean(aboutFile);
 }
 
 $("chooseAboutButton").addEventListener("click", () => $("aboutFileInput").click());
+
+$("cropAboutButton").addEventListener("click", async () => {
+    try {
+        setAboutStatus("Opening photo…");
+        const original = aboutFile ? aboutFile.file : await photoFromSite(sitePhotos.about);
+        setAboutStatus("");
+        const file = await openCropper(original, FRAMES.about);
+        if (!file) return;
+        if (aboutFile) URL.revokeObjectURL(aboutFile.preview);
+        aboutFile = { file, preview: URL.createObjectURL(file) };
+        setAboutStatus("Click Save photo to put it on the site.");
+        renderAbout();
+    } catch (error) {
+        setAboutStatus(`Couldn't crop the photo: ${error.message}`, "error");
+    }
+});
 
 $("aboutFileInput").addEventListener("change", async (event) => {
     const picked = event.target.files[0];
@@ -1635,6 +1752,24 @@ function renderEquipment() {
         choose.addEventListener("click", () => fileInput.click());
 
         photoBox.append(fileInput, choose);
+
+        if (src) {
+            const crop = cropButton(item.name || "equipment photo", async () => {
+                setEquipmentStatus("Opening photo…");
+                const original = item.file || await photoFromSite(item.photo);
+                setEquipmentStatus("");
+                const file = await openCropper(original, FRAMES.equipment);
+                if (!file) return;
+                if (item.preview) URL.revokeObjectURL(item.preview);
+                item.file = file;
+                item.preview = URL.createObjectURL(file);
+                setEquipmentDirty(true);
+                renderEquipment();
+            });
+            crop.className = "button button-ghost";
+            crop.textContent = "Crop photo";
+            photoBox.appendChild(crop);
+        }
 
         /* Name, description and tools */
         const fields = document.createElement("div");
