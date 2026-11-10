@@ -76,6 +76,7 @@ const GITHUB_BRANCH = "main";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
 
 const photoCaptions = {}; // "images/folder/1.jpg" -> comment
+const photoAlts = {};     // "images/folder/1.jpg" -> description for search engines
 
 async function getPhotoInfo() {
     try {
@@ -139,6 +140,7 @@ async function getImagesByFolder() {
         const listed = (photoInfo[folder] || []).map((entry) => {
             const path = `images/${folder}/${entry.file}`;
             if (entry.caption) photoCaptions[path] = entry.caption;
+            if (entry.alt) photoAlts[path] = entry.alt;
             return path;
         });
 
@@ -179,7 +181,7 @@ async function loadProjects() {
         if (images.length > 0) {
             const cover = document.createElement("img");
             cover.src = images[0];
-            cover.alt = project.title;
+            cover.alt = photoAlts[images[0]] || `${project.title}, lighting by Karol Pasko`;
             cover.loading = "lazy";
             card.appendChild(cover);
         }
@@ -242,8 +244,16 @@ function openGallery(project, images) {
     currentTitle = project.title;
 
     document.getElementById("galleryTitle").textContent = project.title;
-    document.getElementById("galleryDescription").textContent =
-        [project.date, project.description, project.notes].filter(Boolean).join("  ·  ");
+    const description = document.getElementById("galleryDescription");
+    description.textContent =
+        [project.date, project.venue, project.description, project.notes].filter(Boolean).join("  ·  ");
+
+    /* Every show has its own page (written by scripts/build-credits.js) */
+    const page = document.createElement("a");
+    page.className = "gallery-page-link";
+    page.href = `shows/${project.folder}.html`;
+    page.textContent = "Page for this show";
+    description.append(document.createElement("br"), page);
 
     galleryGrid.innerHTML = "";
 
@@ -254,7 +264,7 @@ function openGallery(project, images) {
 
         const img = document.createElement("img");
         img.src = src;
-        img.alt = photoCaptions[src] || `${project.title} photo ${index + 1}`;
+        img.alt = photoAlts[src] || photoCaptions[src] || `${project.title}, lighting by Karol Pasko, photo ${index + 1}`;
         img.loading = "lazy";
 
         thumb.appendChild(img);
@@ -275,7 +285,7 @@ function openLightbox(index) {
     currentIndex = (index + currentImages.length) % currentImages.length;
     lightboxImage.src = currentImages[currentIndex];
     const comment = photoCaptions[currentImages[currentIndex]];
-    lightboxImage.alt = comment || `${currentTitle} photo ${currentIndex + 1}`;
+    lightboxImage.alt = photoAlts[currentImages[currentIndex]] || comment || `${currentTitle} photo ${currentIndex + 1}`;
     lightboxCaption.textContent =
         `${currentTitle}  ·  ${currentIndex + 1} / ${currentImages.length}`;
     if (comment) {
