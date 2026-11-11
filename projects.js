@@ -21,6 +21,16 @@
 
 const projects = [
     {
+        folder: "lytham-festival",
+        title: "Lytham Festival",
+        type: "Lighting Shaddow/Operation",
+        date: "July 2026",
+        venue: "Lytham Green",
+        description:
+            "Lytham Festival 2026",
+        notes: "It was a pleasure to join the LCR Lighting team at Lytham Festival 2026, where I operated lighting on a grandMA3 for the festival’s DJ sets, including performances by DJ PHB and Dave Pearce. With no pre-programmed cue stack, every set was busked live, calling the show in real time to match the energy of the music and the crowd. Working alongside an experienced crew on a large scale outdoor event was a valuable opportunity to deliver dynamic, responsive lighting at a major festival."
+    },
+    {
         folder: "lightning-seeds-lytham",
         title: "Lightning Seeds Lytham",
         type: "Lighting Designer & Operator",
