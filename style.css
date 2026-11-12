@@ -3450,31 +3450,6 @@ nav ul a {
     max-width: 760px;
 }
 
-/* Desks: one short paragraph, no badge or repeated tiles */
-.desks {
-    display: grid;
-    grid-template-columns: minmax(240px, 1fr) 2fr;
-    gap: 32px;
-    align-items: start;
-}
-
-.desks h2 {
-    margin-bottom: 0;
-}
-
-.desks-text p {
-    color: var(--muted);
-    font-size: 17px;
-    max-width: 620px;
-    margin-bottom: 14px;
-}
-
-.desks-text .desks-lead {
-    color: var(--text);
-    font-size: 22px;
-    line-height: 1.4;
-}
-
 /* Show cards: plain grey credit line instead of small blue labels */
 .card .project-role {
     color: var(--muted);
@@ -3501,13 +3476,8 @@ nav ul a {
 }
 
 @media (max-width: 760px) {
-    .service-list > div,
-    .desks {
+    .service-list > div {
         grid-template-columns: 1fr;
         gap: 8px;
-    }
-
-    .desks {
-        gap: 20px;
     }
 }

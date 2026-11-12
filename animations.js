@@ -72,7 +72,7 @@
 
     /* ---- Fade up on scroll ---- */
     const targets = document.querySelectorAll(
-        ".section-header, .card, .service-list > div, .desks, .about-text, .about-side, .contact h2, .enquiry-form"
+        ".section-header, .card, .service-list > div, .about-text, .about-side, .contact h2, .enquiry-form"
     );
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver((entries) => {
