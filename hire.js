@@ -14,6 +14,8 @@
     Basket.keepOnly(items);
 
     const cards = {};
+    let lastAdded = "";
+    let lastCount = Basket.totalQty();
 
     /* Each item has its own page at hire/<name>.html (written by scripts/build-credits.js) */
     const pages = itemPages(items);
@@ -67,13 +69,24 @@
             add.type = "button";
             add.className = "button hire-add";
             add.addEventListener("click", () => {
-                if (Basket.get(item.id)) Basket.remove(item.id);
-                else Basket.set(item.id, wanted);
+                if (Basket.get(item.id)) return;   /* already on: the "Remove" link takes it off */
+                lastAdded = item.name;
+                Basket.set(item.id, wanted);
             });
 
             const status = document.createElement("p");
             status.className = "hire-in-basket";
             status.setAttribute("role", "status");
+            status.addEventListener("click", (event) => {
+                if (event.target.closest(".hire-remove")) Basket.remove(item.id);
+            });
+
+            /* Shows on the photo once it's on the enquiry */
+            const badge = document.createElement("span");
+            badge.className = "hire-added-badge";
+            badge.setAttribute("aria-hidden", "true");
+            badge.textContent = "\u2713 Added";
+            card.appendChild(badge);
 
             const actions = document.createElement("div");
             actions.className = "hire-actions";
@@ -92,19 +105,30 @@
             const entry = Basket.get(item.id);
 
             parts.card.classList.toggle("is-added", Boolean(entry));
-            parts.add.textContent = entry ? "Remove" : "Add to enquiry";
-            parts.add.classList.toggle("button-ghost", Boolean(entry));
+            parts.add.textContent = entry ? "\u2713 Added" : "Add to enquiry";
+            parts.add.classList.toggle("is-added", Boolean(entry));
+            parts.add.setAttribute("aria-pressed", entry ? "true" : "false");
             if (entry && document.activeElement !== parts.stepper.input) {
                 parts.stepper.input.value = entry.qty;
             }
             parts.status.innerHTML = entry
-                ? `On your enquiry. <a href="basket.html">View your enquiry</a>`
+                ? `On your enquiry. <a href="basket.html">View your enquiry</a> or <button type="button" class="hire-remove">remove it</button>`
                 : "";
         });
 
         const count = Basket.totalQty();
-        barCount.textContent = `${count} ${count === 1 ? "item" : "items"} on your enquiry`;
+        const total = `${count} ${count === 1 ? "item" : "items"} on your enquiry`;
+        barCount.textContent = lastAdded && count > lastCount ? `${lastAdded} added. ${total}` : total;
         bar.hidden = count === 0;
+
+        /* A short flash of blue on the bar each time something is added */
+        if (count > lastCount && !bar.hidden) {
+            bar.classList.remove("is-flashing");
+            void bar.offsetWidth;
+            bar.classList.add("is-flashing");
+        }
+        lastCount = count;
+        lastAdded = "";
         document.body.classList.toggle("has-hire-bar", count > 0);
     }
 

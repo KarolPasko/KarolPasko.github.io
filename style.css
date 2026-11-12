@@ -2516,8 +2516,96 @@ body.has-hire-bar footer {
     padding-bottom: 96px;
 }
 
-.hire-card.is-added {
-    box-shadow: inset 0 -4px 0 var(--accent);
+/* Added to the enquiry: blue outline, tinted card, tick on the photo */
+.hire-grid .hire-card {
+    position: relative;
+    transition: background-color 0.25s;
+}
+
+.hire-card.is-added,
+.hire-card.is-added:hover {
+    background: #eaf3fa;
+}
+
+/* Drawn over the photo too, so nothing moves when it's added */
+.hire-grid .hire-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid var(--accent);
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+}
+
+.hire-card.is-added::after {
+    opacity: 1;
+}
+
+.hire-added-badge {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+}
+
+.hire-card.is-added .hire-added-badge {
+    opacity: 1;
+    transform: none;
+}
+
+.button.hire-add.is-added,
+.button.hire-add.is-added:hover {
+    background: var(--line);
+    border-color: var(--line);
+    color: #fff;
+    cursor: default;
+}
+
+.hire-card.is-added .hire-in-basket,
+.hire-in-basket:not(:empty) {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.hire-in-basket a {
+    color: var(--accent);
+}
+
+.hire-remove {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font: inherit;
+    font-weight: 400;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.hire-remove:hover {
+    color: var(--text);
+}
+
+/* Menu link fills in once there's something on the enquiry */
+nav ul a.nav-cta.has-items {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+nav ul a.nav-cta.has-items:hover {
+    background: var(--line);
+    border-color: var(--line);
 }
 
 .hire-empty {
@@ -2551,6 +2639,23 @@ body.has-hire-bar footer {
     background: var(--inverse-bg);
     color: var(--inverse-text);
     border-top: 1px solid #3a4760;
+}
+
+.hire-bar.is-flashing {
+    animation: hire-bar-flash 1.2s ease-out;
+}
+
+@keyframes hire-bar-flash {
+    0%, 30% { background: var(--accent); }
+    100% { background: var(--inverse-bg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hire-bar.is-flashing { animation: none; }
+}
+
+.hire-bar p {
+    font-weight: 500;
 }
 
 .hire-bar .button {

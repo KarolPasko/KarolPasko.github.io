@@ -51,6 +51,8 @@ const Basket = (function () {
         const count = totalQty();
         document.querySelectorAll("[data-basket-count]").forEach((el) => {
             el.textContent = count ? `(${count})` : "";
+            const link = el.closest("a");
+            if (link) link.classList.toggle("has-items", count > 0);
         });
     }
 
