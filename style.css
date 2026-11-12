@@ -243,10 +243,7 @@ nav ul a.nav-cta:hover {
     align-items: flex-end;
     padding: 120px 6% 90px;
     border-bottom: 1px solid var(--line);
-    /* Faint 12-column drawing grid */
-    background:
-        repeating-linear-gradient(90deg, transparent 0 calc(100% / 12 - 1px), rgba(11, 20, 38, 0.06) calc(100% / 12 - 1px) calc(100% / 12)),
-        var(--bg);
+    background: var(--bg);
 }
 
 .hero-content {
@@ -764,9 +761,7 @@ body.home {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background:
-        repeating-linear-gradient(90deg, transparent 0 calc(100% / 12 - 1px), rgba(11, 20, 38, 0.06) calc(100% / 12 - 1px) calc(100% / 12)),
-        var(--bg);
+    background: var(--bg);
 }
 
 .home-main {
@@ -1378,9 +1373,7 @@ body.home {
         min-height: auto;
         padding-top: 80px;
         padding-bottom: 60px;
-        background:
-            repeating-linear-gradient(90deg, transparent 0 calc(100% / 4 - 1px), rgba(11, 20, 38, 0.06) calc(100% / 4 - 1px) calc(100% / 4)),
-            var(--bg);
+        background: var(--bg);
     }
 
     .section {
@@ -3406,4 +3399,115 @@ nav ul a {
 
 .admin .admin-alt {
     resize: none;
+}
+
+
+/* =========================
+   PLAIN FINISH
+   Takes out the template-looking bits: rules over every heading,
+   boxed service tiles, badges, chips and spec tables.
+========================= */
+
+.section-header,
+.section-dark .section-header {
+    border-top: 0;
+    padding-top: 0;
+    margin-bottom: 48px;
+}
+
+/* Services: a simple list, name on the left, what it is on the right */
+.service-list {
+    margin: 0 0 56px;
+    border-top: 1px solid rgba(242, 245, 250, 0.18);
+}
+
+.service-list > div {
+    display: grid;
+    grid-template-columns: minmax(200px, 1fr) 2fr;
+    gap: 32px;
+    padding: 26px 0;
+    border-bottom: 1px solid rgba(242, 245, 250, 0.18);
+}
+
+.service-list dt {
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--inverse-text);
+}
+
+.service-list dd {
+    margin: 0;
+    max-width: 620px;
+    color: var(--inverse-muted);
+    font-size: 17px;
+}
+
+.services-note,
+.section-dark .services-note {
+    border: 0;
+    padding: 0;
+    margin: 0 0 14px;
+    max-width: 760px;
+}
+
+/* Desks: one short paragraph, no badge or repeated tiles */
+.desks {
+    display: grid;
+    grid-template-columns: minmax(240px, 1fr) 2fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.desks h2 {
+    margin-bottom: 0;
+}
+
+.desks-text p {
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 620px;
+    margin-bottom: 14px;
+}
+
+.desks-text .desks-lead {
+    color: var(--text);
+    font-size: 22px;
+    line-height: 1.4;
+}
+
+/* Show cards: plain grey credit line instead of small blue labels */
+.card .project-role {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* Long show write-ups stay on the show page; cards keep a short preview */
+.project-card .project-notes {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Hire cards: keep them an even height, full text is on each item's page */
+.hire-grid .hire-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 760px) {
+    .service-list > div,
+    .desks {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .desks {
+        gap: 20px;
+    }
 }

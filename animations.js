@@ -72,7 +72,7 @@
 
     /* ---- Fade up on scroll ---- */
     const targets = document.querySelectorAll(
-        ".section-header, .card, .console, .about-text, .about-side, .contact h2, .enquiry-form"
+        ".section-header, .card, .service-list > div, .desks, .about-text, .about-side, .contact h2, .enquiry-form"
     );
     if (!("IntersectionObserver" in window)) return;
     const io = new IntersectionObserver((entries) => {
@@ -88,7 +88,7 @@
         // stagger cards that sit side by side in a grid
         const siblings = el.parentElement ? Array.from(el.parentElement.children) : [];
         const index = siblings.indexOf(el);
-        if (el.matches(".card, .console")) {
+        if (el.matches(".card, .service-list > div")) {
             el.style.transitionDelay = `${(index % 4) * 80}ms`;
         }
         el.classList.add("reveal");
