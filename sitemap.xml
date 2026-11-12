@@ -8,9 +8,6 @@
     <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-2.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/about/1792588092756.jpg</image:loc></image:image>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/1.jpg</image:loc></image:image>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/2.jpg</image:loc></image:image>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/1.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/2.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/3.jpg</image:loc></image:image>
@@ -26,6 +23,9 @@
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/4.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/5.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/2.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/beauty-and-the-beast/4.jpg</image:loc></image:image>
@@ -60,12 +60,6 @@
     <loc>https://karolpasko.github.io/how-light-travels.html</loc>
   </url>
   <url>
-    <loc>https://karolpasko.github.io/shows/lytham-festival.html</loc>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/1.jpg</image:loc></image:image>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/2.jpg</image:loc></image:image>
-    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/3.jpg</image:loc></image:image>
-  </url>
-  <url>
     <loc>https://karolpasko.github.io/shows/lightning-seeds-lytham.html</loc>
     <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/1.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/lightning-seeds-lytham/2.jpg</image:loc></image:image>
@@ -85,6 +79,12 @@
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/4.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/5.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/addams-family/6.jpg</image:loc></image:image>
+  </url>
+  <url>
+    <loc>https://karolpasko.github.io/shows/lytham-festival.html</loc>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/lytham-festival/3.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://karolpasko.github.io/shows/beauty-and-the-beast.html</loc>
