@@ -23,7 +23,9 @@ async function loadSlides(box) {
     }
 
     if (!exists) {
-        box.innerHTML = `<p class="slides-missing">${box.dataset.missing || "Presentation coming soon"}</p>`;
+        // Nothing uploaded yet: show nothing rather than a "coming soon" box
+        if (box.dataset.missing) box.innerHTML = `<p class="slides-missing">${box.dataset.missing}</p>`;
+        else box.hidden = true;
         return;
     }
 

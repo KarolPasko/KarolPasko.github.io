@@ -23,7 +23,7 @@ const projects = [
     {
         folder: "lytham-festival",
         title: "Lytham Festival",
-        type: "Lighting Shaddow/Operation",
+        type: "Lighting Shadow/Operation",
         date: "July 2026",
         venue: "Lytham Green",
         description:
