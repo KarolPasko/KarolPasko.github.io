@@ -335,6 +335,16 @@ function jsonLd(data) {
     return `    <script type="application/ld+json">\n    ${text}\n    </script>`;
 }
 
+// Google Analytics (GA4). Keep in step with the tag in the hand-written pages' <head>.
+const GOOGLE_TAG = `    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4DYWZ843C0"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-4DYWZ843C0');
+    </script>`;
+
 function chrome() {
     const hire = fs.readFileSync("hire.html", "utf8");
     const header = hire.match(/<header>[\s\S]*?<\/header>/);
@@ -357,6 +367,7 @@ ${GENERATED}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+${GOOGLE_TAG}
     <base href="../">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
