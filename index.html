@@ -120,7 +120,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="stylesheet" href="style.css?v=15">
     <!-- credits-schema:start (written by scripts/build-credits.js) -->
     <script type="application/ld+json">
     {
@@ -860,14 +860,16 @@ From organising the equipment hire to delivering the final lighting production, 
     </div>
 </div>
 
-<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+<div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Photo and video viewer">
     <button id="lightboxClose" class="close-button" aria-label="Close">&times;</button>
-    <button id="lightboxPrev" class="lightbox-arrow prev" aria-label="Previous photo">&#8249;</button>
+    <button id="lightboxPrev" class="lightbox-arrow prev" aria-label="Previous">&#8249;</button>
     <figure>
         <img id="lightboxImage" src="" alt="">
+        <video id="lightboxVideo" controls playsinline preload="metadata" hidden></video>
+        <iframe id="lightboxFrame" src="about:blank" title="Video" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen hidden></iframe>
         <figcaption id="lightboxCaption"></figcaption>
     </figure>
-    <button id="lightboxNext" class="lightbox-arrow next" aria-label="Next photo">&#8250;</button>
+    <button id="lightboxNext" class="lightbox-arrow next" aria-label="Next">&#8250;</button>
 </div>
 
 <!-- =========================
@@ -995,7 +997,7 @@ From organising the equipment hire to delivering the final lighting production, 
 <script src="animations.js"></script>
 <script src="site-config.js"></script>
 <script src="contact.js?v=3"></script>
-<script src="projects.js?v=2"></script>
+<script src="projects.js?v=3"></script>
 <script src="site-photos.js?v=3"></script>
 <script src="counter.js"></script>
 <script src="hire-promo.js"></script>

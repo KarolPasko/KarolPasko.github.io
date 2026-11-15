@@ -27,6 +27,32 @@ const vm = require("vm");
 const SITE = "https://karolpasko.github.io/";
 const PERSON_ID = SITE + "#karol-pasko";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
+const VIDEO_TYPES = /\.(mp4|webm|mov|m4v)$/i;
+
+/* YouTube or Vimeo link -> its embed address (same rules as projects.js), or "" */
+function videoEmbed(link) {
+    let address;
+    try { address = new URL(link); } catch { return ""; }
+    const host = address.hostname.replace(/^(www|m)\./, "");
+    let id = "";
+    if (host === "youtu.be") id = address.pathname.slice(1);
+    else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+        id = address.searchParams.get("v") ||
+            (address.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)/) || [])[1] || "";
+    }
+    id = id.split("/")[0];
+    if (/^[\w-]{6,}$/.test(id)) return `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
+
+    if (host === "vimeo.com" || host === "player.vimeo.com") {
+        const parts = address.pathname.split("/").filter(Boolean);
+        const at = parts.findIndex((part) => /^\d+$/.test(part));
+        if (at >= 0) {
+            const hash = address.searchParams.get("h") || (/^[0-9a-f]{6,}$/i.test(parts[at + 1] || "") ? parts[at + 1] : "");
+            return `https://player.vimeo.com/video/${parts[at]}${hash ? `?h=${hash}` : ""}`;
+        }
+    }
+    return "";
+}
 
 /* Pages search engines should list, in sitemap order */
 const PAGES = ["index.html", "hire.html", "education.html", "how-light-travels.html"];
@@ -46,29 +72,45 @@ function readJson(path, fallback) {
     }
 }
 
-/* Each project's photos in the same order the site shows them: photos.json first, then the rest by number */
-function projectPhotos(projects) {
+/*
+    Each project's photos and videos in the same order the site shows them:
+    photos.json first, then the rest by number. Each item has a kind:
+    "photo", "video" (a file in the folder) or "link" (YouTube/Vimeo, with embed).
+*/
+function projectMedia(projects) {
     const listed = readJson("images/photos.json", {});
     const result = {};
     for (const project of projects) {
         const folder = `images/${project.folder}`;
-        const photos = (listed[project.folder] || [])
-            .filter((photo) => fs.existsSync(`${folder}/${photo.file}`))
-            .map((photo) => ({
-                path: `${folder}/${photo.file}`,
-                note: photo.caption || photo.comment || photo.note || "",
-                alt: photo.alt || ""
-            }));
-        const known = new Set(photos.map((photo) => photo.path));
+        const items = (listed[project.folder] || [])
+            .map((entry) => {
+                const note = entry.caption || entry.comment || entry.note || "";
+                const alt = entry.alt || "";
+                if (entry.link) {
+                    const embed = videoEmbed(entry.link);
+                    return embed && { kind: "link", path: entry.link, embed, note, alt };
+                }
+                if (!entry.file || !fs.existsSync(`${folder}/${entry.file}`)) return null;
+                const kind = IMAGE_TYPES.test(entry.file) ? "photo" : VIDEO_TYPES.test(entry.file) ? "video" : null;
+                return kind && { kind, path: `${folder}/${entry.file}`, note, alt };
+            })
+            .filter(Boolean);
+        const known = new Set(items.map((item) => item.path));
         const others = fs.existsSync(folder)
             ? fs.readdirSync(folder)
-                .filter((file) => IMAGE_TYPES.test(file) && !known.has(`${folder}/${file}`))
+                .filter((file) => (IMAGE_TYPES.test(file) || VIDEO_TYPES.test(file)) && !known.has(`${folder}/${file}`))
                 .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-                .map((file) => ({ path: `${folder}/${file}`, note: "", alt: "" }))
+                .map((file) => ({ kind: IMAGE_TYPES.test(file) ? "photo" : "video", path: `${folder}/${file}`, note: "", alt: "" }))
             : [];
-        result[project.folder] = photos.concat(others);
+        result[project.folder] = items.concat(others);
     }
     return result;
+}
+
+/* Just the photos, for covers, share images, photo data and the sitemap */
+function projectPhotos(media) {
+    return Object.fromEntries(Object.entries(media)
+        .map(([folder, items]) => [folder, items.filter((item) => item.kind === "photo")]));
 }
 
 function sitePhotos() {
@@ -411,7 +453,8 @@ function breadcrumbs(trail) {
     };
 }
 
-function showPageHtml(project, photos) {
+function showPageHtml(project, media) {
+    const photos = media.filter((item) => item.kind === "photo");
     const path = showPage(project);
     const where = project.venue ? ` at ${project.venue}` : "";
     const role = [project.type, project.venue, project.date].filter(Boolean).join(" · ");
@@ -419,10 +462,22 @@ function showPageHtml(project, photos) {
         `Lighting by Karol Pasko for ${project.title}${where}${project.date ? `, ${project.date}` : ""}. ${sentence(project.description)} ${project.notes || ""}`);
     const cover = photos[0];
 
-    const figures = photos.map((photo, index) => {
-        const caption = photo.note ? `\n            <figcaption>${escapeHtml(photo.note)}</figcaption>` : "";
+    const figures = media.map((item, index) => {
+        const caption = item.note ? `\n            <figcaption>${escapeHtml(item.note)}</figcaption>` : "";
+        const label = escapeHtml(item.alt || item.note || `${project.title}, lighting by Karol Pasko, video`);
+        if (item.kind === "video") {
+            return `        <figure class="show-photo show-video">
+            <video src="${escapeHtml(item.path)}#t=0.1" controls playsinline preload="metadata" aria-label="${label}"></video>${caption}
+        </figure>`;
+        }
+        if (item.kind === "link") {
+            return `        <figure class="show-photo show-video">
+            <iframe src="${escapeHtml(item.embed)}" title="${label}" loading="lazy" allow="fullscreen; picture-in-picture; encrypted-media" allowfullscreen></iframe>${caption}
+        </figure>`;
+        }
+        const photoIndex = photos.indexOf(item);
         return `        <figure class="show-photo">
-            <a href="${escapeHtml(photo.path)}"><img src="${escapeHtml(photo.path)}" alt="${escapeHtml(photoAlt(photo, project, index))}"${index > 1 ? ' loading="lazy"' : ""}></a>${caption}
+            <a href="${escapeHtml(item.path)}"><img src="${escapeHtml(item.path)}" alt="${escapeHtml(photoAlt(item, project, photoIndex))}"${index > 1 ? ' loading="lazy"' : ""}></a>${caption}
         </figure>`;
     }).join("\n");
 
@@ -533,7 +588,8 @@ function writePages(folder, pages) {
 
 const chromeParts = chrome();
 const projects = readProjects();
-const photos = projectPhotos(projects);
+const media = projectMedia(projects);
+const photos = projectPhotos(media);
 const site = sitePhotos();
 const shareImage = site.hero[0] ? site.hero[0] : null;
 
@@ -577,7 +633,7 @@ for (const page of PAGES) {
     fs.writeFileSync(page, html);
 }
 
-writePages("shows", Object.fromEntries(projects.map((project) => [showPage(project), showPageHtml(project, photos[project.folder])])));
+writePages("shows", Object.fromEntries(projects.map((project) => [showPage(project), showPageHtml(project, media[project.folder])])));
 writePages("hire", Object.fromEntries(equipmentItems().map((item) => [item.page, itemPageHtml(item)])));
 
 fs.writeFileSync("sitemap.xml", sitemapXml(projects, photos, site));
