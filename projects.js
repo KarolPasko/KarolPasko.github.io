@@ -21,6 +21,15 @@
 
 const projects = [
     {
+        folder: "tallent-show",
+        title: "Tallent Show",
+        type: "Lighting Design, Lighting operation",
+        date: "July 2026",
+        description:
+            "",
+        notes: "I was brought in by a school to provide the lighting production for their talent show, taking an ordinary school hall and transforming it into a professional performance venue.\n\nI took responsibility for organising and sourcing all the required lighting hire, planning the lighting setup and overseeing the installation. Using intelligent lighting fixtures and a carefully designed lighting setup, I transformed the space into an exciting stage environment, bringing the performances to life and creating a real sense of occasion.\n\nThe show was operated using an Avolites Tiger Touch II lighting console, allowing me to programme and control dynamic lighting effects, colour changes, movements and atmospheric looks throughout the performances.\n\nFrom organising the equipment hire to delivering the final lighting production, I helped turn a standard school hall into a vibrant entertainment venue, elevating the overall experience for both performers and the audience."
+    },
+    {
         folder: "lightning-seeds-lytham",
         title: "Lightning Seeds Lytham",
         type: "Lighting Designer & Operator",
