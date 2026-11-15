@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=14">
+    <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -110,7 +110,7 @@
     <div class="admin-heading">
         <div>
             <p class="small-title">Photos</p>
-            <h2>Add photos to a show</h2>
+            <h2>Add photos and videos to a show</h2>
         </div>
         <button id="signOut" type="button" class="button button-ghost">Forget token</button>
     </div>
@@ -141,9 +141,9 @@
     </div>
 
     <div id="dropZone" class="drop-zone" tabindex="0" role="button">
-        <p><strong>Drag photos here</strong> or click to choose</p>
-        <p class="admin-help">Any photo works, including iPhone HEIC. Photos are turned into JPEGs and shrunk if needed so the site stays fast.</p>
-        <input id="fileInput" type="file" accept="image/*,.heic,.heif,.avif,.tif,.tiff,.bmp" multiple hidden>
+        <p><strong>Drag photos or videos here</strong> or click to choose</p>
+        <p class="admin-help">Any photo works, including iPhone HEIC. Photos are turned into JPEGs and shrunk if needed so the site stays fast. Videos go up as they are, up to 50 MB each (about a minute of phone video). MP4 plays in every browser.</p>
+        <input id="fileInput" type="file" accept="image/*,.heic,.heif,.avif,.tif,.tiff,.bmp,video/mp4,video/webm,video/quicktime,.mp4,.m4v,.mov,.webm" multiple hidden>
     </div>
 
     <div id="pendingGrid" class="admin-thumbs"></div>
@@ -154,10 +154,21 @@
     </div>
     <p id="photoStatus" class="form-status"></p>
 
+    <form id="videoLinkForm" class="admin-video-link">
+        <label class="admin-label">Or add a YouTube or Vimeo video
+            <span class="admin-row">
+                <input id="videoLinkInput" type="url" placeholder="Paste the link, e.g. https://youtu.be/…" autocomplete="off">
+                <button id="addLinkButton" type="submit" class="button button-ghost">Add video</button>
+            </span>
+        </label>
+        <p class="admin-help">Best for longer or bigger videos. The video plays on your site without visitors leaving it.</p>
+    </form>
+    <p id="linkStatus" class="form-status"></p>
+
     <h3 class="admin-subheading">Already on the site</h3>
     <p class="admin-help">
-        Drag photos to change their order (or use the arrows), and add a
-        comment under any photo. The first photo is the cover. Click
+        Drag photos and videos to change their order (or use the arrows), and add a
+        comment under any of them. The first photo is the cover. Click
         <strong>Save</strong> when you're done.
     </p>
     <div id="existingGrid" class="admin-thumbs admin-photos"></div>

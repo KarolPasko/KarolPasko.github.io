@@ -15,6 +15,16 @@ const BRANCH = "main";
 const TOKEN_KEY = "kp-admin-token";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
 const OTHER_PHOTO_TYPES = /\.(heic|heif|avif|tiff?|bmp)$/i;
+const VIDEO_TYPES = /\.(mp4|webm|mov|m4v)$/i;
+const MEDIA_TYPES = /\.(jpe?g|png|webp|gif|mp4|webm|mov|m4v)$/i;
+
+/*
+    Videos are uploaded as they are (no shrinking in the browser). GitHub
+    refuses files over 100 MB and warns over 50 MB, and big videos make
+    the site slow, so anything bigger should go on YouTube or Vimeo and be
+    added as a link instead.
+*/
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
 
 /* Photos bigger than this are shrunk to a JPEG before upload */
 const MAX_SIDE = 2000;
@@ -28,7 +38,7 @@ const $ = (id) => document.getElementById(id);
 let token = "";
 let shows = [];          // [{ folder, title, type, date, description, notes }]
 let repoPaths = [];      // every file path in the repository
-let photosByFolder = {}; // { folder: ["images/folder/1.jpg", …] }
+let photosByFolder = {}; // { folder: ["images/folder/1.jpg", "images/folder/2.mp4", …] }
 let pending = [];        // [{ file, name, preview }]
 let photoInfo = {};      // images/photos.json: { folder: [{ file, caption }] }
 let editing = [];        // photos of the chosen show being reordered: [{ path, caption }]
@@ -178,7 +188,7 @@ async function loadShows() {
     photosByFolder = {};
     for (const file of repoTree.tree) {
         const parts = file.path.split("/");
-        if (file.type === "blob" && parts.length === 3 && parts[0] === "images" && IMAGE_TYPES.test(parts[2])) {
+        if (file.type === "blob" && parts.length === 3 && parts[0] === "images" && MEDIA_TYPES.test(parts[2])) {
             (photosByFolder[parts[1]] ||= []).push(file.path);
         }
     }
@@ -243,19 +253,104 @@ $("newTitle").addEventListener("input", updateUploadButton);
    EXISTING PHOTOS
 ========================= */
 
-/* Photos in the saved order first, then any not ordered yet by number */
+/*
+    A show's items are photo and video paths ("images/show/3.jpg",
+    "images/show/4.mp4") and YouTube/Vimeo links, which are kept in
+    photos.json as { link } entries rather than as files.
+*/
+function isLink(item) {
+    return /^https?:\/\//i.test(item);
+}
+
+function isVideoItem(item) {
+    return isLink(item) || VIDEO_TYPES.test(item);
+}
+
+/* YouTube or Vimeo link -> { site, thumb } (same rules as projects.js), or null */
+function videoLink(link) {
+    let url;
+    try { url = new URL(link); } catch (error) { return null; }
+    const host = url.hostname.replace(/^(www|m)\./, "");
+
+    let id = "";
+    if (host === "youtu.be") id = url.pathname.slice(1);
+    else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+        id = url.searchParams.get("v") ||
+            (url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)/) || [])[1] || "";
+    }
+    id = id.split("/")[0];
+    if (/^[\w-]{6,}$/.test(id)) return { site: "YouTube", thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg` };
+
+    if ((host === "vimeo.com" || host === "player.vimeo.com") && /\/\d+/.test(url.pathname)) {
+        return { site: "Vimeo", thumb: "" };
+    }
+    return null;
+}
+
+/* The photos.json entry for one item */
+function itemEntry(path) {
+    return isLink(path) ? { link: path } : { file: path.split("/").pop() };
+}
+
+function entryPath(folder, entry) {
+    return entry.link || `images/${folder}/${entry.file}`;
+}
+
+/* Photos and videos in the saved order first, then any not ordered yet by number */
 function orderedPhotos(folder) {
     const photos = photosByFolder[folder] || [];
-    const saved = (photoInfo[folder] || []).map((entry) => `images/${folder}/${entry.file}`);
+    const saved = (photoInfo[folder] || []).map((entry) => entryPath(folder, entry));
     return [
-        ...saved.filter((path) => photos.includes(path)),
+        ...saved.filter((path) => photos.includes(path) || isLink(path)),
         ...photos.filter((path) => !saved.includes(path))
     ];
 }
 
 function savedEntry(path) {
+    if (isLink(path)) {
+        for (const folder in photoInfo) {
+            const found = (photoInfo[folder] || []).find((entry) => entry.link === path);
+            if (found) return found;
+        }
+        return {};
+    }
     const [, folder, file] = path.split("/");
     return (photoInfo[folder] || []).find((entry) => entry.file === file) || {};
+}
+
+/* A small preview of a photo, video file or video link */
+function mediaPreview(item, src, alt) {
+    if (isLink(item)) {
+        const link = videoLink(item);
+        if (link && link.thumb) {
+            const img = document.createElement("img");
+            img.src = link.thumb;
+            img.alt = alt;
+            img.loading = "lazy";
+            img.draggable = false;
+            return img;
+        }
+        const box = document.createElement("div");
+        box.className = "admin-video-blank";
+        box.textContent = `${link ? link.site : "Video"} link`;
+        return box;
+    }
+    if (VIDEO_TYPES.test(item)) {
+        const video = document.createElement("video");
+        video.src = `${src}#t=0.1`;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.draggable = false;
+        video.setAttribute("aria-label", alt);
+        return video;
+    }
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = alt;
+    img.loading = "lazy";
+    img.draggable = false;
+    return img;
 }
 
 function savedCaption(path) {
@@ -318,8 +413,12 @@ function renderExisting() {
         return;
     }
 
+    /* The site uses the first photo as the cover (or the first video if there are no photos) */
+    const coverIndex = Math.max(0, editing.findIndex((item) => !isVideoItem(item.path)));
+
     editing.forEach((item, index) => {
-        const name = item.path.split("/").pop();
+        const name = isLink(item.path) ? item.path : item.path.split("/").pop();
+        const what = isVideoItem(item.path) ? "video" : "photo";
 
         const tile = document.createElement("figure");
         tile.className = "admin-thumb admin-photo";
@@ -348,14 +447,13 @@ function renderExisting() {
             movePhoto(dragFrom, index);
         });
 
-        const img = document.createElement("img");
-        img.src = siteUrl(item.path);
-        img.alt = name;
-        img.loading = "lazy";
-        img.draggable = false;
+        const img = mediaPreview(item.path, isLink(item.path) ? item.path : siteUrl(item.path), name);
 
         const label = document.createElement("figcaption");
-        label.textContent = index === 0 ? `${index + 1}. Cover` : `${index + 1}.`;
+        label.textContent = `${index + 1}.` +
+            (isLink(item.path) ? ` ${videoLink(item.path)?.site || "Video"} link` : isVideoItem(item.path) ? " Video" : "") +
+            (index === coverIndex ? (isVideoItem(item.path) ? " · Cover" : " Cover") : "");
+        label.title = name;
 
         const caption = document.createElement("textarea");
         caption.className = "admin-caption";
@@ -390,18 +488,19 @@ function renderExisting() {
         const remove = document.createElement("button");
         remove.type = "button";
         remove.className = "admin-thumb-remove";
-        remove.setAttribute("aria-label", `Delete photo ${index + 1}`);
+        remove.setAttribute("aria-label", `Delete ${what} ${index + 1}`);
         remove.textContent = "×";
         remove.addEventListener("click", () => deletePhoto(item.path));
 
-        const crop = cropButton(`photo ${index + 1}`, () => cropSavedPhoto(item.path));
-
-        const alt = altInput(item.alt, `Description of photo ${index + 1} for search engines`, (value) => {
+        const alt = altInput(item.alt, `Description of ${what} ${index + 1} for search engines`, (value) => {
             item.alt = value;
             setDirty(true);
         });
+        if (what === "video") alt.placeholder = "Describe the video for Google…";
 
-        tile.append(img, remove, crop, label, moves, caption, alt);
+        tile.append(img, remove);
+        if (what === "photo") tile.append(cropButton(`photo ${index + 1}`, () => cropSavedPhoto(item.path)));
+        tile.append(label, moves, caption, alt);
         grid.appendChild(tile);
     });
 }
@@ -409,7 +508,7 @@ function renderExisting() {
 /* photos.json entries for a list of photo paths, keeping saved comments */
 function folderEntries(paths) {
     return paths.map((path) => {
-        const entry = { file: path.split("/").pop() };
+        const entry = itemEntry(path);
         const caption = savedCaption(path);
         if (caption) entry.caption = caption;
         const alt = savedAlt(path);
@@ -427,7 +526,7 @@ function folderEntries(paths) {
 function photoInfoChange(info, removed = []) {
     const complete = { ...info };
     for (const folder in photosByFolder) {
-        const listed = (complete[folder] || []).map((entry) => `images/${folder}/${entry.file}`);
+        const listed = (complete[folder] || []).map((entry) => entryPath(folder, entry));
         const missing = photosByFolder[folder]
             .filter((path) => !listed.includes(path) && !removed.includes(path));
         if (missing.length) {
@@ -440,29 +539,81 @@ function photoInfoChange(info, removed = []) {
     return { path: PHOTO_INFO, base64: textToBase64(JSON.stringify(complete, null, 2) + "\n") };
 }
 
-$("saveOrderButton").addEventListener("click", async () => {
+/* Saves the order, comments and descriptions being edited (and any video link just added) */
+async function saveEditing(message) {
     const folder = $("showSelect").value;
     const info = { ...photoInfo };
     info[folder] = editing.map(({ path, caption, alt }) => {
-        const entry = { file: path.split("/").pop() };
+        const entry = itemEntry(path);
         if (caption.trim()) entry.caption = caption.trim();
         if ((alt || "").trim()) entry.alt = alt.trim();
         return entry;
     });
 
+    const title = shows.find((show) => show.folder === folder)?.title || folder;
+    await commit(`${message} for ${title} (admin page)`, [photoInfoChange(info)]);
+    photoInfo = info;
+    setDirty(false);
+}
+
+$("saveOrderButton").addEventListener("click", async () => {
     $("saveOrderButton").disabled = true;
     setOrderStatus("Saving order and comments…");
 
     try {
-        const title = shows.find((show) => show.folder === folder)?.title || folder;
-        await commit(`Update photo order and comments for ${title} (admin page)`, [photoInfoChange(info)]);
-        photoInfo = info;
-        setDirty(false);
+        await saveEditing("Update photo order and comments");
         setOrderStatus("Saved. The site updates in a minute or two.", "success");
     }
     catch (error) {
         $("saveOrderButton").disabled = false;
         setOrderStatus(`Couldn't save: ${error.message}`, "error");
+    }
+});
+
+/* =========================
+   VIDEO LINKS (YouTube / Vimeo)
+========================= */
+
+function setLinkStatus(text, kind = "") {
+    $("linkStatus").className = `form-status ${kind}`;
+    $("linkStatus").textContent = text;
+}
+
+$("videoLinkForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const link = $("videoLinkInput").value.trim();
+
+    if ($("showSelect").value === "__new") {
+        setLinkStatus("Make the show first by uploading a photo or video to it, then add the link.", "error");
+        return;
+    }
+    if (!videoLink(link)) {
+        setLinkStatus("That doesn't look like a YouTube or Vimeo link. Copy it from the Share button on the video.", "error");
+        return;
+    }
+    if (editing.some((item) => item.path === link)) {
+        setLinkStatus("That video is already in this show.", "error");
+        return;
+    }
+
+    editing.push({ path: link, caption: "", alt: "" });
+    renderExisting();
+    $("addLinkButton").disabled = true;
+    setLinkStatus("Adding video…");
+
+    try {
+        await saveEditing("Add video link");
+        $("videoLinkInput").value = "";
+        renderExisting();
+        setLinkStatus("Added at the end of the show. Drag it to move it. The site updates in a minute or two.", "success");
+    }
+    catch (error) {
+        editing = editing.filter((item) => item.path !== link);
+        renderExisting();
+        setLinkStatus(`Couldn't add the video: ${error.message}`, "error");
+    }
+    finally {
+        $("addLinkButton").disabled = false;
     }
 });
 
@@ -495,20 +646,24 @@ async function cropSavedPhoto(path) {
 }
 
 async function deletePhoto(path) {
-    if (!confirm(`Delete photo ${path.split("/").pop()} from the website?`)) return;
+    const link = isLink(path);
+    const what = isVideoItem(path) ? "video" : "photo";
+    if (!confirm(link
+        ? "Take this video link off the website? (The video itself stays on YouTube/Vimeo.)"
+        : `Delete ${what} ${path.split("/").pop()} from the website?`)) return;
 
-    const [, folder] = path.split("/");
+    const folder = $("showSelect").value;
     const info = {
         ...photoInfo,
         [folder]: folderEntries(orderedPhotos(folder).filter((p) => p !== path))
     };
-    const changes = [{ path, remove: true }, photoInfoChange(info, [path])];
+    const changes = link ? [photoInfoChange(info)] : [{ path, remove: true }, photoInfoChange(info, [path])];
 
     setOrderStatus("Deleting…");
     try {
-        await commit(`Delete ${path} (admin page)`, changes);
+        await commit(link ? `Remove video link from ${folder} (admin page)` : `Delete ${path} (admin page)`, changes);
         photoInfo = info;
-        photosByFolder[folder] = photosByFolder[folder].filter((p) => p !== path);
+        photosByFolder[folder] = (photosByFolder[folder] || []).filter((p) => p !== path);
         editing = editing.filter((item) => item.path !== path);
         renderExisting();
         setOrderStatus("Deleted. The site updates in a minute or two.", "success");
@@ -929,6 +1084,14 @@ function isPhoto(file) {
     return file.type.startsWith("image/") || OTHER_PHOTO_TYPES.test(file.name);
 }
 
+function isVideo(file) {
+    return file.type.startsWith("video/") || VIDEO_TYPES.test(file.name);
+}
+
+function megabytes(bytes) {
+    return `${Math.round(bytes / 1024 / 1024)} MB`;
+}
+
 async function canDecode(file) {
     try {
         (await createImageBitmap(file)).close();
@@ -1004,9 +1167,20 @@ async function toWebPhoto(file) {
 }
 
 async function addFiles(fileList) {
-    const files = [...fileList].filter(isPhoto);
-    const skipped = fileList.length - files.length;
+    const all = [...fileList];
+    const videos = all.filter((file) => isVideo(file));
+    const files = all.filter((file) => !isVideo(file) && isPhoto(file));
+    const skipped = all.length - files.length - videos.length;
     const failed = [];
+    const tooBig = [];
+    const wrongType = [];
+
+    for (const file of videos) {
+        if (!VIDEO_TYPES.test(file.name)) { wrongType.push(file.name); continue; }
+        if (file.size > MAX_VIDEO_BYTES) { tooBig.push(`${file.name} (${megabytes(file.size)})`); continue; }
+        pending.push({ file, preview: URL.createObjectURL(file), video: true });
+    }
+    renderPending();
 
     for (let i = 0; i < files.length; i++) {
         setPhotoStatus(`Reading photo ${i + 1} of ${files.length}…`);
@@ -1022,7 +1196,9 @@ async function addFiles(fileList) {
 
     const problems = [];
     if (failed.length) problems.push(`Couldn't open ${failed.join(", ")}. Try exporting it as a JPEG first.`);
-    if (skipped) problems.push(`Skipped ${skipped} file${skipped === 1 ? "" : "s"} that ${skipped === 1 ? "isn't a photo" : "aren't photos"}.`);
+    if (tooBig.length) problems.push(`${tooBig.join(", ")} ${tooBig.length === 1 ? "is" : "are"} over ${megabytes(MAX_VIDEO_BYTES)}, too big for the site. Put ${tooBig.length === 1 ? "it" : "them"} on YouTube and add the link below instead, or send a shorter clip.`);
+    if (wrongType.length) problems.push(`${wrongType.join(", ")}: use an MP4 video (or MOV, WebM).`);
+    if (skipped) problems.push(`Skipped ${skipped} file${skipped === 1 ? "" : "s"} that ${skipped === 1 ? "isn't a photo or video" : "aren't photos or videos"}.`);
     setPhotoStatus(problems.join(" "), problems.length ? "error" : "");
 }
 
@@ -1034,12 +1210,10 @@ function renderPending() {
         const tile = document.createElement("figure");
         tile.className = "admin-thumb";
 
-        const img = document.createElement("img");
-        img.src = item.preview;
-        img.alt = item.file.name;
+        const img = mediaPreview(item.video ? item.file.name : "photo.jpg", item.preview, item.file.name);
 
         const caption = document.createElement("figcaption");
-        caption.textContent = item.file.name;
+        caption.textContent = item.video ? `${item.file.name} · ${megabytes(item.file.size) === "0 MB" ? "under 1 MB" : megabytes(item.file.size)}` : item.file.name;
 
         const remove = document.createElement("button");
         remove.type = "button";
@@ -1061,7 +1235,8 @@ function renderPending() {
             renderPending();
         });
 
-        tile.append(img, caption, remove, crop);
+        tile.append(img, caption, remove);
+        if (!item.video) tile.append(crop);
         grid.appendChild(tile);
     });
 
@@ -1079,7 +1254,17 @@ function updateUploadButton() {
     const needsTitle = $("showSelect").value === "__new" && !$("newTitle").value.trim();
     $("uploadButton").disabled = pending.length === 0 || needsTitle;
     $("uploadButton").textContent =
-        pending.length > 1 ? `Upload ${pending.length} photos` : "Upload to website";
+        pending.length > 1 ? `Upload ${countWords(pending)}` : "Upload to website";
+}
+
+/* "3 photos", "2 photos and 1 video" */
+function countWords(items) {
+    const videos = items.filter((item) => item.video).length;
+    const photos = items.length - videos;
+    const words = [];
+    if (photos) words.push(`${photos} photo${photos === 1 ? "" : "s"}`);
+    if (videos) words.push(`${videos} video${videos === 1 ? "" : "s"}`);
+    return words.join(" and ");
 }
 
 function setPhotoStatus(text, kind = "") {
@@ -1099,6 +1284,12 @@ function blobToBase64(blob) {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
+}
+
+/* Videos go up exactly as they are */
+async function prepareVideo(file) {
+    const ext = (file.name.match(VIDEO_TYPES) || [".mp4"])[0].slice(1).toLowerCase();
+    return { base64: await blobToBase64(file), ext };
 }
 
 /* Returns { base64, ext }, shrinking large photos to a JPEG */
@@ -1149,8 +1340,8 @@ $("uploadButton").addEventListener("click", async () => {
 
     try {
         for (let i = 0; i < pending.length; i++) {
-            setPhotoStatus(`Preparing photo ${i + 1} of ${pending.length}…`);
-            const { base64, ext } = await preparePhoto(pending[i].file);
+            setPhotoStatus(`Preparing ${pending[i].video ? "video" : "photo"} ${i + 1} of ${pending.length}…`);
+            const { base64, ext } = pending[i].video ? await prepareVideo(pending[i].file) : await preparePhoto(pending[i].file);
             changes.push({ path: `images/${folder}/${next++}.${ext}`, base64 });
         }
 
@@ -1179,12 +1370,11 @@ $("uploadButton").addEventListener("click", async () => {
         const info = { ...photoInfo, [folder]: folderEntries([...orderedPhotos(folder), ...newPaths]) };
         changes.push(photoInfoChange(info));
 
-        setPhotoStatus("Uploading to GitHub…");
-        const count = pending.length;
-        await commit(
-            `Add ${count} photo${count === 1 ? "" : "s"} to ${title} (admin page)`,
-            changes
-        );
+        const words = countWords(pending);
+        setPhotoStatus(pending.some((item) => item.video)
+            ? "Uploading to GitHub… videos can take a few minutes, keep this tab open."
+            : "Uploading to GitHub…");
+        await commit(`Add ${words} to ${title} (admin page)`, changes);
 
         pending.forEach((item) => URL.revokeObjectURL(item.preview));
         pending = [];
@@ -1198,7 +1388,7 @@ $("uploadButton").addEventListener("click", async () => {
         showChanged();
 
         setPhotoStatus(
-            `Done! ${count} photo${count === 1 ? "" : "s"} added to “${title}”. The site updates in a minute or two.`,
+            `Done! ${words} added to “${title}”. The site updates in a minute or two.`,
             "success"
         );
     }

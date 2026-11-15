@@ -15,8 +15,10 @@
 
     The admin page (admin.html) can add, edit, reorder and delete these.
 
-    Every photo in the folder is shown automatically (.jpg, .jpeg,
-    .png, .webp, .gif), so just upload pictures to the folder on GitHub.
+    Every photo and video in the folder is shown automatically (.jpg,
+    .jpeg, .png, .webp, .gif, .mp4, .webm, .mov, .m4v), so just upload
+    them to the folder on GitHub. YouTube and Vimeo videos are added as
+    links on the admin page.
 */
 
 const projects = [
@@ -93,6 +95,107 @@ const projects = [
 const GITHUB_REPO = "KarolPasko/KarolPasko.github.io";
 const GITHUB_BRANCH = "main";
 const IMAGE_TYPES = /\.(jpe?g|png|webp|gif)$/i;
+const VIDEO_TYPES = /\.(mp4|webm|mov|m4v)$/i;
+const MEDIA_TYPES = /\.(jpe?g|png|webp|gif|mp4|webm|mov|m4v)$/i;
+
+/*
+    A show's list mixes three kinds of item:
+      "images/folder/3.jpg"            a photo
+      "images/folder/4.mp4"            a video uploaded to the site
+      "https://youtu.be/…" or Vimeo    a video link (kept in photos.json)
+*/
+function isVideoFile(item) {
+    return VIDEO_TYPES.test(item);
+}
+
+function isLink(item) {
+    return /^https?:\/\//i.test(item);
+}
+
+function isPhotoItem(item) {
+    return !isLink(item) && IMAGE_TYPES.test(item);
+}
+
+/* YouTube or Vimeo link -> what's needed to play it, or null */
+function videoLink(link) {
+    let url;
+    try { url = new URL(link); } catch (error) { return null; }
+    const host = url.hostname.replace(/^(www|m)\./, "");
+
+    let id = "";
+    if (host === "youtu.be") id = url.pathname.slice(1);
+    else if (host === "youtube.com" || host === "youtube-nocookie.com") {
+        id = url.searchParams.get("v") ||
+            (url.pathname.match(/^\/(?:embed|shorts|live)\/([^/?#]+)/) || [])[1] || "";
+    }
+    id = id.split("/")[0];
+    if (/^[\w-]{6,}$/.test(id)) {
+        return {
+            site: "YouTube",
+            embed: `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`,
+            thumb: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+        };
+    }
+
+    if (host === "vimeo.com" || host === "player.vimeo.com") {
+        const parts = url.pathname.split("/").filter(Boolean);
+        const at = parts.findIndex((part) => /^\d+$/.test(part));
+        if (at >= 0) {
+            const hash = url.searchParams.get("h") || (/^[0-9a-f]{6,}$/i.test(parts[at + 1] || "") ? parts[at + 1] : "");
+            return {
+                site: "Vimeo",
+                embed: `https://player.vimeo.com/video/${parts[at]}?autoplay=1${hash ? `&h=${hash}` : ""}`,
+                thumb: ""
+            };
+        }
+    }
+    return null;
+}
+
+/* "View 4 photos", "View 3 photos and 1 video", "Coming soon" */
+function mediaCount(items) {
+    const videos = items.filter((item) => isLink(item) || isVideoFile(item)).length;
+    const photos = items.length - videos;
+    const words = [];
+    if (photos) words.push(`${photos} photo${photos === 1 ? "" : "s"}`);
+    if (videos) words.push(`${videos} video${videos === 1 ? "" : "s"}`);
+    return words.length ? `View ${words.join(" and ")}` : "Photos coming soon";
+}
+
+/* A small still for a video: the YouTube picture, the video's first frame, or a plain dark box */
+function videoStill(item, alt) {
+    const link = isLink(item) ? videoLink(item) : null;
+
+    if (link && link.thumb) {
+        const img = document.createElement("img");
+        img.src = link.thumb;
+        img.alt = alt;
+        img.loading = "lazy";
+        return img;
+    }
+
+    if (!link && isVideoFile(item)) {
+        const video = document.createElement("video");
+        video.src = `${item}#t=0.1`;
+        video.muted = true;
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.setAttribute("aria-label", alt);
+        return video;
+    }
+
+    const box = document.createElement("span");
+    box.className = "video-still-blank";
+    box.textContent = link ? `${link.site} video` : "Video";
+    return box;
+}
+
+function playMark() {
+    const mark = document.createElement("span");
+    mark.className = "play-mark";
+    mark.setAttribute("aria-hidden", "true");
+    return mark;
+}
 
 const photoCaptions = {}; // "images/folder/1.jpg" -> comment
 const photoAlts = {};     // "images/folder/1.jpg" -> description for search engines
@@ -128,7 +231,7 @@ async function getRepoImages() {
                 file.type === "blob" &&
                 parts.length === 3 &&
                 parts[0] === "images" &&
-                IMAGE_TYPES.test(parts[2])
+                MEDIA_TYPES.test(parts[2])
             ) {
                 (byFolder[parts[1]] ||= []).push(file.path);
             }
@@ -156,8 +259,11 @@ async function getImagesByFolder() {
     const folders = new Set([...Object.keys(photoInfo), ...Object.keys(repoImages || {})]);
 
     for (const folder of folders) {
-        const listed = (photoInfo[folder] || []).map((entry) => {
-            const path = `images/${folder}/${entry.file}`;
+        const entries = (photoInfo[folder] || []).filter((entry) => entry.file || videoLink(entry.link || ""));
+        const links = entries.filter((entry) => entry.link).map((entry) => entry.link);
+
+        const listed = entries.map((entry) => {
+            const path = entry.link || `images/${folder}/${entry.file}`;
             if (entry.caption) photoCaptions[path] = entry.caption;
             if (entry.alt) photoAlts[path] = entry.alt;
             return path;
@@ -170,7 +276,7 @@ async function getImagesByFolder() {
 
         const inRepo = repoImages[folder] || [];
         byFolder[folder] = [
-            ...listed.filter((path) => inRepo.includes(path)),
+            ...listed.filter((path) => inRepo.includes(path) || links.includes(path)),
             ...inRepo.filter((path) => !listed.includes(path))
         ];
     }
@@ -197,12 +303,22 @@ async function loadProjects() {
         card.type = "button";
         card.className = "card project-card";
 
-        if (images.length > 0) {
-            const cover = document.createElement("img");
-            cover.src = images[0];
-            cover.alt = photoAlts[images[0]] || `${project.title}, lighting by Karol Pasko`;
-            cover.loading = "lazy";
-            card.appendChild(cover);
+        /* The cover is the first photo; a show with only videos uses the first video */
+        const coverItem = images.find(isPhotoItem) || images[0];
+        if (coverItem) {
+            const coverAlt = photoAlts[coverItem] || `${project.title}, lighting by Karol Pasko`;
+            if (isPhotoItem(coverItem)) {
+                const cover = document.createElement("img");
+                cover.src = coverItem;
+                cover.alt = coverAlt;
+                cover.loading = "lazy";
+                card.appendChild(cover);
+            } else {
+                const cover = document.createElement("span");
+                cover.className = "project-video-cover";
+                cover.append(videoStill(coverItem, coverAlt), playMark());
+                card.appendChild(cover);
+            }
         }
 
         const role = document.createElement("p");
@@ -217,10 +333,7 @@ async function loadProjects() {
 
         const count = document.createElement("p");
         count.className = "project-count";
-        count.textContent =
-            images.length === 0 ? "Photos coming soon"
-            : images.length === 1 ? "View 1 photo"
-            : `View ${images.length} photos`;
+        count.textContent = mediaCount(images);
 
         card.append(role, title, description);
 
@@ -252,6 +365,8 @@ const gallery = document.getElementById("gallery");
 const galleryGrid = document.getElementById("galleryGrid");
 const lightbox = document.getElementById("lightbox");
 const lightboxImage = document.getElementById("lightboxImage");
+const lightboxVideo = document.getElementById("lightboxVideo");
+const lightboxFrame = document.getElementById("lightboxFrame");
 const lightboxCaption = document.getElementById("lightboxCaption");
 
 let currentImages = [];
@@ -281,12 +396,20 @@ function openGallery(project, images) {
         thumb.type = "button";
         thumb.className = "gallery-thumb";
 
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = photoAlts[src] || photoCaptions[src] || `${project.title}, lighting by Karol Pasko, photo ${index + 1}`;
-        img.loading = "lazy";
+        const alt = photoAlts[src] || photoCaptions[src] || `${project.title}, lighting by Karol Pasko, ${isPhotoItem(src) ? "photo" : "video"} ${index + 1}`;
 
-        thumb.appendChild(img);
+        if (isPhotoItem(src)) {
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = alt;
+            img.loading = "lazy";
+            thumb.appendChild(img);
+        } else {
+            thumb.classList.add("gallery-thumb-video");
+            thumb.setAttribute("aria-label", `Play ${alt}`);
+            thumb.append(videoStill(src, alt), playMark());
+        }
+
         thumb.addEventListener("click", () => openLightbox(index));
         galleryGrid.appendChild(thumb);
     });
@@ -300,11 +423,36 @@ function closeGallery() {
     document.body.style.overflow = "";
 }
 
+/* Stops any video playing in the viewer */
+function stopVideo() {
+    lightboxVideo.pause();
+    lightboxVideo.removeAttribute("src");
+    lightboxVideo.load();
+    lightboxFrame.src = "about:blank";
+}
+
 function openLightbox(index) {
     currentIndex = (index + currentImages.length) % currentImages.length;
-    lightboxImage.src = currentImages[currentIndex];
-    const comment = photoCaptions[currentImages[currentIndex]];
-    lightboxImage.alt = photoAlts[currentImages[currentIndex]] || comment || `${currentTitle} photo ${currentIndex + 1}`;
+    const item = currentImages[currentIndex];
+    const comment = photoCaptions[item];
+    const link = isLink(item) ? videoLink(item) : null;
+
+    stopVideo();
+    lightboxImage.hidden = !isPhotoItem(item);
+    lightboxVideo.hidden = !(!link && isVideoFile(item));
+    lightboxFrame.hidden = !link;
+
+    if (link) {
+        lightboxFrame.src = link.embed;
+        lightboxFrame.title = comment || `${currentTitle} video`;
+    } else if (isVideoFile(item)) {
+        lightboxVideo.src = item;
+        lightboxVideo.play().catch(() => {}); // the controls are there if the browser blocks autoplay
+    } else {
+        lightboxImage.src = item;
+        lightboxImage.alt = photoAlts[item] || comment || `${currentTitle} photo ${currentIndex + 1}`;
+    }
+
     lightboxCaption.textContent =
         `${currentTitle}  ·  ${currentIndex + 1} / ${currentImages.length}`;
     if (comment) {
@@ -316,6 +464,7 @@ function openLightbox(index) {
 }
 
 function closeLightbox() {
+    stopVideo();
     lightbox.classList.remove("active");
 }
 
@@ -337,6 +486,7 @@ lightbox.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
     if (lightbox.classList.contains("active")) {
         if (event.key === "Escape") closeLightbox();
+        if (event.target === lightboxVideo) return; // arrows skip through the video instead
         if (event.key === "ArrowLeft") openLightbox(currentIndex - 1);
         if (event.key === "ArrowRight") openLightbox(currentIndex + 1);
     } else if (event.key === "Escape") {
