@@ -23,6 +23,16 @@
 
 const projects = [
     {
+        folder: "forged-bonfire-night-special-event-pure-global",
+        title: "FORGED – Bonfire Night Special Event | Pure Global",
+        type: "Lighting Design, Programming and operation",
+        date: "November 2026",
+        venue: "Keighley",
+        description:
+            "Lighting Design, Programming and operation",
+        notes: "I worked on the lighting and special effects for Pure Global’s Bonfire Night event, FORGED.\n\nMy role involved designing and programming a lighting cue stack across five separate music tracks, each approximately five minutes long. I used intelligent lighting to create different atmospheres throughout the event, setting a mood with atmospheric lighting as guests arrived before transitioning into more vibrant, upbeat lighting during the performances to enhance the energy and atmosphere.\n\nAlongside programming the lighting, I was responsible for the live operation of the lighting and special effects on the nights of the event. This included controlling the cold sparks, vertical jets and low fog, coordinating these effects with the music and lighting cues to create an engaging and synchronised experience for the audience.\n\nhttps://pureglobal.co.uk/"
+    },
+    {
         folder: "tallent-show",
         title: "Tallent Show",
         type: "Lighting Design, Lighting operation",
