@@ -8,6 +8,15 @@
     <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-2.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/hero/1792588473855-3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/about/1792588092756.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/7.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/8.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/9.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/tallent-show/3.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/tallent-show/1.jpg</image:loc></image:image>
     <image:image><image:loc>https://karolpasko.github.io/images/tallent-show/2.jpg</image:loc></image:image>
@@ -61,6 +70,18 @@
   </url>
   <url>
     <loc>https://karolpasko.github.io/how-light-travels.html</loc>
+  </url>
+  <url>
+    <loc>https://karolpasko.github.io/shows/forged-bonfire-night-special-event-pure-global.html</loc>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/1.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/2.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/3.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/4.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/5.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/6.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/7.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/8.jpg</image:loc></image:image>
+    <image:image><image:loc>https://karolpasko.github.io/images/forged-bonfire-night-special-event-pure-global/9.jpg</image:loc></image:image>
   </url>
   <url>
     <loc>https://karolpasko.github.io/shows/tallent-show.html</loc>
