@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
 
@@ -311,6 +311,75 @@
         <button id="undoEquipmentButton" type="button" class="button button-ghost" hidden>Undo changes</button>
     </div>
     <p id="equipmentStatus" class="form-status"></p>
+</section>
+
+<!-- =========================
+     DEVELOPMENT PROJECTS
+========================= -->
+
+<section id="devPanel" class="section admin-panel" hidden>
+    <p class="small-title">Development</p>
+    <h2>Development projects</h2>
+    <p class="admin-help">
+        These pages aren't linked from anywhere on the site and are hidden from
+        Google. Send people the link instead:
+        <a id="devLink" href="development/" target="_blank" rel="noopener">karolpasko.github.io/development/</a>
+    </p>
+
+    <h3 class="admin-subtitle">Log entries</h3>
+    <p class="admin-help">
+        Nothing shows on a log until you accept it. You also get an email for
+        each new entry with Accept and Reject buttons.
+    </p>
+    <div class="admin-row dev-admin-filter">
+        <select id="devStatusFilter">
+            <option value="pending">Waiting for you</option>
+            <option value="accepted">Accepted (on the site)</option>
+            <option value="rejected">Rejected</option>
+        </select>
+        <button id="devRefresh" type="button" class="button button-ghost">Refresh</button>
+    </div>
+    <div id="devEntries" class="dev-admin-entries"></div>
+    <p id="devEntriesStatus" class="form-status"></p>
+
+    <h3 class="admin-subtitle">Projects</h3>
+    <p class="admin-help">
+        Each project gets its own log page. Untick <strong>Taking new entries</strong>
+        to keep a log readable but stop new feedback.
+    </p>
+    <div id="devProjectList" class="admin-equipment"></div>
+    <div class="admin-actions">
+        <button id="addDevProject" type="button" class="button button-ghost">Add a project</button>
+        <button id="saveDevProjects" type="button" class="button" disabled>Save projects</button>
+        <button id="undoDevProjects" type="button" class="button button-ghost" hidden>Undo changes</button>
+    </div>
+    <p id="devProjectsStatus" class="form-status"></p>
+
+    <h3 class="admin-subtitle">Log connection</h3>
+    <p id="devConnected" class="admin-help" hidden>
+        Connected. Entries are kept in a Google Sheet called
+        <em>KLD developer log</em> in your Google Drive.
+    </p>
+    <p id="devNotConnected" class="admin-help">
+        The logs need a small free Google Apps Script to take in entries and
+        email you. It only takes a few minutes, once.
+    </p>
+    <details id="devSetup" class="admin-steps">
+        <summary>How to set it up</summary>
+        <ol>
+            <li>Sign in to Google with the account you want to own the log, then open <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener">Apps Script &rarr; New project</a>.</li>
+            <li>Delete what's in the editor, click <button id="copyDevScript" type="button" class="button button-ghost dev-inline-button">Copy the script</button> and paste it in. Click the save icon.</li>
+            <li>In the bar at the top pick <strong>setup</strong> and press <strong>Run</strong>. Google asks for permission: choose your account, then <strong>Advanced &rarr; Go to project (unsafe)</strong> &rarr; <strong>Allow</strong>. It says unsafe only because you wrote the script yourself rather than Google checking it.</li>
+            <li>Click <strong>Deploy &rarr; New deployment</strong>, click the cog and pick <strong>Web app</strong>. Set <strong>Execute as</strong> to <strong>Me</strong> and <strong>Who has access</strong> to <strong>Anyone</strong>, then <strong>Deploy</strong>.</li>
+            <li>Copy the <strong>Web app URL</strong> (it ends in <code>/exec</code>), paste it below and click <strong>Save</strong>.</li>
+        </ol>
+        <p>If you change the script later, use <strong>Deploy &rarr; Manage deployments &rarr; edit &rarr; New version</strong> so the URL stays the same.</p>
+    </details>
+    <form id="devEndpointForm" class="admin-row dev-endpoint">
+        <input id="devEndpointInput" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+        <button type="submit" class="button button-ghost">Save</button>
+    </form>
+    <p id="devEndpointStatus" class="form-status"></p>
 </section>
 
 <!-- =========================

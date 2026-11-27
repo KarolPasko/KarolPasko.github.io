@@ -3711,3 +3711,234 @@ nav ul a {
         gap: 8px;
     }
 }
+
+
+/* =========================
+   DEVELOPMENT (development/, only reachable by link)
+========================= */
+
+.dev-hero {
+    min-height: 44vh;
+}
+
+.dev-hero .hero-lead {
+    margin-bottom: 0;
+}
+
+.dev-back {
+    margin-bottom: 28px;
+}
+
+.dev-back a {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.dev-back a:hover {
+    color: var(--accent);
+}
+
+.dev-empty {
+    color: var(--muted);
+}
+
+.dev-projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    max-width: 1100px;
+}
+
+.dev-project {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+    padding: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    text-decoration: none;
+}
+
+.dev-project:hover {
+    border-color: var(--line);
+}
+
+.dev-project h2 {
+    font-size: 28px;
+}
+
+.dev-project p {
+    color: var(--muted);
+}
+
+.dev-project-link {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.dev-log-section {
+    max-width: 100%;
+}
+
+.dev-log-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 820px;
+    margin-bottom: 32px;
+}
+
+.dev-log-head h2 {
+    font-size: clamp(28px, 4vw, 40px);
+}
+
+.dev-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.dev-filter select {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+}
+
+.dev-log {
+    list-style: none;
+    max-width: 820px;
+    display: grid;
+    gap: 0;
+}
+
+.dev-entry {
+    padding: 26px 0;
+    border-top: 1px solid var(--border);
+}
+
+.dev-entry:last-child {
+    border-bottom: 1px solid var(--border);
+}
+
+.dev-entry-meta {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.dev-entry-meta strong {
+    color: var(--text);
+}
+
+.dev-entry-text,
+.dev-reply p:last-child {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.dev-reply {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-tint);
+}
+
+.dev-reply-who {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+    .dev-project {
+        padding: 24px;
+    }
+}
+
+/* Development projects on the admin page */
+.admin-subtitle {
+    font-size: 22px;
+    margin: 40px 0 10px;
+}
+
+.dev-admin-filter select {
+    flex: 1 1 260px;
+}
+
+.dev-admin-entries {
+    display: grid;
+    gap: 12px;
+    margin: 20px 0 0;
+}
+
+.dev-admin-entry {
+    display: grid;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+}
+
+.dev-admin-entry .dev-entry-meta {
+    margin-bottom: 0;
+}
+
+.dev-admin-entry textarea {
+    width: 100%;
+    margin-top: 6px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 400;
+    resize: vertical;
+}
+
+.dev-admin-entry > .button,
+.dev-admin-entry .admin-equipment-tools .button {
+    justify-self: start;
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.dev-admin-project {
+    grid-template-columns: 1fr;
+}
+
+.admin .dev-admin-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.admin .dev-admin-check input {
+    width: auto;
+}
+
+.dev-admin-link {
+    margin-bottom: 12px;
+    overflow-wrap: anywhere;
+}
+
+.dev-admin-link a {
+    color: var(--accent);
+}
+
+.admin .dev-inline-button {
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.dev-endpoint {
+    margin-top: 16px;
+}
