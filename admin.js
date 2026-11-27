@@ -144,8 +144,12 @@ async function connect(newToken) {
         $("heroPanel").hidden = false;
         $("aboutPanel").hidden = false;
         $("equipmentPanel").hidden = false;
+        $("devPanel").hidden = false;
 
-        await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos(), loadEquipment()]);
+        /* The Accept/Reject emails link to #devPanel */
+        if (location.hash === "#devPanel") $("devPanel").scrollIntoView();
+
+        await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos(), loadEquipment(), loadDevProjects()]);
     }
 
     catch (error) {
@@ -2117,6 +2121,400 @@ $("saveEquipmentButton").addEventListener("click", async () => {
         setEquipmentStatus(`Couldn't save: ${error.message}`, "error");
         $("saveEquipmentButton").disabled = false;
     }
+});
+
+
+/* =========================
+   DEVELOPMENT PROJECTS
+   data/dev-projects.json, read by development/devlog.js:
+   { endpoint: "<Apps Script web app URL>", projects: [{ id, name, description, open }] }
+   Log entries live in a Google Sheet behind that web app
+   (scripts/devlog-apps-script.gs). It checks this page's GitHub token
+   before it lets the admin calls through.
+========================= */
+
+const DEV_PROJECTS = "data/dev-projects.json";
+
+let devData = { endpoint: "", projects: [] }; // what's on the site now
+let devProjects = [];                          // being edited
+let devEntries = [];                           // from the Apps Script
+
+async function loadDevProjects() {
+    try {
+        devData = JSON.parse(await readText(DEV_PROJECTS));
+    } catch (error) {
+        devData = { endpoint: "", projects: [] };
+    }
+    devData.projects = devData.projects || [];
+    devData.endpoint = devData.endpoint || "";
+
+    $("devEndpointInput").value = devData.endpoint;
+    showDevConnection();
+    resetDevProjects();
+    loadDevEntries();
+}
+
+function showDevConnection() {
+    const connected = Boolean(devData.endpoint);
+    $("devConnected").hidden = !connected;
+    $("devNotConnected").hidden = connected;
+    $("devSetup").open = !connected;
+}
+
+async function saveDevData(next, message) {
+    const text = JSON.stringify(next, null, 2) + "\n";
+    await commit(message, [{ path: DEV_PROJECTS, base64: textToBase64(text) }]);
+    devData = next;
+}
+
+function devProjectName(id) {
+    const project = devData.projects.find((item) => item.id === id);
+    return project ? project.name : id;
+}
+
+/* ---- Talking to the Apps Script ---- */
+
+async function devAdmin(op, extra = {}) {
+    if (!devData.endpoint) throw new Error("The log isn't connected yet (see Log connection below).");
+    const response = await fetch(devData.endpoint, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin", token, op, ...extra })
+    });
+    const data = await response.json().catch(() => ({ ok: false, error: "The script didn't reply properly. Check it's deployed as a web app with access for Anyone." }));
+    if (!data.ok) throw new Error(data.error || "The script refused that.");
+    return data;
+}
+
+function setDevEntriesStatus(text, kind = "") {
+    $("devEntriesStatus").className = `form-status ${kind}`;
+    $("devEntriesStatus").textContent = text;
+}
+
+async function loadDevEntries() {
+    if (!devData.endpoint) {
+        $("devEntries").innerHTML = "";
+        setDevEntriesStatus("Entries will show here once the log is connected.");
+        return;
+    }
+
+    setDevEntriesStatus("Loading…");
+    try {
+        devEntries = (await devAdmin("list")).entries || [];
+        setDevEntriesStatus("");
+        renderDevEntries();
+    } catch (error) {
+        setDevEntriesStatus(`Couldn't load entries: ${error.message}`, "error");
+    }
+}
+
+function devButton(label, className, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `button ${className}`;
+    button.textContent = label;
+    button.addEventListener("click", onClick);
+    return button;
+}
+
+async function devAction(op, entry, extra, done) {
+    setDevEntriesStatus("Saving…");
+    try {
+        await devAdmin(op, { id: entry.id, ...extra });
+        done();
+        setDevEntriesStatus("Saved.", "success");
+        renderDevEntries();
+    } catch (error) {
+        setDevEntriesStatus(`Couldn't save: ${error.message}`, "error");
+    }
+}
+
+function renderDevEntries() {
+    const status = $("devStatusFilter").value;
+    const list = $("devEntries");
+    list.innerHTML = "";
+
+    const pending = devEntries.filter((entry) => entry.status === "pending").length;
+    $("devStatusFilter").options[0].textContent = `Waiting for you (${pending})`;
+
+    const shown = devEntries.filter((entry) => entry.status === status);
+    if (shown.length === 0) {
+        list.innerHTML = `<p class="admin-help">${status === "pending" ? "Nothing waiting. You're up to date." : "None yet."}</p>`;
+        return;
+    }
+
+    shown.forEach((entry) => {
+        const card = document.createElement("div");
+        card.className = "dev-admin-entry";
+
+        const meta = document.createElement("p");
+        meta.className = "dev-entry-meta";
+        const when = new Date(entry.submitted);
+        const strong = document.createElement("strong");
+        strong.textContent = `${devProjectName(entry.project)}, version ${entry.version}`;
+        meta.append(strong, ` · ${entry.developer}`);
+        if (!isNaN(when)) meta.append(` · ${when.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}`);
+
+        const text = document.createElement("p");
+        text.className = "dev-entry-text";
+        text.textContent = entry.feedback;
+
+        card.append(meta, text);
+
+        /* Reply, shown under the entry on the site */
+        if (entry.status === "accepted") {
+            const label = document.createElement("label");
+            label.className = "admin-label";
+            label.textContent = "Your reply (optional, shown under it on the log)";
+            const reply = document.createElement("textarea");
+            reply.rows = 2;
+            reply.maxLength = 2000;
+            reply.value = entry.reply || "";
+            label.appendChild(reply);
+            card.appendChild(label);
+
+            const saveReply = devButton("Save reply", "button-ghost", () =>
+                devAction("reply", entry, { reply: reply.value }, () => { entry.reply = reply.value.trim(); }));
+            reply.addEventListener("input", () => { saveReply.hidden = reply.value.trim() === (entry.reply || ""); });
+            saveReply.hidden = true;
+            card.appendChild(saveReply);
+        }
+
+        const tools = document.createElement("div");
+        tools.className = "admin-equipment-tools";
+
+        if (entry.status !== "accepted") {
+            tools.appendChild(devButton("Accept", "", () =>
+                devAction("accept", entry, {}, () => { entry.status = "accepted"; })));
+        }
+        if (entry.status !== "rejected") {
+            tools.appendChild(devButton(entry.status === "accepted" ? "Take off the log" : "Reject", "button-ghost", () =>
+                devAction("reject", entry, {}, () => { entry.status = "rejected"; })));
+        }
+        tools.appendChild(devButton("Delete", "button-danger", () => {
+            if (!confirm(`Delete this entry from ${entry.developer} for good?`)) return;
+            devAction("delete", entry, {}, () => { devEntries = devEntries.filter((item) => item !== entry); });
+        }));
+
+        card.appendChild(tools);
+        list.appendChild(card);
+    });
+}
+
+$("devStatusFilter").addEventListener("change", renderDevEntries);
+$("devRefresh").addEventListener("click", loadDevEntries);
+
+/* ---- Projects ---- */
+
+function setDevProjectsStatus(text, kind = "") {
+    $("devProjectsStatus").className = `form-status ${kind}`;
+    $("devProjectsStatus").textContent = text;
+}
+
+function setDevProjectsDirty(dirty) {
+    $("saveDevProjects").disabled = !dirty;
+    $("undoDevProjects").hidden = !dirty;
+}
+
+function resetDevProjects() {
+    devProjects = devData.projects.map((project) => ({ ...project, saved: true }));
+    setDevProjectsDirty(false);
+    renderDevProjects();
+}
+
+function moveDevProject(from, to) {
+    if (to < 0 || to >= devProjects.length) return;
+    devProjects.splice(to, 0, devProjects.splice(from, 1)[0]);
+    setDevProjectsDirty(true);
+    renderDevProjects();
+}
+
+function devLogUrl(id) {
+    return `https://karolpasko.github.io/development/log.html?project=${encodeURIComponent(id)}`;
+}
+
+function renderDevProjects() {
+    const list = $("devProjectList");
+    list.innerHTML = "";
+
+    if (devProjects.length === 0) {
+        list.innerHTML = '<p class="admin-help">No projects yet. Click <strong>Add a project</strong>.</p>';
+        return;
+    }
+
+    devProjects.forEach((project, index) => {
+        const row = document.createElement("div");
+        row.className = "admin-equipment-item dev-admin-project";
+
+        const fields = document.createElement("div");
+        fields.className = "admin-equipment-fields";
+
+        const nameLabel = document.createElement("label");
+        nameLabel.className = "admin-label";
+        nameLabel.textContent = "Name";
+        const name = document.createElement("input");
+        name.type = "text";
+        name.value = project.name || "";
+        name.placeholder = "e.g. KLD Console";
+        name.addEventListener("input", () => {
+            project.name = name.value;
+            /* The link only follows the name until it's been saved, so sent links keep working */
+            if (!project.saved) {
+                project.id = slugify(name.value);
+                linkText.textContent = project.id ? devLogUrl(project.id) : "";
+            }
+            setDevProjectsDirty(true);
+        });
+        nameLabel.appendChild(name);
+
+        const descLabel = document.createElement("label");
+        descLabel.className = "admin-label";
+        descLabel.textContent = "Description";
+        const desc = document.createElement("textarea");
+        desc.rows = 3;
+        desc.value = project.description || "";
+        desc.placeholder = "What it is and what kind of feedback you're after";
+        desc.addEventListener("input", () => {
+            project.description = desc.value;
+            setDevProjectsDirty(true);
+        });
+        descLabel.appendChild(desc);
+
+        const openLabel = document.createElement("label");
+        openLabel.className = "dev-admin-check";
+        const open = document.createElement("input");
+        open.type = "checkbox";
+        open.checked = project.open !== false;
+        open.addEventListener("change", () => {
+            project.open = open.checked;
+            setDevProjectsDirty(true);
+        });
+        openLabel.append(open, " Taking new entries");
+
+        const link = document.createElement("p");
+        link.className = "admin-help dev-admin-link";
+        const linkText = document.createElement("a");
+        linkText.target = "_blank";
+        linkText.rel = "noopener";
+        linkText.textContent = project.id ? devLogUrl(project.id) : "";
+        if (project.saved) linkText.href = devLogUrl(project.id);
+        link.append("Link: ", linkText);
+        if (!project.saved) link.append(" (works once saved)");
+
+        const tools = document.createElement("div");
+        tools.className = "admin-equipment-tools";
+
+        const up = devButton("▲ Up", "button-ghost", () => moveDevProject(index, index - 1));
+        up.disabled = index === 0;
+        const down = devButton("▼ Down", "button-ghost", () => moveDevProject(index, index + 1));
+        down.disabled = index === devProjects.length - 1;
+        const remove = devButton("Remove", "button-danger", () => {
+            if (!confirm(`Remove ${project.name || "this project"}? Its log page will stop working. Entries stay in your Google Sheet.`)) return;
+            devProjects.splice(index, 1);
+            setDevProjectsDirty(true);
+            renderDevProjects();
+        });
+        tools.append(up, down, remove);
+
+        fields.append(nameLabel, descLabel, openLabel, link, tools);
+        row.appendChild(fields);
+        list.appendChild(row);
+    });
+}
+
+$("addDevProject").addEventListener("click", () => {
+    devProjects.push({ id: "", name: "", description: "", open: true, saved: false });
+    setDevProjectsDirty(true);
+    renderDevProjects();
+    const inputs = $("devProjectList").querySelectorAll("input[type=text]");
+    inputs[inputs.length - 1].focus();
+});
+
+$("undoDevProjects").addEventListener("click", () => {
+    resetDevProjects();
+    setDevProjectsStatus("");
+});
+
+$("saveDevProjects").addEventListener("click", async () => {
+    const projects = devProjects.map((project) => ({
+        id: project.id,
+        name: (project.name || "").trim(),
+        description: (project.description || "").trim(),
+        open: project.open !== false
+    }));
+
+    if (projects.some((project) => !project.name || !project.id)) {
+        setDevProjectsStatus("Every project needs a name.", "error");
+        return;
+    }
+    if (new Set(projects.map((project) => project.id)).size !== projects.length) {
+        setDevProjectsStatus("Two projects have the same name. Give one a different name.", "error");
+        return;
+    }
+
+    $("saveDevProjects").disabled = true;
+    setDevProjectsStatus("Saving to GitHub…");
+    try {
+        await saveDevData({ ...devData, projects }, "Update development projects (admin page)");
+        resetDevProjects();
+        renderDevEntries();
+        setDevProjectsStatus("Saved. The development pages update in a minute or two.", "success");
+    } catch (error) {
+        setDevProjectsStatus(`Couldn't save: ${error.message}`, "error");
+        $("saveDevProjects").disabled = false;
+    }
+});
+
+/* ---- Connection ---- */
+
+$("devEndpointForm").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const endpoint = $("devEndpointInput").value.trim();
+    const status = $("devEndpointStatus");
+
+    if (endpoint && !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(endpoint)) {
+        status.className = "form-status error";
+        status.textContent = "That doesn't look like an Apps Script web app URL. It should start with https://script.google.com/macros/s/ and end in /exec.";
+        return;
+    }
+
+    status.className = "form-status";
+    status.textContent = "Checking the script…";
+    try {
+        if (endpoint) {
+            const reply = await fetch(`${endpoint}?action=ping`).then((response) => response.json());
+            if (!reply.ok) throw new Error(reply.error || "The script didn't answer.");
+        }
+        status.textContent = "Saving to GitHub…";
+        await saveDevData({ ...devData, endpoint }, "Connect development logs (admin page)");
+        showDevConnection();
+        loadDevEntries();
+        status.className = "form-status success";
+        status.textContent = endpoint ? "Connected. The log pages switch on in a minute or two." : "Disconnected.";
+    } catch (error) {
+        status.className = "form-status error";
+        status.textContent = `Couldn't connect: ${error.message} Check the deployment is a Web app with access for Anyone.`;
+    }
+});
+
+$("copyDevScript").addEventListener("click", async () => {
+    const button = $("copyDevScript");
+    try {
+        let code;
+        try {
+            code = await readText("scripts/devlog-apps-script.gs");
+        } catch (error) {
+            code = await fetch("scripts/devlog-apps-script.gs", { cache: "no-store" }).then((response) => {
+                if (!response.ok) throw new Error("not found");
+                return response.text();
+            });
+        }
+        await navigator.clipboard.writeText(code);
+        button.textContent = "Copied";
+    } catch (error) {
+        window.open(`https://github.com/${REPO}/blob/${BRANCH}/scripts/devlog-apps-script.gs`, "_blank", "noopener");
+        button.textContent = "Opened it on GitHub instead";
+    }
+    setTimeout(() => { button.textContent = "Copy the script"; }, 3000);
 });
 
 

@@ -1,0 +1,11 @@
+{
+  "endpoint": "",
+  "projects": [
+    {
+      "id": "kld-console",
+      "name": "KLD Console",
+      "description": "KLD Console is an app I’m working on. If you’ve been trying it out, tell me what works, what doesn’t and what you’d like to see, and say which version you were using.",
+      "open": true
+    }
+  ]
+}
