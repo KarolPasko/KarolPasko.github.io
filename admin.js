@@ -136,19 +136,10 @@ async function connect(newToken) {
         try { localStorage.setItem(TOKEN_KEY, token); } catch (error) { /* private window */ }
 
         $("signIn").hidden = true;
-        $("statsPanel").hidden = false;
+        $("adminNav").hidden = false;
+        $("adminMain").classList.add("signed-in");
+        showPage();
         loadStats();
-        $("photosPanel").hidden = false;
-        $("enquiriesPanel").hidden = false;
-        $("worksPanel").hidden = false;
-        $("heroPanel").hidden = false;
-        $("aboutPanel").hidden = false;
-        $("equipmentPanel").hidden = false;
-        $("devPanel").hidden = false;
-        $("accountsPanel").hidden = false;
-
-        /* The Accept/Reject emails link to #devPanel */
-        if (location.hash === "#devPanel") $("devPanel").scrollIntoView();
 
         await Promise.all([loadShows(), loadEnquirySettings(), loadSitePhotos(), loadEquipment(), loadDevProjects()]);
     }
@@ -167,6 +158,60 @@ $("tokenForm").addEventListener("submit", (event) => {
     event.preventDefault();
     connect($("tokenInput").value.trim());
 });
+
+/* =========================
+   PAGES
+   Each part of the admin is its own page (admin.html#shows,
+   admin.html#hire, …). They share one sign-in and load once, so
+   switching pages keeps anything you haven't saved yet.
+========================= */
+
+const DEFAULT_PAGE = "visitors";
+
+function pageFromHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return DEFAULT_PAGE;
+    if (document.querySelector(`.admin-page[data-page="${CSS.escape(id)}"]`)) return id;
+
+    /* Older links name a section, e.g. the Accept/Reject emails link to #devPanel */
+    const section = document.getElementById(id);
+    const page = section && section.closest(".admin-page");
+    return page ? page.dataset.page : DEFAULT_PAGE;
+}
+
+function showPage() {
+    if (!token) return;
+    const id = pageFromHash();
+    let title = "";
+
+    document.querySelectorAll(".admin-page").forEach((page) => {
+        const open = page.dataset.page === id;
+        page.hidden = !open;
+        if (open) title = page.querySelector("h1").textContent;
+    });
+    const strip = $("adminNav");
+    strip.querySelectorAll("a").forEach((link) => {
+        if (link.dataset.page !== id) return link.removeAttribute("aria-current");
+        link.setAttribute("aria-current", "page");
+
+        /* On phones the pages are a row you can swipe: keep this one in view */
+        const box = strip.getBoundingClientRect();
+        const at = link.getBoundingClientRect();
+        if (at.left < box.left || at.right > box.right) {
+            strip.scrollLeft += at.left - box.left - 16;
+        }
+    });
+
+    document.title = `${title} | Admin | Karol Pasko Technical`;
+    window.scrollTo(0, 0);
+}
+
+window.addEventListener("hashchange", showPage);
+
+function goToPage(id) {
+    if (location.hash === `#${id}`) showPage();
+    else location.hash = id;
+}
 
 $("signOut").addEventListener("click", () => {
     try { localStorage.removeItem(TOKEN_KEY); } catch (error) { /* ignore */ }
@@ -241,6 +286,16 @@ function showChanged() {
     setOrderStatus("");
     startEditing();
     updateUploadButton();
+}
+
+/* From the Shows page: open this show on the Photos and videos page */
+function openShowPhotos(folder) {
+    if (folder !== currentShow) {
+        if (editingDirty && !confirm("You have unsaved changes to the photo order or comments. Discard them?")) return;
+        $("showSelect").value = folder;
+        showChanged();
+    }
+    goToPage("photos");
 }
 
 let currentShow = "";
@@ -793,7 +848,13 @@ function renderShowOrder() {
         later.addEventListener("click", () => moveShow(index, index + 1));
 
         moves.append(earlier, later);
-        tile.append(picture, label, moves, edit);
+        const photos = document.createElement("button");
+        photos.type = "button";
+        photos.className = "admin-show-edit";
+        photos.textContent = "Photos and videos";
+        photos.addEventListener("click", () => openShowPhotos(folder));
+
+        tile.append(picture, label, moves, edit, photos);
         grid.appendChild(tile);
     });
 }
