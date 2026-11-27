@@ -154,6 +154,7 @@
     const form = $("checkoutForm");
     const status = $("checkoutStatus");
     const sendButton = $("sendButton");
+    if (typeof KLD !== "undefined") KLD.prefill(form);
 
     async function send(order) {
         const fields = {
@@ -257,6 +258,25 @@
 
         try {
             await send(order);
+            if (typeof KLD !== "undefined") {
+                KLD.recordEnquiry({
+                    name: order.name,
+                    email: order.email,
+                    kind: `Hire enquiry ${order.ref}`,
+                    details: [
+                        `Phone: ${order.phone || "-"}`,
+                        `Organisation: ${order.organisation || "-"}`,
+                        `Venue: ${order.venue}`,
+                        `Hire dates: ${datesText(order.dates)}`,
+                        `How they want it: ${order.service}`,
+                        "",
+                        "Equipment:",
+                        equipmentText(order.entries),
+                        "",
+                        order.message || ""
+                    ].join("\n").trim()
+                });
+            }
             try { sessionStorage.setItem(LAST_KEY, JSON.stringify(order)); } catch (error) { /* ignore */ }
             Basket.clear();
             form.reset();
