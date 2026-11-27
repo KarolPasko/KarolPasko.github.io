@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body id="top">
 
@@ -96,11 +96,11 @@
 
     <!-- Step 2: contact details, sends the enquiry -->
     <div id="stepDetails" class="checkout-step" hidden>
-        <h1>Your details</h1>
+        <h1>About the event</h1>
 
         <div class="checkout-layout">
             <form id="checkoutForm" class="checkout-form" novalidate>
-                <div class="form-row">
+                <div class="form-row" data-contact>
                     <label>Name
                         <input type="text" name="name" autocomplete="name" required>
                     </label>
@@ -109,7 +109,7 @@
                     </label>
                 </div>
                 <div class="form-row">
-                    <label>Phone
+                    <label data-contact>Phone
                         <input type="tel" name="phone" autocomplete="tel">
                     </label>
                     <label>Organisation (optional)
@@ -190,7 +190,8 @@
 <script src="site-config.js"></script>
 <script src="basket.js"></script>
 <script src="account-client.js"></script>
-<script src="checkout.js?v=3"></script>
+<script src="account-gate.js"></script>
+<script src="checkout.js?v=4"></script>
 <script src="counter.js"></script>
 </body>
 </html>

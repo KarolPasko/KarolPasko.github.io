@@ -92,7 +92,9 @@ function saveToAccount(data) {
     });
 }
 
-if (typeof KLD !== "undefined") KLD.prefill(enquiryForm);
+/* Sending needs an account: account-gate.js swaps the name and email for a sign-in */
+if (typeof AccountGate !== "undefined") AccountGate.attach(enquiryForm);
+else if (typeof KLD !== "undefined") KLD.prefill(enquiryForm);
 
 enquiryForm.addEventListener("submit", async (event) => {
     event.preventDefault();

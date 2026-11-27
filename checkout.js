@@ -154,7 +154,9 @@
     const form = $("checkoutForm");
     const status = $("checkoutStatus");
     const sendButton = $("sendButton");
-    if (typeof KLD !== "undefined") KLD.prefill(form);
+    /* Sending needs an account: account-gate.js swaps the contact details for a sign-in */
+    if (typeof AccountGate !== "undefined") AccountGate.attach(form);
+    else if (typeof KLD !== "undefined") KLD.prefill(form);
 
     async function send(order) {
         const fields = {
