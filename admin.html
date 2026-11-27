@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=17">
+    <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 
@@ -26,7 +26,7 @@
     </nav>
 </header>
 
-<main class="admin">
+<main id="adminMain" class="admin">
 
 <!-- =========================
      SIGN IN
@@ -59,16 +59,34 @@
     </details>
 </section>
 
+
+<div id="adminNav" class="admin-sidebar" role="navigation" aria-label="Admin pages" hidden>
+    <ul>
+        <li><a href="#visitors" data-page="visitors">Visitors</a></li>
+        <li><a href="#shows" data-page="shows">Shows</a></li>
+        <li><a href="#photos" data-page="photos">Photos and videos</a></li>
+        <li><a href="#site-photos" data-page="site-photos">Site photos</a></li>
+        <li><a href="#hire" data-page="hire">Hire</a></li>
+        <li><a href="#enquiries" data-page="enquiries">Enquiries and accounts</a></li>
+        <li><a href="#development" data-page="development">Development</a></li>
+    </ul>
+    <button id="signOut" type="button" class="admin-signout">Forget token</button>
+</div>
+
+<div class="admin-pages">
+
 <!-- =========================
      VISITORS
 ========================= -->
 
-<section id="statsPanel" class="section admin-panel" hidden>
-    <div class="admin-heading">
-        <div>
-            <p class="small-title">Analytics</p>
-            <h2>Visitors</h2>
-        </div>
+<div id="page-visitors" class="admin-page" data-page="visitors" hidden>
+<div class="admin-page-head">
+    <h1>Visitors</h1>
+    <p>How many people are looking at the site.</p>
+</div>
+
+<section id="statsPanel" class="section admin-panel">
+    <div class="admin-heading admin-heading-end">
         <button id="refreshStats" type="button" class="button button-ghost">Refresh</button>
     </div>
     <p class="admin-help">
@@ -101,19 +119,75 @@
     </label>
     <p id="statsStatus" class="form-status"></p>
 </section>
+</div>
 
 <!-- =========================
-     PHOTOS
+     SHOWS
 ========================= -->
 
-<section id="photosPanel" class="section admin-panel" hidden>
-    <div class="admin-heading">
-        <div>
-            <p class="small-title">Photos</p>
-            <h2>Add photos and videos to a show</h2>
-        </div>
-        <button id="signOut" type="button" class="button button-ghost">Forget token</button>
+<div id="page-shows" class="admin-page" data-page="shows" hidden>
+<div class="admin-page-head">
+    <h1>Shows</h1>
+    <p>The shows on your lighting page: their order, names and details.</p>
+</div>
+
+<section id="worksPanel" class="section admin-panel">
+    <p class="admin-help">
+        Drag shows (or use the arrows) into the order they should appear on
+        the lighting page, then click <strong>Save show order</strong>. Click
+        <strong>Edit</strong> on a show to rename it, change its details or delete it.
+    </p>
+    <div id="showOrderGrid" class="admin-thumbs admin-photos"></div>
+    <div class="admin-actions">
+        <button id="saveShowsButton" type="button" class="button" disabled>Save show order</button>
+        <button id="undoShowsButton" type="button" class="button button-ghost" hidden>Undo changes</button>
     </div>
+    <p id="showsStatus" class="form-status"></p>
+
+    <form id="showEditor" class="admin-new-show admin-editor" hidden>
+        <h3 id="editorHeading">Edit show</h3>
+        <label class="admin-label">Show name
+            <input id="editTitle" type="text" required>
+        </label>
+        <label class="admin-label">Your role
+            <input id="editType" type="text" placeholder="e.g. Lighting Design">
+        </label>
+        <label class="admin-label">Date
+            <input id="editDate" type="text" placeholder="e.g. March 2025">
+        </label>
+        <label class="admin-label">Venue
+            <input id="editVenue" type="text" placeholder="e.g. Lowther Pavilion, Lytham (optional)">
+        </label>
+        <label class="admin-label">Short description
+            <input id="editDescription" type="text">
+        </label>
+        <label class="admin-label">Notes
+            <textarea id="editNotes" rows="4" placeholder="Anything else worth mentioning (optional)"></textarea>
+        </label>
+        <label class="admin-label">Google description
+            <textarea id="editSeo" rows="2" maxlength="300" placeholder="One or two sentences shown under the link in Google (optional). Leave empty and it's made from the details above."></textarea>
+        </label>
+        <div class="admin-actions">
+            <button type="submit" class="button">Save details</button>
+            <button id="cancelEdit" type="button" class="button button-ghost">Cancel</button>
+            <button id="deleteShow" type="button" class="button button-danger">Delete show</button>
+        </div>
+        <p id="editStatus" class="form-status"></p>
+    </form>
+</section>
+</div>
+
+<!-- =========================
+     PHOTOS AND VIDEOS
+========================= -->
+
+<div id="page-photos" class="admin-page" data-page="photos" hidden>
+<div class="admin-page-head">
+    <h1>Photos and videos</h1>
+    <p>Add photos and videos to a show, or start a new one.</p>
+</div>
+
+<section id="photosPanel" class="section admin-panel">
 
     <label class="admin-label">Show
         <select id="showSelect"></select>
@@ -178,64 +252,19 @@
     </div>
     <p id="orderStatus" class="form-status"></p>
 </section>
+</div>
 
 <!-- =========================
-     WORK ORDER
+     SITE PHOTOS
 ========================= -->
 
-<section id="worksPanel" class="section admin-panel" hidden>
-    <p class="small-title">Work</p>
-    <h2>Your shows</h2>
-    <p class="admin-help">
-        Drag shows (or use the arrows) into the order they should appear on
-        the lighting page, then click <strong>Save show order</strong>. Click
-        <strong>Edit</strong> on a show to rename it, change its details or delete it.
-    </p>
-    <div id="showOrderGrid" class="admin-thumbs admin-photos"></div>
-    <div class="admin-actions">
-        <button id="saveShowsButton" type="button" class="button" disabled>Save show order</button>
-        <button id="undoShowsButton" type="button" class="button button-ghost" hidden>Undo changes</button>
-    </div>
-    <p id="showsStatus" class="form-status"></p>
+<div id="page-site-photos" class="admin-page" data-page="site-photos" hidden>
+<div class="admin-page-head">
+    <h1>Site photos</h1>
+    <p>The photos at the top of the lighting page, and your About photo.</p>
+</div>
 
-    <form id="showEditor" class="admin-new-show admin-editor" hidden>
-        <h3 id="editorHeading">Edit show</h3>
-        <label class="admin-label">Show name
-            <input id="editTitle" type="text" required>
-        </label>
-        <label class="admin-label">Your role
-            <input id="editType" type="text" placeholder="e.g. Lighting Design">
-        </label>
-        <label class="admin-label">Date
-            <input id="editDate" type="text" placeholder="e.g. March 2025">
-        </label>
-        <label class="admin-label">Venue
-            <input id="editVenue" type="text" placeholder="e.g. Lowther Pavilion, Lytham (optional)">
-        </label>
-        <label class="admin-label">Short description
-            <input id="editDescription" type="text">
-        </label>
-        <label class="admin-label">Notes
-            <textarea id="editNotes" rows="4" placeholder="Anything else worth mentioning (optional)"></textarea>
-        </label>
-        <label class="admin-label">Google description
-            <textarea id="editSeo" rows="2" maxlength="300" placeholder="One or two sentences shown under the link in Google (optional). Leave empty and it's made from the details above."></textarea>
-        </label>
-        <div class="admin-actions">
-            <button type="submit" class="button">Save details</button>
-            <button id="cancelEdit" type="button" class="button button-ghost">Cancel</button>
-            <button id="deleteShow" type="button" class="button button-danger">Delete show</button>
-        </div>
-        <p id="editStatus" class="form-status"></p>
-    </form>
-</section>
-
-<!-- =========================
-     LIGHTING PAGE PHOTOS
-========================= -->
-
-<section id="heroPanel" class="section admin-panel" hidden>
-    <p class="small-title">Lighting page</p>
+<section id="heroPanel" class="section admin-panel">
     <h2>Photos at the top of the lighting page</h2>
     <p class="admin-help">
         These show behind the title at the top of the lighting page, one at a
@@ -260,12 +289,7 @@
     <p id="heroStatus" class="form-status"></p>
 </section>
 
-<!-- =========================
-     ABOUT PHOTO
-========================= -->
-
-<section id="aboutPanel" class="section admin-panel" hidden>
-    <p class="small-title">About me</p>
+<section id="aboutPanel" class="section admin-panel">
     <h2>Your photo</h2>
     <p class="admin-help">
         This photo shows next to the About section on the lighting page. A
@@ -288,14 +312,19 @@
         </div>
     </div>
 </section>
+</div>
 
 <!-- =========================
-     EQUIPMENT HIRE
+     HIRE
 ========================= -->
 
-<section id="equipmentPanel" class="section admin-panel" hidden>
-    <p class="small-title">Hire</p>
-    <h2>Your equipment</h2>
+<div id="page-hire" class="admin-page" data-page="hire" hidden>
+<div class="admin-page-head">
+    <h1>Hire</h1>
+    <p>The equipment listed on your hire page.</p>
+</div>
+
+<section id="equipmentPanel" class="section admin-panel">
     <p class="admin-help">
         These are listed on the <a href="hire.html">hire page</a>. Visitors
         add them to a list and send it to you with an enquiry, so there are no
@@ -312,21 +341,91 @@
     </div>
     <p id="equipmentStatus" class="form-status"></p>
 </section>
+</div>
 
 <!-- =========================
-     DEVELOPMENT PROJECTS
+     ENQUIRIES AND ACCOUNTS
 ========================= -->
 
-<section id="devPanel" class="section admin-panel" hidden>
-    <p class="small-title">Development</p>
-    <h2>Development projects</h2>
+<div id="page-enquiries" class="admin-page" data-page="enquiries" hidden>
+<div class="admin-page-head">
+    <h1>Enquiries and accounts</h1>
+    <p>People who've signed up, what they've sent you, and where enquiries go.</p>
+</div>
+
+<section id="accountsPanel" class="section admin-panel">
+    <div class="admin-heading">
+        <div>
+            <h2>People who've signed up</h2>
+        </div>
+        <button id="refreshAccounts" type="button" class="button button-ghost">Refresh</button>
+    </div>
+    <p class="admin-help">
+        Anyone can make an account on the <a href="account.html" target="_blank" rel="noopener">account page</a>.
+        Enquiries they send while signed in are listed under them, and so are
+        enquiries sent with the same email. Tick <strong>Developer</strong> and pick
+        projects to let someone into the developer portal.
+    </p>
+    <input id="accountSearch" type="search" placeholder="Search by name, email or username" class="account-search">
+    <div id="accountList" class="dev-admin-entries"></div>
+    <details id="looseEnquiries" class="admin-steps" hidden>
+        <summary>Enquiries from people without an account</summary>
+        <div id="looseEnquiryList" class="dev-admin-entries"></div>
+    </details>
+    <p id="accountsStatus" class="form-status"></p>
+</section>
+
+<section id="enquiriesPanel" class="section admin-panel">
+    <h2>Where enquiries go</h2>
+
+    <div id="enquiriesReady" hidden>
+        <p class="admin-help">
+            Every enquiry sent from the &ldquo;Send enquiry&rdquo; form is listed in
+            your Formspree inbox, and you also get a copy by email.
+        </p>
+        <div class="admin-actions">
+            <a id="enquiriesLink" class="button" target="_blank" rel="noopener">Open enquiries</a>
+            <a href="https://mail.google.com/mail/u/0/#search/from%3Aformspree" class="button button-ghost" target="_blank" rel="noopener">Search Gmail</a>
+        </div>
+    </div>
+
+    <div id="enquiriesSetup">
+        <p class="admin-help">
+            Right now the form opens the visitor's email app and the enquiry
+            lands in your Gmail. To collect enquiries in one list instead:
+        </p>
+        <ol class="admin-steps-list">
+            <li>Sign up free at <a href="https://formspree.io/register" target="_blank" rel="noopener">formspree.io</a> with karolek01122@gmail.com and create a new form.</li>
+            <li>Copy the form's ID (the code after <code>/f/</code> in its endpoint, like <code>xyzabcde</code>) and paste it here.</li>
+        </ol>
+    </div>
+
+    <form id="formspreeForm" class="admin-row">
+        <input id="formspreeInput" type="text" placeholder="Formspree form ID" autocomplete="off">
+        <button type="submit" class="button button-ghost">Save</button>
+    </form>
+    <p id="enquiryStatus" class="form-status"></p>
+</section>
+</div>
+
+<!-- =========================
+     DEVELOPMENT
+========================= -->
+
+<div id="page-development" class="admin-page" data-page="development" hidden>
+<div class="admin-page-head">
+    <h1>Development</h1>
+    <p>Developer logs, tasks and projects.</p>
+</div>
+
+<section id="devPanel" class="section admin-panel">
     <p class="admin-help">
         These pages aren't linked from anywhere on the site and are hidden from
         Google. Send people the link instead:
         <a id="devLink" href="development/" target="_blank" rel="noopener">karolpasko.github.io/development/</a>.
         Developers sign in at
         <a href="development/portal.html" target="_blank" rel="noopener">karolpasko.github.io/development/portal.html</a>.
-        Choose who's a developer, and on which projects, under <a href="#accountsPanel">Accounts</a>.
+        Choose who's a developer, and on which projects, under <a href="#enquiries">Enquiries and accounts</a>.
     </p>
 
     <h3 class="admin-subtitle">Log entries</h3>
@@ -397,70 +496,9 @@
     </form>
     <p id="devEndpointStatus" class="form-status"></p>
 </section>
+</div>
 
-<!-- =========================
-     ACCOUNTS
-========================= -->
-
-<section id="accountsPanel" class="section admin-panel" hidden>
-    <div class="admin-heading">
-        <div>
-            <p class="small-title">Accounts</p>
-            <h2>People who've signed up</h2>
-        </div>
-        <button id="refreshAccounts" type="button" class="button button-ghost">Refresh</button>
-    </div>
-    <p class="admin-help">
-        Anyone can make an account on the <a href="account.html" target="_blank" rel="noopener">account page</a>.
-        Enquiries they send while signed in are listed under them, and so are
-        enquiries sent with the same email. Tick <strong>Developer</strong> and pick
-        projects to let someone into the developer portal.
-    </p>
-    <input id="accountSearch" type="search" placeholder="Search by name, email or username" class="account-search">
-    <div id="accountList" class="dev-admin-entries"></div>
-    <details id="looseEnquiries" class="admin-steps" hidden>
-        <summary>Enquiries from people without an account</summary>
-        <div id="looseEnquiryList" class="dev-admin-entries"></div>
-    </details>
-    <p id="accountsStatus" class="form-status"></p>
-</section>
-
-<!-- =========================
-     ENQUIRIES
-========================= -->
-
-<section id="enquiriesPanel" class="section admin-panel" hidden>
-    <p class="small-title">Enquiries</p>
-    <h2>Who has been in touch</h2>
-
-    <div id="enquiriesReady" hidden>
-        <p class="admin-help">
-            Every enquiry sent from the &ldquo;Send enquiry&rdquo; form is listed in
-            your Formspree inbox, and you also get a copy by email.
-        </p>
-        <div class="admin-actions">
-            <a id="enquiriesLink" class="button" target="_blank" rel="noopener">Open enquiries</a>
-            <a href="https://mail.google.com/mail/u/0/#search/from%3Aformspree" class="button button-ghost" target="_blank" rel="noopener">Search Gmail</a>
-        </div>
-    </div>
-
-    <div id="enquiriesSetup">
-        <p class="admin-help">
-            Right now the form opens the visitor's email app and the enquiry
-            lands in your Gmail. To collect enquiries in one list instead:
-        </p>
-        <ol class="admin-steps-list">
-            <li>Sign up free at <a href="https://formspree.io/register" target="_blank" rel="noopener">formspree.io</a> with karolek01122@gmail.com and create a new form.</li>
-            <li>Copy the form's ID (the code after <code>/f/</code> in its endpoint, like <code>xyzabcde</code>) and paste it here.</li>
-        </ol>
-    </div>
-
-    <form id="formspreeForm" class="admin-row">
-        <input id="formspreeInput" type="text" placeholder="Formspree form ID" autocomplete="off">
-        <button type="submit" class="button button-ghost">Save</button>
-    </form>
-    <p id="enquiryStatus" class="form-status"></p>
-</section>
+</div>
 
 </main>
 
