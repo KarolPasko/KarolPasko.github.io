@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=17">
 </head>
 <body id="top">
 
@@ -29,9 +29,9 @@
 
         <ul id="navLinks">
             <li><a href="index.html">Home</a></li>
-            <li><a href="index.html#work">Work</a></li>
-            <li><a href="hire.html">Hire</a></li>
             <li><a href="development/">Development</a></li>
+            <li><a href="development/portal.html">Dev portal</a></li>
+            <li><a href="account.html" class="nav-cta">Account</a></li>
         </ul>
     </nav>
 </header>
@@ -59,25 +59,20 @@
 
 <section id="devFormSection" class="section contact dev-form-section">
     <h2>Add to the log</h2>
-    <p>
-        Say which version you were using and what you found. Use any name you
-        like. I read everything before it goes up, so it won't show straight
-        away.
+    <p id="devFormGate">
+        Posting is for developers on this project.
+        <a href="development/portal.html">Sign in to the developer portal</a>
+        to add to the log.
     </p>
 
-    <form id="devForm" class="enquiry-form">
-        <div class="form-row">
-            <label>Version
-                <input type="text" name="version" maxlength="30" placeholder="e.g. 0.3.1" required>
-            </label>
-            <label>Your developer name
-                <input type="text" name="developer" maxlength="40" autocomplete="nickname" required>
-            </label>
-        </div>
+    <form id="devForm" class="enquiry-form" hidden>
+        <p class="dev-posting-as">Posting as <strong id="devPostingAs"></strong>. I read everything before it goes up, so it won't show straight away.</p>
+        <label>Version
+            <input type="text" name="version" maxlength="30" placeholder="e.g. 0.3.1" required>
+        </label>
         <label>Feedback
             <textarea name="feedback" rows="6" maxlength="4000" placeholder="What happened, what you expected, and how to make it happen again" required></textarea>
         </label>
-        <input type="text" name="website" class="form-trap" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="submit" class="button">Send for approval</button>
         <p id="devFormStatus" class="form-status" role="status"></p>
     </form>
@@ -98,6 +93,7 @@
 
 <script src="site.js"></script>
 <script src="animations.js"></script>
+<script src="account-client.js"></script>
 <script src="development/devlog.js"></script>
 </body>
 </html>

@@ -6,12 +6,12 @@
    Log entries live in a Google Sheet behind a small Apps Script web app
    (scripts/devlog-apps-script.gs). Its address is "endpoint" in
    data/dev-projects.json, set from the admin page. Only entries Karol has
-   accepted come back from it.
+   accepted come back from it, and only developers he has added to a
+   project can post (account-client.js handles signing in).
 ========================= */
 
 (function () {
     const $ = (id) => document.getElementById(id);
-    const NAME_KEY = "kp-dev-name";
     const VERSION_KEY = "kp-dev-version";
 
     function remember(key, value) {
@@ -26,13 +26,6 @@
         const date = new Date(iso);
         if (isNaN(date)) return "";
         return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-    }
-
-    async function loadConfig() {
-        const response = await fetch(`data/dev-projects.json?t=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error("Couldn't load the project list.");
-        const data = await response.json();
-        return { endpoint: data.endpoint || "", projects: (data.projects || []).filter((p) => p.id && p.name) };
     }
 
     /* ---- Project list ---- */
@@ -146,9 +139,32 @@
         $("devFormStatus").textContent = text;
     }
 
-    function setupForm(endpoint, project) {
+    /* Only developers Karol has added to this project can post */
+    async function setupForm(project) {
+        if (!KLD.signedIn()) return;
+
+        let me;
+        try {
+            me = (await KLD.call("me")).me;
+        } catch (error) {
+            return;
+        }
+
+        const gate = $("devFormGate");
+        const inProject = me.developer && (me.projects || []).some((item) => item.id === project.id);
+        if (!me.developer || !inProject) {
+            gate.textContent = "You're signed in, but you haven't been added to this project yet. Karol will add you if you're helping with it.";
+            return;
+        }
+        if (!me.devUsername) {
+            gate.innerHTML = 'Pick your developer username in the <a href="development/portal.html">developer portal</a> first.';
+            return;
+        }
+
         const form = $("devForm");
-        form.developer.value = recall(NAME_KEY);
+        gate.hidden = true;
+        form.hidden = false;
+        $("devPostingAs").textContent = me.devUsername;
         form.version.value = recall(VERSION_KEY);
 
         form.addEventListener("submit", async (event) => {
@@ -157,23 +173,10 @@
             button.disabled = true;
             setFormStatus("Sending…");
 
-            const entry = {
-                action: "submit",
-                project: project.id,
-                version: form.version.value.trim(),
-                developer: form.developer.value.trim(),
-                feedback: form.feedback.value.trim(),
-                website: form.website.value
-            };
-
+            const version = form.version.value.trim();
             try {
-                /* Sent as plain text so the browser doesn't need a CORS preflight */
-                const response = await fetch(endpoint, { method: "POST", body: JSON.stringify(entry) });
-                const data = await response.json();
-                if (!data.ok) throw new Error(data.error || "It didn't send.");
-
-                remember(NAME_KEY, entry.developer);
-                remember(VERSION_KEY, entry.version);
+                await KLD.call("submit", { project: project.id, version, feedback: form.feedback.value.trim() });
+                remember(VERSION_KEY, version);
                 form.feedback.value = "";
                 setFormStatus("Thanks, that's been sent. It will show on the log once I've read it.", "success");
             }
@@ -211,7 +214,7 @@
         }
 
         if (project.open === false) $("devFormSection").hidden = true;
-        else setupForm(config.endpoint, project);
+        else setupForm(project);
 
         $("devFilter").addEventListener("change", renderLog);
 
@@ -225,7 +228,7 @@
     async function start() {
         let config;
         try {
-            config = await loadConfig();
+            config = await KLD.config();
         } catch (error) {
             const target = $("devProjects") || $("devLogStatus");
             target.textContent = error.message;

@@ -76,6 +76,24 @@ async function sendEnquiry(data) {
     }
 }
 
+/* Signed-in visitors: fill in their details, and keep a copy under their account */
+function saveToAccount(data) {
+    if (typeof KLD === "undefined") return;
+    const lines = [];
+    if (data.get("date")) lines.push(`Date(s): ${data.get("date")}`);
+    if (data.get("venue")) lines.push(`Venue: ${data.get("venue")}`);
+    if (data.get("equipment")) lines.push(`Equipment: ${data.get("equipment")}`);
+    if (data.get("message")) lines.push(lines.length ? "" : null, data.get("message"));
+    KLD.recordEnquiry({
+        name: data.get("name"),
+        email: data.get("email"),
+        kind: data.get("equipment") ? "Hire enquiry" : "Enquiry",
+        details: lines.filter((line) => line !== null).join("\n")
+    });
+}
+
+if (typeof KLD !== "undefined") KLD.prefill(enquiryForm);
+
 enquiryForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -89,6 +107,7 @@ enquiryForm.addEventListener("submit", async (event) => {
 
     try {
         await sendEnquiry(data);
+        saveToAccount(data);
         enquiryForm.reset();
         enquiryStatus.classList.add("success");
         enquiryStatus.textContent =

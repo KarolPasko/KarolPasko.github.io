@@ -145,6 +145,7 @@ async function connect(newToken) {
         $("aboutPanel").hidden = false;
         $("equipmentPanel").hidden = false;
         $("devPanel").hidden = false;
+        $("accountsPanel").hidden = false;
 
         /* The Accept/Reject emails link to #devPanel */
         if (location.hash === "#devPanel") $("devPanel").scrollIntoView();
@@ -2194,6 +2195,7 @@ async function loadDevEntries() {
     if (!devData.endpoint) {
         $("devEntries").innerHTML = "";
         setDevEntriesStatus("Entries will show here once the log is connected.");
+        $("accountsStatus").textContent = "Accounts switch on once the log is connected (see Development projects).";
         return;
     }
 
@@ -2205,6 +2207,8 @@ async function loadDevEntries() {
     } catch (error) {
         setDevEntriesStatus(`Couldn't load entries: ${error.message}`, "error");
     }
+    loadAccounts();
+    loadTasks();
 }
 
 function devButton(label, className, onClick) {
@@ -2251,7 +2255,7 @@ function renderDevEntries() {
         const when = new Date(entry.submitted);
         const strong = document.createElement("strong");
         strong.textContent = `${devProjectName(entry.project)}, version ${entry.version}`;
-        meta.append(strong, ` · ${entry.developer}`);
+        meta.append(strong, ` · ${entry.developer}${entry.realName ? ` (${entry.realName})` : ""}`);
         if (!isNaN(when)) meta.append(` · ${when.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}`);
 
         const text = document.createElement("p");
@@ -2457,6 +2461,8 @@ $("saveDevProjects").addEventListener("click", async () => {
         await saveDevData({ ...devData, projects }, "Update development projects (admin page)");
         resetDevProjects();
         renderDevEntries();
+        renderTasks();
+        renderAccounts();
         setDevProjectsStatus("Saved. The development pages update in a minute or two.", "success");
     } catch (error) {
         setDevProjectsStatus(`Couldn't save: ${error.message}`, "error");
@@ -2515,6 +2521,341 @@ $("copyDevScript").addEventListener("click", async () => {
         button.textContent = "Opened it on GitHub instead";
     }
     setTimeout(() => { button.textContent = "Copy the script"; }, 3000);
+});
+
+
+/* =========================
+   ACCOUNTS
+   Kept in the same Google Sheet as the logs (scripts/devlog-apps-script.gs).
+   Each account can be made a developer and put on projects. Enquiries
+   sent while signed in (or with the same email) are shown under it.
+========================= */
+
+let accounts = [];
+let accountEnquiries = [];
+
+function setAccountsStatus(text, kind = "") {
+    $("accountsStatus").className = `form-status ${kind}`;
+    $("accountsStatus").textContent = text;
+}
+
+async function loadAccounts() {
+    setAccountsStatus("Loading…");
+    try {
+        const result = await devAdmin("accounts");
+        accounts = result.accounts || [];
+        accountEnquiries = result.enquiries || [];
+        setAccountsStatus(accounts.length ? "" : "Nobody has signed up yet.");
+        renderAccounts();
+        renderTasks();
+    } catch (error) {
+        setAccountsStatus(`Couldn't load accounts: ${error.message}`, "error");
+    }
+}
+
+function niceDate(iso, withTime = false) {
+    const date = new Date(iso);
+    if (!iso || isNaN(date)) return "never";
+    return withTime
+        ? date.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })
+        : date.toLocaleDateString("en-GB", { dateStyle: "medium" });
+}
+
+function enquiryCard(enquiry) {
+    const card = document.createElement("div");
+    card.className = "dev-admin-entry";
+    const meta = document.createElement("p");
+    meta.className = "dev-entry-meta";
+    const kind = document.createElement("strong");
+    kind.textContent = enquiry.kind || "Enquiry";
+    meta.append(kind, ` · ${niceDate(enquiry.created, true)}`);
+    if (!enquiry.account) meta.append(` · ${enquiry.name || ""} ${enquiry.email ? `<${enquiry.email}>` : ""}`);
+    const text = document.createElement("p");
+    text.className = "dev-entry-text";
+    text.textContent = enquiry.details;
+    card.append(meta, text);
+    return card;
+}
+
+function accountEnquiryList(account) {
+    return accountEnquiries.filter((enquiry) => enquiry.account === account.id
+        || (!enquiry.account && enquiry.email && enquiry.email === account.email));
+}
+
+function accountLabel(account) {
+    return account.devUsername ? `${account.devUsername} (${account.name})` : account.name;
+}
+
+function renderAccounts() {
+    const list = $("accountList");
+    list.innerHTML = "";
+    const search = $("accountSearch").value.trim().toLowerCase();
+
+    accounts
+        .filter((account) => !search || [account.name, account.email, account.devUsername, account.phone]
+            .some((value) => String(value || "").toLowerCase().includes(search)))
+        .forEach((account) => list.appendChild(accountCard(account)));
+
+    const loose = accountEnquiries.filter((enquiry) => !enquiry.account
+        && !accounts.some((account) => account.email === enquiry.email));
+    $("looseEnquiries").hidden = loose.length === 0;
+    $("looseEnquiries").querySelector("summary").textContent = `Enquiries from people without an account (${loose.length})`;
+    $("looseEnquiryList").innerHTML = "";
+    loose.forEach((enquiry) => $("looseEnquiryList").appendChild(enquiryCard(enquiry)));
+}
+
+function accountCard(account) {
+    const card = document.createElement("div");
+    card.className = "dev-admin-entry admin-account";
+
+    const top = document.createElement("div");
+    const name = document.createElement("p");
+    name.className = "admin-account-name";
+    name.textContent = account.name;
+    if (account.devUsername) {
+        const user = document.createElement("span");
+        user.textContent = ` · developer username ${account.devUsername}`;
+        name.appendChild(user);
+    }
+    const contact = document.createElement("p");
+    contact.className = "dev-entry-meta";
+    const mail = document.createElement("a");
+    mail.href = `mailto:${account.email}`;
+    mail.textContent = account.email;
+    contact.append(mail);
+    if (account.phone) contact.append(` · ${account.phone}`);
+    contact.append(` · joined ${niceDate(account.created)} · last signed in ${niceDate(account.lastLogin, true)}`);
+    top.append(name, contact);
+    card.appendChild(top);
+
+    /* Enquiries */
+    const enquiries = accountEnquiryList(account);
+    const enquiryBox = document.createElement("details");
+    enquiryBox.className = "admin-account-enquiries";
+    const summary = document.createElement("summary");
+    summary.textContent = enquiries.length === 1 ? "1 enquiry" : `${enquiries.length} enquiries`;
+    enquiryBox.appendChild(summary);
+    enquiries.forEach((enquiry) => enquiryBox.appendChild(enquiryCard(enquiry)));
+    if (enquiries.length === 0) enquiryBox.querySelector("summary").textContent = "No enquiries yet";
+    card.appendChild(enquiryBox);
+
+    /* Developer access */
+    const access = document.createElement("div");
+    access.className = "admin-account-access";
+    const devLabel = document.createElement("label");
+    devLabel.className = "dev-admin-check";
+    const dev = document.createElement("input");
+    dev.type = "checkbox";
+    dev.checked = account.developer;
+    devLabel.append(dev, " Developer (can use the developer portal)");
+    access.appendChild(devLabel);
+
+    const projectBox = document.createElement("div");
+    projectBox.className = "admin-account-projects";
+    projectBox.hidden = !account.developer;
+    const ticks = devData.projects.map((project) => {
+        const label = document.createElement("label");
+        label.className = "dev-admin-check";
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.value = project.id;
+        box.checked = account.projects.includes(project.id);
+        label.append(box, ` ${project.name}`);
+        projectBox.appendChild(label);
+        return box;
+    });
+    if (ticks.length === 0) projectBox.textContent = "Add a project under Development projects first.";
+    access.appendChild(projectBox);
+
+    const save = devButton("Save access", "", async () => {
+        save.disabled = true;
+        setAccountsStatus("Saving…");
+        try {
+            const projects = ticks.filter((box) => box.checked).map((box) => box.value);
+            await devAdmin("setAccess", { id: account.id, developer: dev.checked, projects });
+            account.developer = dev.checked;
+            account.projects = projects;
+            setAccountsStatus(`Saved ${account.name}.`, "success");
+            renderTasks();
+        } catch (error) {
+            setAccountsStatus(`Couldn't save: ${error.message}`, "error");
+        }
+        save.disabled = false;
+    });
+    dev.addEventListener("change", () => { projectBox.hidden = !dev.checked; });
+
+    const remove = devButton("Delete account", "button-danger", async () => {
+        if (!confirm(`Delete ${account.name}'s account? Their enquiries and log entries stay.`)) return;
+        setAccountsStatus("Deleting…");
+        try {
+            await devAdmin("deleteAccount", { id: account.id });
+            accounts = accounts.filter((item) => item !== account);
+            renderAccounts();
+            setAccountsStatus("Deleted.", "success");
+        } catch (error) {
+            setAccountsStatus(`Couldn't delete: ${error.message}`, "error");
+        }
+    });
+
+    const tools = document.createElement("div");
+    tools.className = "admin-equipment-tools";
+    tools.append(save, remove);
+    access.appendChild(tools);
+    card.appendChild(access);
+    return card;
+}
+
+$("accountSearch").addEventListener("input", renderAccounts);
+$("refreshAccounts").addEventListener("click", loadAccounts);
+
+
+/* =========================
+   TASKS (per development project)
+========================= */
+
+let tasks = [];
+let taskStatuses = ["To do", "In progress", "Done"];
+
+function setTaskStatus(text, kind = "") {
+    $("taskStatus").className = `form-status ${kind}`;
+    $("taskStatus").textContent = text;
+}
+
+async function loadTasks() {
+    try {
+        const result = await devAdmin("tasks");
+        tasks = result.tasks || [];
+        taskStatuses = result.statuses || taskStatuses;
+        renderTasks();
+    } catch (error) {
+        setTaskStatus(`Couldn't load tasks: ${error.message}`, "error");
+    }
+}
+
+function renderTaskProjects() {
+    const select = $("taskProject");
+    const chosen = select.value;
+    select.innerHTML = "";
+    devData.projects.forEach((project) => select.appendChild(new Option(project.name, project.id)));
+    if (devData.projects.some((project) => project.id === chosen)) select.value = chosen;
+}
+
+function renderTasks() {
+    renderTaskProjects();
+    const project = $("taskProject").value;
+    const list = $("taskList");
+    list.innerHTML = "";
+    $("addTask").disabled = !project || !devData.endpoint;
+    if (!project) return;
+
+    const shown = tasks.filter((task) => task.project === project);
+    if (shown.length === 0) {
+        list.innerHTML = '<p class="admin-help">No tasks for this project yet.</p>';
+        return;
+    }
+    shown.forEach((task) => list.appendChild(taskCard(task)));
+}
+
+function taskCard(task) {
+    const card = document.createElement("div");
+    card.className = "dev-admin-entry admin-task";
+
+    const titleLabel = document.createElement("label");
+    titleLabel.className = "admin-label";
+    titleLabel.textContent = "Task";
+    const title = document.createElement("input");
+    title.type = "text";
+    title.maxLength = 150;
+    title.value = task.title || "";
+    title.placeholder = "e.g. Test the new fader page on a tablet";
+    titleLabel.appendChild(title);
+
+    const detailsLabel = document.createElement("label");
+    detailsLabel.className = "admin-label";
+    detailsLabel.textContent = "Details (optional)";
+    const details = document.createElement("textarea");
+    details.rows = 2;
+    details.value = task.details || "";
+    detailsLabel.appendChild(details);
+
+    const row = document.createElement("div");
+    row.className = "admin-task-row";
+
+    const whoLabel = document.createElement("label");
+    whoLabel.className = "admin-label";
+    whoLabel.textContent = "For";
+    const who = document.createElement("select");
+    who.appendChild(new Option("Everyone on the project", ""));
+    accounts
+        .filter((account) => account.developer && account.projects.includes(task.project))
+        .forEach((account) => who.appendChild(new Option(accountLabel(account), account.id)));
+    if (task.assignee && ![...who.options].some((option) => option.value === task.assignee)) {
+        const gone = accounts.find((account) => account.id === task.assignee);
+        who.appendChild(new Option(gone ? `${accountLabel(gone)} (not on this project)` : "Someone who's left", task.assignee));
+    }
+    who.value = task.assignee || "";
+    whoLabel.appendChild(who);
+
+    const statusLabel = document.createElement("label");
+    statusLabel.className = "admin-label";
+    statusLabel.textContent = "Progress";
+    const status = document.createElement("select");
+    taskStatuses.forEach((value) => status.appendChild(new Option(value, value)));
+    status.value = task.status || taskStatuses[0];
+    statusLabel.appendChild(status);
+    row.append(whoLabel, statusLabel);
+
+    const tools = document.createElement("div");
+    tools.className = "admin-equipment-tools";
+    const save = devButton(task.id ? "Save task" : "Add task", "", async () => {
+        save.disabled = true;
+        setTaskStatus("Saving…");
+        try {
+            const fields = { id: task.id || "", project: task.project, title: title.value, details: details.value, assignee: who.value, status: status.value };
+            const result = await devAdmin("saveTask", fields);
+            Object.assign(task, fields, { id: result.id, title: title.value.trim(), details: details.value.trim() });
+            setTaskStatus("Saved.", "success");
+            renderTasks();
+        } catch (error) {
+            setTaskStatus(`Couldn't save: ${error.message}`, "error");
+            save.disabled = false;
+        }
+    });
+    const remove = devButton(task.id ? "Delete" : "Cancel", "button-danger", async () => {
+        if (task.id) {
+            if (!confirm(`Delete the task "${task.title}"?`)) return;
+            setTaskStatus("Deleting…");
+            try {
+                await devAdmin("deleteTask", { id: task.id });
+                setTaskStatus("Deleted.", "success");
+            } catch (error) {
+                setTaskStatus(`Couldn't delete: ${error.message}`, "error");
+                return;
+            }
+        }
+        tasks = tasks.filter((item) => item !== task);
+        renderTasks();
+    });
+    tools.append(save, remove);
+
+    if (task.updated && task.id) {
+        const when = document.createElement("p");
+        when.className = "dev-entry-meta";
+        when.textContent = `Last changed ${niceDate(task.updated, true)}`;
+        card.append(titleLabel, detailsLabel, row, when, tools);
+    } else {
+        card.append(titleLabel, detailsLabel, row, tools);
+    }
+    return card;
+}
+
+$("taskProject").addEventListener("change", renderTasks);
+$("addTask").addEventListener("click", () => {
+    const project = $("taskProject").value;
+    if (!project) return;
+    tasks.unshift({ id: "", project, title: "", details: "", assignee: "", status: taskStatuses[0] });
+    renderTasks();
+    $("taskList").querySelector("input").focus();
 });
 
 

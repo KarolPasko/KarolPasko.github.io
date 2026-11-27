@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=16">
+    <link rel="stylesheet" href="style.css?v=17">
 </head>
 <body>
 
@@ -323,7 +323,10 @@
     <p class="admin-help">
         These pages aren't linked from anywhere on the site and are hidden from
         Google. Send people the link instead:
-        <a id="devLink" href="development/" target="_blank" rel="noopener">karolpasko.github.io/development/</a>
+        <a id="devLink" href="development/" target="_blank" rel="noopener">karolpasko.github.io/development/</a>.
+        Developers sign in at
+        <a href="development/portal.html" target="_blank" rel="noopener">karolpasko.github.io/development/portal.html</a>.
+        Choose who's a developer, and on which projects, under <a href="#accountsPanel">Accounts</a>.
     </p>
 
     <h3 class="admin-subtitle">Log entries</h3>
@@ -341,6 +344,19 @@
     </div>
     <div id="devEntries" class="dev-admin-entries"></div>
     <p id="devEntriesStatus" class="form-status"></p>
+
+    <h3 class="admin-subtitle">Tasks</h3>
+    <p class="admin-help">
+        Developers see the tasks for their projects in the developer portal
+        and can mark how far they've got. Set a task for everyone on the
+        project or for one developer.
+    </p>
+    <div class="admin-row dev-admin-filter">
+        <select id="taskProject" aria-label="Project"></select>
+        <button id="addTask" type="button" class="button button-ghost">Add a task</button>
+    </div>
+    <div id="taskList" class="dev-admin-entries"></div>
+    <p id="taskStatus" class="form-status"></p>
 
     <h3 class="admin-subtitle">Projects</h3>
     <p class="admin-help">
@@ -380,6 +396,33 @@
         <button type="submit" class="button button-ghost">Save</button>
     </form>
     <p id="devEndpointStatus" class="form-status"></p>
+</section>
+
+<!-- =========================
+     ACCOUNTS
+========================= -->
+
+<section id="accountsPanel" class="section admin-panel" hidden>
+    <div class="admin-heading">
+        <div>
+            <p class="small-title">Accounts</p>
+            <h2>People who've signed up</h2>
+        </div>
+        <button id="refreshAccounts" type="button" class="button button-ghost">Refresh</button>
+    </div>
+    <p class="admin-help">
+        Anyone can make an account on the <a href="account.html" target="_blank" rel="noopener">account page</a>.
+        Enquiries they send while signed in are listed under them, and so are
+        enquiries sent with the same email. Tick <strong>Developer</strong> and pick
+        projects to let someone into the developer portal.
+    </p>
+    <input id="accountSearch" type="search" placeholder="Search by name, email or username" class="account-search">
+    <div id="accountList" class="dev-admin-entries"></div>
+    <details id="looseEnquiries" class="admin-steps" hidden>
+        <summary>Enquiries from people without an account</summary>
+        <div id="looseEnquiryList" class="dev-admin-entries"></div>
+    </details>
+    <p id="accountsStatus" class="form-status"></p>
 </section>
 
 <!-- =========================

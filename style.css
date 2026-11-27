@@ -3942,3 +3942,309 @@ nav ul a {
 .dev-endpoint {
     margin-top: 16px;
 }
+
+
+/* =========================
+   ACCOUNT AND DEVELOPER PORTAL
+========================= */
+
+.account-section h2 {
+    font-size: clamp(24px, 3vw, 32px);
+    margin-bottom: 18px;
+}
+
+.account-box {
+    max-width: 520px;
+}
+
+.account-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
+    gap: 72px;
+    max-width: 1100px;
+}
+
+.account-switch {
+    display: flex;
+    gap: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+}
+
+.account-switch button,
+.link-button {
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0;
+}
+
+.account-switch button {
+    padding: 0 0 12px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    font-weight: 600;
+}
+
+.account-switch button.is-current {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+}
+
+.link-button {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.account-form {
+    display: grid;
+    gap: 18px;
+}
+
+.account-form label {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.account-form input,
+.account-form textarea,
+.portal-task select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 16px;
+}
+
+.account-form textarea {
+    resize: vertical;
+}
+
+.account-form input:focus,
+.account-form textarea:focus,
+.portal-task select:focus {
+    outline: none;
+    border-color: var(--line);
+}
+
+.account-form input:disabled {
+    color: var(--muted);
+    background: var(--bg-alt);
+}
+
+.account-form .button {
+    justify-self: start;
+    cursor: pointer;
+}
+
+.account-form .button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.account-small {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.account-password {
+    margin: 28px 0 8px;
+}
+
+.account-password summary {
+    cursor: pointer;
+    color: var(--accent);
+    margin-bottom: 16px;
+}
+
+.account-portal {
+    margin: 24px 0;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--accent-tint);
+}
+
+.account-portal a {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+#signOutButton {
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.account-enquiries {
+    list-style: none;
+    margin-top: 20px;
+}
+
+.portal-who {
+    margin-bottom: 28px;
+}
+
+.portal-who a {
+    color: var(--accent);
+}
+
+.portal-projects {
+    display: grid;
+    gap: 28px;
+    max-width: 820px;
+}
+
+.portal-project {
+    display: grid;
+    gap: 14px;
+    padding: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.portal-project h3 {
+    font-size: 18px;
+    margin-top: 16px;
+}
+
+.portal-tasks {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.portal-task {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+}
+
+.portal-task-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.portal-task select {
+    width: auto;
+    padding: 8px 10px;
+    font-size: 14px;
+}
+
+.portal-task select[data-status="Done"] {
+    color: #15803d;
+}
+
+.portal-task-for {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+.portal-task .dev-entry-text {
+    color: var(--muted);
+    margin-top: 6px;
+}
+
+.portal-heading {
+    margin: 64px 0 18px;
+}
+
+.portal-state.is-pending { color: #b45309; }
+.portal-state.is-accepted { color: #15803d; }
+.portal-state.is-rejected { color: #b91c1c; }
+
+.dev-posting-as {
+    color: var(--inverse-muted);
+}
+
+.dev-posting-as strong {
+    color: var(--inverse-text);
+}
+
+.dev-form-section #devFormGate a {
+    color: var(--inverse-text);
+}
+
+@media (max-width: 800px) {
+    .account-grid {
+        grid-template-columns: 1fr;
+        gap: 56px;
+    }
+
+    .portal-project {
+        padding: 22px;
+    }
+
+    .portal-task-head {
+        flex-wrap: wrap;
+    }
+}
+
+/* Accounts and tasks on the admin page */
+.admin .account-search {
+    margin-bottom: 8px;
+}
+
+.admin-account-name {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.admin-account-name span {
+    font-weight: 400;
+    color: var(--accent);
+    font-size: 15px;
+}
+
+.dev-entry-meta a {
+    color: inherit;
+}
+
+.admin-account-enquiries summary {
+    cursor: pointer;
+    color: var(--accent);
+}
+
+.admin-account-enquiries .dev-admin-entry {
+    margin-top: 10px;
+    background: var(--surface);
+}
+
+.admin-account-access {
+    display: grid;
+    gap: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.admin-account-projects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 22px;
+    padding-left: 26px;
+}
+
+.admin-task .admin-label {
+    margin-bottom: 0;
+}
+
+.admin-task-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .admin-task-row {
+        grid-template-columns: 1fr;
+    }
+}
